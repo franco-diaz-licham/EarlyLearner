@@ -1,7 +1,7 @@
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.CoreContext;
 
 namespace EarlyLearner.Domain.PlanningContext.Entities;
 
@@ -11,7 +11,7 @@ namespace EarlyLearner.Domain.PlanningContext.Entities;
 /// </summary>
 public sealed class Goal : Entity<GoalId>
 {
-    private readonly List<ReadinessDomainCode> _readinessDomains = [];
+    private readonly List<ReadinessOutcome> _readinessOutcomes = [];
 
     private Goal(
         GoalId id,
@@ -20,7 +20,7 @@ public sealed class Goal : Entity<GoalId>
         string title,
         GoalTypeEnum type,
         DateRange timeframe,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
     {
         HouseholdId = householdId;
@@ -29,13 +29,13 @@ public sealed class Goal : Entity<GoalId>
         Type = type;
         Timeframe = timeframe;
         Status = GoalStatusEnum.Active;
-        var requiredReadinessDomains = readinessDomains.Distinct().ToArray();
-        if (requiredReadinessDomains.Length == 0)
+        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredReadinessOutcomes.Length == 0)
         {
-            throw new DomainException("Goal must target at least one readiness domain.");
+            throw new DomainException("Goal must target at least one readiness outcome.");
         }
 
-        _readinessDomains.AddRange(requiredReadinessDomains);
+        _readinessOutcomes.AddRange(requiredReadinessOutcomes);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public sealed class Goal : Entity<GoalId>
     /// <summary>
     /// School-readiness areas this goal is intended to support.
     /// </summary>
-    public IReadOnlyCollection<ReadinessDomainCode> ReadinessDomains => _readinessDomains.AsReadOnly();
+    public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
 
     public static Goal Create(
         HouseholdId householdId,
@@ -79,9 +79,9 @@ public sealed class Goal : Entity<GoalId>
         string title,
         GoalTypeEnum type,
         DateRange timeframe,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
-        return new Goal(new GoalId(Guid.NewGuid()), householdId, childId, title, type, timeframe, readinessDomains);
+        return new Goal(new GoalId(Guid.NewGuid()), householdId, childId, title, type, timeframe, readinessOutcomes);
     }
 
     public void Rename(string title)

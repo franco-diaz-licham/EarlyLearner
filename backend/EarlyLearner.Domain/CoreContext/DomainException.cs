@@ -1,4 +1,4 @@
-namespace EarlyLearner.Domain.Common;
+namespace EarlyLearner.Domain.CoreContext;
 
 /// <summary>
 /// Represents a business rule violation raised by the domain model.

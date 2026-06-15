@@ -1,5 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.CoreContext;
 
 namespace EarlyLearner.Domain.IdentityContext.Entities;
 

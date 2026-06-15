@@ -1,26 +1,26 @@
-using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
 
 /// <summary>
-/// Links a readiness domain to the concrete evidence that supports progress.
+/// Links a readiness outcome to the concrete evidence that supports progress.
 /// Evidence references keep readiness conclusions explainable to parents.
 /// </summary>
 public sealed class EvidenceReference : Entity<EvidenceReferenceId>
 {
     private EvidenceReference(
         EvidenceReferenceId id,
-        ReadinessDomainCode domainCode,
+        ReadinessOutcome readinessOutcome,
         EvidenceSourceTypeEnum sourceType,
-        Guid sourceId,
+        Guid evidenceRecordId,
         DateOnly observedOn,
         string summary)
         : base(id)
     {
-        DomainCode = domainCode;
+        ReadinessOutcome = readinessOutcome;
         SourceType = sourceType;
-        SourceId = sourceId;
+        EvidenceRecordId = evidenceRecordId;
         ObservedOn = observedOn;
         Summary = summary;
     }
@@ -28,7 +28,7 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     /// <summary>
     /// Readiness area supported by this evidence.
     /// </summary>
-    public ReadinessDomainCode DomainCode { get; }
+    public ReadinessOutcome ReadinessOutcome { get; }
 
     /// <summary>
     /// Kind of record that produced the evidence.
@@ -38,7 +38,7 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     /// <summary>
     /// Identifier of the source record at the boundary where evidence was captured.
     /// </summary>
-    public Guid SourceId { get; }
+    public Guid EvidenceRecordId { get; }
 
     /// <summary>
     /// Date the evidence was observed or completed.
@@ -51,19 +51,19 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     public string Summary { get; }
 
     public static EvidenceReference Create(
-        ReadinessDomainCode domainCode,
+        ReadinessOutcome readinessOutcome,
         EvidenceSourceTypeEnum sourceType,
-        Guid sourceId,
+        Guid evidenceRecordId,
         DateOnly observedOn,
         string summary)
     {
-        if (sourceId == Guid.Empty) throw new DomainException("Evidence source id is required.");
+        if (evidenceRecordId == Guid.Empty) throw new DomainException("Evidence record id is required.");
 
         return new EvidenceReference(
             new EvidenceReferenceId(Guid.NewGuid()),
-            domainCode,
+            readinessOutcome,
             sourceType,
-            sourceId,
+            evidenceRecordId,
             observedOn,
             Required(summary, nameof(summary)));
     }
@@ -71,7 +71,6 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     private static string Required(string value, string name)
     {
         if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} is required.");
-
         return value.Trim();
     }
 }

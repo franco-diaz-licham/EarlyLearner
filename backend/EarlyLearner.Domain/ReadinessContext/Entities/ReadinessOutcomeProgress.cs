@@ -1,26 +1,24 @@
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
-
+using EarlyLearner.Domain.CoreContext;
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
 
 /// <summary>
-/// Tracks one readiness domain within a child's readiness profile. It is owned
+/// Tracks one readiness outcome within a child's readiness profile. It is owned
 /// by the readiness profile aggregate and changes only through the aggregate root.
 /// </summary>
-public sealed class ReadinessDomainProgress
+public sealed class ReadinessOutcomeProgress
 {
     private readonly List<EvidenceReference> _evidence = [];
 
-    internal ReadinessDomainProgress(ReadinessDomainCode domainCode)
+    internal ReadinessOutcomeProgress(ReadinessOutcome readinessOutcome)
     {
-        DomainCode = domainCode;
+        ReadinessOutcome = readinessOutcome;
         Status = ReadinessStatusEnum.NotYetObserved;
     }
 
     /// <summary>
     /// Readiness area being tracked within the child's profile.
     /// </summary>
-    public ReadinessDomainCode DomainCode { get; }
+    public ReadinessOutcome ReadinessOutcome { get; }
 
     /// <summary>
     /// Supportive progress status calculated from the available evidence.
@@ -38,7 +36,7 @@ public sealed class ReadinessDomainProgress
 
     internal void AddEvidence(EvidenceReference evidenceReference)
     {
-        if (evidenceReference.DomainCode != DomainCode) throw new DomainException("Evidence domain must match progress domain.");
+        if (evidenceReference.ReadinessOutcome.Id != ReadinessOutcome.Id) throw new DomainException("Evidence domain must match progress outcome.");
 
         _evidence.Add(evidenceReference);
         Status = CalculateStatus();

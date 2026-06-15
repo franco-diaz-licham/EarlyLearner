@@ -1,6 +1,6 @@
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.ReadinessContext.Entities;
 
 namespace EarlyLearner.Domain.PlanningContext.Entities;
 
@@ -11,24 +11,24 @@ namespace EarlyLearner.Domain.PlanningContext.Entities;
 public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
 {
     private readonly List<GoalId> _goalIds = [];
-    private readonly List<ReadinessDomainCode> _readinessDomains = [];
+    private readonly List<ReadinessOutcome> _readinessOutcomes = [];
 
     internal PlannedLearningSession(
         PlannedLearningSessionId id,
         DateOnly plannedDate,
         string title,
         IEnumerable<GoalId> goalIds,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
     {
         PlannedDate = plannedDate;
         Title = Required(title, nameof(title));
         Status = SessionStatusEnum.Planned;
         _goalIds.AddRange(goalIds.Distinct());
-        var requiredReadinessDomains = readinessDomains.Distinct().ToArray();
-        if (requiredReadinessDomains.Length == 0) throw new DomainException("Planned session must target at least one readiness domain.");
+        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Planned session must target at least one readiness outcome.");
 
-        _readinessDomains.AddRange(requiredReadinessDomains);
+        _readinessOutcomes.AddRange(requiredReadinessOutcomes);
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
     /// <summary>
     /// Readiness areas expected to be practised or observed during this session.
     /// </summary>
-    public IReadOnlyCollection<ReadinessDomainCode> ReadinessDomains => _readinessDomains.AsReadOnly();
+    public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
 
     internal void Complete()
     {

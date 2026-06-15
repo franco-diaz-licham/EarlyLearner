@@ -1,9 +1,9 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.PortfolioContext.ValueObjects;
+using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 
-namespace EarlyLearner.Domain.PortfolioContext.Entities;
+namespace EarlyLearner.Domain.ReadinessContext.Entities;
 
 /// <summary>
 /// Aggregate root for evidence a parent chooses to preserve for reflection or
@@ -11,7 +11,8 @@ namespace EarlyLearner.Domain.PortfolioContext.Entities;
 /// </summary>
 public sealed class PortfolioItem : Entity<PortfolioItemId>
 {
-    private readonly List<ReadinessDomainCode> _readinessDomains = [];
+    private readonly List<ReadinessOutcome> _readinessOutcomes = [];
+    private readonly List<StoredFile> _storedFiles = [];
 
     private PortfolioItem(
         PortfolioItemId id,
@@ -19,22 +20,24 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
         ChildId childId,
         DateOnly capturedOn,
         string caption,
-        AttachmentReference? attachment,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        PortfolioEvidenceSource? source,
+        IEnumerable<StoredFile> storedFiles,
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
     {
         HouseholdId = householdId;
         ChildId = childId;
         CapturedOn = capturedOn;
         Caption = Required(caption, nameof(caption));
-        Attachment = attachment;
-        var requiredReadinessDomains = readinessDomains.Distinct().ToArray();
-        if (requiredReadinessDomains.Length == 0)
+        Source = source;
+        _storedFiles.AddRange(storedFiles.DistinctBy(file => file.Id));
+        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredReadinessOutcomes.Length == 0)
         {
-            throw new DomainException("Portfolio item must target at least one readiness domain.");
+            throw new DomainException("Portfolio item must target at least one readiness outcome.");
         }
 
-        _readinessDomains.AddRange(requiredReadinessDomains);
+        _readinessOutcomes.AddRange(requiredReadinessOutcomes);
     }
 
     /// <summary>
@@ -58,22 +61,32 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
     public string Caption { get; }
 
     /// <summary>
-    /// Optional reference to media or a document stored outside the domain model.
+    /// Optional captured evidence record this portfolio item was selected from.
     /// </summary>
-    public AttachmentReference? Attachment { get; }
+    public PortfolioEvidenceSource? Source { get; }
 
     /// <summary>
     /// Readiness areas this portfolio item may support as evidence.
     /// </summary>
-    public IReadOnlyCollection<ReadinessDomainCode> ReadinessDomains => _readinessDomains.AsReadOnly();
+    public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
+
+    #region Nav props
+
+    /// <summary>
+    /// Stored files selected into this portfolio item, such as photos, videos, artwork, or documents.
+    /// </summary>
+    public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
+
+    #endregion
 
     public static PortfolioItem Add(
         HouseholdId householdId,
         ChildId childId,
         DateOnly capturedOn,
         string caption,
-        AttachmentReference? attachment,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        PortfolioEvidenceSource? source,
+        IEnumerable<StoredFile> storedFiles,
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
         var item = new PortfolioItem(
             new PortfolioItemId(Guid.NewGuid()),
@@ -81,8 +94,9 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
             childId,
             capturedOn,
             caption,
-            attachment,
-            readinessDomains);
+            source,
+            storedFiles,
+            readinessOutcomes);
 
         item.RaiseDomainEvent(new PortfolioItemAdded(item.Id, childId, DateTimeOffset.UtcNow));
         return item;

@@ -1,7 +1,7 @@
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.CoreContext;
 
 namespace EarlyLearner.Domain.PlanningContext.Entities;
 
@@ -65,7 +65,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
         DateOnly plannedDate,
         string title,
         IEnumerable<GoalId> goalIds,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
         if (!Period.Contains(plannedDate)) throw new DomainException("Planned session date must be inside the plan period.");
 
@@ -74,7 +74,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
             plannedDate,
             title,
             goalIds,
-            readinessDomains);
+            readinessOutcomes);
 
         _sessions.Add(session);
         return session;

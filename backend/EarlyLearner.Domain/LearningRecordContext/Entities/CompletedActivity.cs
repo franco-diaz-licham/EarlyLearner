@@ -1,23 +1,25 @@
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.Entities;
 
 namespace EarlyLearner.Domain.LearningRecordContext.Entities;
 
 /// <summary>
 /// A parent-recorded activity completed by the child. It is owned by a daily log
-/// and may provide evidence for one or more readiness domains.
+/// and may provide evidence for one or more readiness outcomes.
 /// </summary>
 public sealed class CompletedActivity : Entity<CompletedActivityId>
 {
-    private readonly List<ReadinessDomainCode> _readinessDomains = [];
+    private readonly List<ReadinessOutcome> _readinessOutcomes = [];
+    private readonly List<StoredFile> _storedFiles = [];
 
-    internal CompletedActivity(CompletedActivityId id, string title, IEnumerable<ReadinessDomainCode> readinessDomains) : base(id)
+    internal CompletedActivity(CompletedActivityId id, string title, IEnumerable<ReadinessOutcome> readinessOutcomes) : base(id)
     {
         Title = Required(title, nameof(title));
-        var requiredReadinessDomains = readinessDomains.Distinct().ToArray();
-        if (requiredReadinessDomains.Length == 0) throw new DomainException("Completed activity must target at least one readiness domain.");
-        _readinessDomains.AddRange(requiredReadinessDomains);
+        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Completed activity must target at least one readiness outcome.");
+        _readinessOutcomes.AddRange(requiredReadinessOutcomes);
     }
 
     /// <summary>
@@ -28,7 +30,24 @@ public sealed class CompletedActivity : Entity<CompletedActivityId>
     /// <summary>
     /// Readiness areas this activity practised or demonstrated.
     /// </summary>
-    public IReadOnlyCollection<ReadinessDomainCode> ReadinessDomains => _readinessDomains.AsReadOnly();
+    public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
+
+    #region Nav props
+
+    /// <summary>
+    /// Stored files attached to this completed activity, such as photos, videos, or scanned work.
+    /// </summary>
+    public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
+
+    #endregion
+
+    public void AttachStoredFile(StoredFile storedFile)
+    {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
+        {
+            _storedFiles.Add(storedFile);
+        }
+    }
 
     private static string Required(string value, string name)
     {

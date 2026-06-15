@@ -1,4 +1,4 @@
-namespace EarlyLearner.Domain.Common;
+namespace EarlyLearner.Domain.CoreContext;
 
 /// <summary>
 /// Represents a closed calendar date range used for goals and planning periods.
@@ -17,11 +17,7 @@ public sealed record DateRange
 
     public static DateRange Create(DateOnly startDate, DateOnly endDate)
     {
-        if (endDate < startDate)
-        {
-            throw new DomainException("End date must be on or after start date.");
-        }
-
+        if (endDate < startDate) throw new DomainException("End date must be on or after start date.");
         return new DateRange(startDate, endDate);
     }
 

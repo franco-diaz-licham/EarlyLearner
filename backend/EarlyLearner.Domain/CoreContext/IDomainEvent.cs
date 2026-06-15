@@ -1,4 +1,4 @@
-namespace EarlyLearner.Domain.Common;
+namespace EarlyLearner.Domain.CoreContext;
 
 /// <summary>
 /// Marks an in-process event raised by an aggregate after something meaningful

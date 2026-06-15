@@ -1,5 +1,6 @@
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
-using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.Entities;
 
 namespace EarlyLearner.Domain.LearningRecordContext.Entities;
 
@@ -9,6 +10,8 @@ namespace EarlyLearner.Domain.LearningRecordContext.Entities;
 /// </summary>
 public sealed class RoutineEntry : Entity<RoutineEntryId>
 {
+    private readonly List<StoredFile> _storedFiles = [];
+
     internal RoutineEntry(RoutineEntryId id, string routineName, string notes) : base(id)
     {
         RoutineName = Required(routineName, nameof(routineName));
@@ -24,6 +27,23 @@ public sealed class RoutineEntry : Entity<RoutineEntryId>
     /// Parent notes about how the child approached the routine.
     /// </summary>
     public string Notes { get; }
+
+    #region Nav props
+
+    /// <summary>
+    /// Stored files attached to this routine entry, such as photos or short videos of the skill practised.
+    /// </summary>
+    public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
+
+    #endregion
+
+    public void AttachStoredFile(StoredFile storedFile)
+    {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
+        {
+            _storedFiles.Add(storedFile);
+        }
+    }
 
     private static string Required(string value, string name)
     {

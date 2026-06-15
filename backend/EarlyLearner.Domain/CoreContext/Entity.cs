@@ -1,4 +1,4 @@
-namespace EarlyLearner.Domain.Common;
+namespace EarlyLearner.Domain.CoreContext;
 
 /// <summary>
 /// Base type for domain entities that have identity and can raise domain events.

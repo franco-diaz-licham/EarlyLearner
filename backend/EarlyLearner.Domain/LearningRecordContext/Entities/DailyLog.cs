@@ -1,7 +1,8 @@
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.Entities;
 
 namespace EarlyLearner.Domain.LearningRecordContext.Entities;
 
@@ -14,6 +15,7 @@ public sealed class DailyLog : Entity<DailyLogId>
     private readonly List<CompletedActivity> _completedActivities = [];
     private readonly List<ReadingEntry> _readingEntries = [];
     private readonly List<RoutineEntry> _routineEntries = [];
+    private readonly List<StoredFile> _storedFiles = [];
 
     private DailyLog(DailyLogId id, HouseholdId householdId, ChildId childId, DateOnly logDate) : base(id)
     {
@@ -54,6 +56,11 @@ public sealed class DailyLog : Entity<DailyLogId>
     /// </summary>
     public IReadOnlyCollection<RoutineEntry> RoutineEntries => _routineEntries.AsReadOnly();
 
+    /// <summary>
+    /// Stored files attached to the whole daily record, such as a photo summary or scanned worksheet.
+    /// </summary>
+    public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
+
     #endregion
 
     public static DailyLog Create(HouseholdId householdId, ChildId childId, DateOnly logDate)
@@ -61,9 +68,9 @@ public sealed class DailyLog : Entity<DailyLogId>
         return new DailyLog(new DailyLogId(Guid.NewGuid()), householdId, childId, logDate);
     }
 
-    public CompletedActivity LogCompletedActivity(string title, IEnumerable<ReadinessDomainCode> readinessDomains)
+    public CompletedActivity LogCompletedActivity(string title, IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
-        var activity = new CompletedActivity(new CompletedActivityId(Guid.NewGuid()), title, readinessDomains);
+        var activity = new CompletedActivity(new CompletedActivityId(Guid.NewGuid()), title, readinessOutcomes);
         _completedActivities.Add(activity);
         RaiseDomainEvent(new LearningActivityLogged(Id, activity.Id, DateTimeOffset.UtcNow));
         return activity;
@@ -81,5 +88,13 @@ public sealed class DailyLog : Entity<DailyLogId>
         var routineEntry = new RoutineEntry(new RoutineEntryId(Guid.NewGuid()), routineName, notes);
         _routineEntries.Add(routineEntry);
         return routineEntry;
+    }
+
+    public void AttachStoredFile(StoredFile storedFile)
+    {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
+        {
+            _storedFiles.Add(storedFile);
+        }
     }
 }

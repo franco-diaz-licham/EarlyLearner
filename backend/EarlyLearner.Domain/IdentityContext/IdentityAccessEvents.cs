@@ -1,4 +1,4 @@
-using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 
 namespace EarlyLearner.Domain.IdentityContext;

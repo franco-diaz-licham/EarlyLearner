@@ -1,7 +1,8 @@
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.Entities;
 
 namespace EarlyLearner.Domain.LearningRecordContext.Entities;
 
@@ -11,7 +12,8 @@ namespace EarlyLearner.Domain.LearningRecordContext.Entities;
 /// </summary>
 public sealed class Observation : Entity<ObservationId>
 {
-    private readonly List<ReadinessDomainCode> _readinessDomains = [];
+    private readonly List<ReadinessOutcome> _readinessOutcomes = [];
+    private readonly List<StoredFile> _storedFiles = [];
 
     private Observation(
         ObservationId id,
@@ -19,20 +21,20 @@ public sealed class Observation : Entity<ObservationId>
         ChildId childId,
         DateOnly observedOn,
         string note,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
     {
         HouseholdId = householdId;
         ChildId = childId;
         ObservedOn = observedOn;
         Note = Required(note, nameof(note));
-        var requiredReadinessDomains = readinessDomains.Distinct().ToArray();
-        if (requiredReadinessDomains.Length == 0)
+        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredReadinessOutcomes.Length == 0)
         {
-            throw new DomainException("Observation must target at least one readiness domain.");
+            throw new DomainException("Observation must target at least one readiness outcome.");
         }
 
-        _readinessDomains.AddRange(requiredReadinessDomains);
+        _readinessOutcomes.AddRange(requiredReadinessOutcomes);
     }
 
     /// <summary>
@@ -58,14 +60,23 @@ public sealed class Observation : Entity<ObservationId>
     /// <summary>
     /// Readiness areas this observation may support as evidence.
     /// </summary>
-    public IReadOnlyCollection<ReadinessDomainCode> ReadinessDomains => _readinessDomains.AsReadOnly();
+    public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
+
+    #region Nav props
+
+    /// <summary>
+    /// Stored files attached to this observation, such as photos, videos, audio notes, or documents.
+    /// </summary>
+    public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
+
+    #endregion
 
     public static Observation Record(
         HouseholdId householdId,
         ChildId childId,
         DateOnly observedOn,
         string note,
-        IEnumerable<ReadinessDomainCode> readinessDomains)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
         var observation = new Observation(
             new ObservationId(Guid.NewGuid()),
@@ -73,10 +84,18 @@ public sealed class Observation : Entity<ObservationId>
             childId,
             observedOn,
             note,
-            readinessDomains);
+            readinessOutcomes);
 
         observation.RaiseDomainEvent(new ObservationRecorded(observation.Id, childId, DateTimeOffset.UtcNow));
         return observation;
+    }
+
+    public void AttachStoredFile(StoredFile storedFile)
+    {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
+        {
+            _storedFiles.Add(storedFile);
+        }
     }
 
     private static string Required(string value, string name)

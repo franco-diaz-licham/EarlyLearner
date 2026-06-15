@@ -1,5 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
@@ -11,14 +11,14 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class ReadinessProfile : Entity<ReadinessProfileId>
 {
-    private readonly List<ReadinessDomainProgress> _domainProgress = [];
+    private readonly List<ReadinessOutcomeProgress> _outcomeProgress = [];
     private readonly List<SuggestedNextStep> _suggestedNextSteps = [];
 
-    private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId, IEnumerable<ReadinessDomainCode> domainCodes) : base(id)
+    private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId, IEnumerable<ReadinessOutcome> readinessOutcomes) : base(id)
     {
         HouseholdId = householdId;
         ChildId = childId;
-        _domainProgress.AddRange(domainCodes.Select(domainCode => new ReadinessDomainProgress(domainCode)));
+        _outcomeProgress.AddRange(readinessOutcomes.Select(readinessOutcome => new ReadinessOutcomeProgress(readinessOutcome)));
     }
 
     /// <summary>
@@ -34,9 +34,9 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     #region Nav props
 
     /// <summary>
-    /// Progress summaries for each tracked readiness domain.
+    /// Progress summaries for each tracked readiness outcome.
     /// </summary>
-    public IReadOnlyCollection<ReadinessDomainProgress> DomainProgress => _domainProgress.AsReadOnly();
+    public IReadOnlyCollection<ReadinessOutcomeProgress> OutcomeProgress => _outcomeProgress.AsReadOnly();
 
     /// <summary>
     /// Practical parent-facing recommendations derived from readiness evidence and gaps.
@@ -48,37 +48,37 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     public static ReadinessProfile Create(
         HouseholdId householdId,
         ChildId childId,
-        IEnumerable<ReadinessDomainCode> domainCodes)
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
-        var requiredDomainCodes = domainCodes.Distinct().ToArray();
-        if (requiredDomainCodes.Length == 0) throw new DomainException("Readiness profile must track at least one domain.");
+        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Readiness profile must track at least one outcome.");
 
         return new ReadinessProfile(
             new ReadinessProfileId(Guid.NewGuid()),
             householdId,
             childId,
-            requiredDomainCodes);
+            requiredReadinessOutcomes);
     }
 
     public void AddEvidence(EvidenceReference evidenceReference)
     {
-        var progress = _domainProgress.SingleOrDefault(item => item.DomainCode == evidenceReference.DomainCode);
+        var progress = _outcomeProgress.SingleOrDefault(item => item.ReadinessOutcome.Id == evidenceReference.ReadinessOutcome.Id);
         if (progress is null)
         {
-            throw new DomainException("Readiness domain is not tracked by this profile.");
+            throw new DomainException("readiness outcome is not tracked by this profile.");
         }
 
         var previousStatus = progress.Status;
         progress.AddEvidence(evidenceReference);
 
-        RaiseDomainEvent(new ReadinessEvidenceAdded(Id, ChildId, evidenceReference.DomainCode, DateTimeOffset.UtcNow));
-        if (previousStatus != progress.Status) RaiseDomainEvent(new ReadinessStatusChanged(Id, ChildId, evidenceReference.DomainCode, progress.Status, DateTimeOffset.UtcNow));
+        RaiseDomainEvent(new ReadinessEvidenceAdded(Id, ChildId, evidenceReference.ReadinessOutcome.Id, DateTimeOffset.UtcNow));
+        if (previousStatus != progress.Status) RaiseDomainEvent(new ReadinessStatusChanged(Id, ChildId, evidenceReference.ReadinessOutcome.Id, progress.Status, DateTimeOffset.UtcNow));
     }
 
-    public SuggestedNextStep AddSuggestedNextStep(ReadinessDomainCode domainCode, string text)
+    public SuggestedNextStep AddSuggestedNextStep(ReadinessOutcome readinessOutcome, string text)
     {
-        if (_domainProgress.All(item => item.DomainCode != domainCode)) throw new DomainException("Suggested next step must target a tracked readiness domain.");
-        var nextStep = SuggestedNextStep.Create(domainCode, text);
+        if (_outcomeProgress.All(item => item.ReadinessOutcome.Id != readinessOutcome.Id)) throw new DomainException("Suggested next step must target a tracked readiness outcome.");
+        var nextStep = SuggestedNextStep.Create(readinessOutcome, text);
         _suggestedNextSteps.Add(nextStep);
         return nextStep;
     }

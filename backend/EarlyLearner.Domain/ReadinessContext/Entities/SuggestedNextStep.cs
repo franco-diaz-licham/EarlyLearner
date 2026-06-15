@@ -1,4 +1,4 @@
-using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
@@ -9,27 +9,27 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
 {
-    private SuggestedNextStep(SuggestedNextStepId id, ReadinessDomainCode domainCode, string text) : base(id)
+    private SuggestedNextStep(SuggestedNextStepId id, ReadinessOutcome readinessOutcome, string text) : base(id)
     {
-        DomainCode = domainCode;
+        ReadinessOutcome = readinessOutcome;
         Text = text;
     }
 
     /// <summary>
     /// Readiness area this recommendation is intended to strengthen.
     /// </summary>
-    public ReadinessDomainCode DomainCode { get; }
+    public ReadinessOutcome ReadinessOutcome { get; }
 
     /// <summary>
     /// Practical action a carer can try next at home.
     /// </summary>
     public string Text { get; }
 
-    internal static SuggestedNextStep Create(ReadinessDomainCode domainCode, string text)
+    internal static SuggestedNextStep Create(ReadinessOutcome readinessOutcome, string text)
     {
         return new SuggestedNextStep(
             new SuggestedNextStepId(Guid.NewGuid()),
-            domainCode,
+            readinessOutcome,
             Required(text, nameof(text)));
     }
 
