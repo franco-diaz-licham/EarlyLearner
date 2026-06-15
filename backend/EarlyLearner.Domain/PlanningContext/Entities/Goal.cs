@@ -1,0 +1,103 @@
+using EarlyLearner.Domain.PlanningContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.Common;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+
+namespace EarlyLearner.Domain.PlanningContext.Entities;
+
+/// <summary>
+/// Aggregate root representing an intentional learning or development aim for a
+/// child. Goals provide context for planning, evidence, and readiness progress.
+/// </summary>
+public sealed class Goal : Entity<GoalId>
+{
+    private readonly List<ReadinessDomainCode> _readinessDomains = [];
+
+    private Goal(
+        GoalId id,
+        HouseholdId householdId,
+        ChildId childId,
+        string title,
+        GoalTypeEnum type,
+        DateRange timeframe,
+        IEnumerable<ReadinessDomainCode> readinessDomains)
+        : base(id)
+    {
+        HouseholdId = householdId;
+        ChildId = childId;
+        Title = Required(title, nameof(title));
+        Type = type;
+        Timeframe = timeframe;
+        Status = GoalStatusEnum.Active;
+        var requiredReadinessDomains = readinessDomains.Distinct().ToArray();
+        if (requiredReadinessDomains.Length == 0)
+        {
+            throw new DomainException("Goal must target at least one readiness domain.");
+        }
+
+        _readinessDomains.AddRange(requiredReadinessDomains);
+    }
+
+    /// <summary>
+    /// Household that owns the child and controls access to this goal.
+    /// </summary>
+    public HouseholdId HouseholdId { get; }
+
+    /// <summary>
+    /// Child this intentional learning or development aim belongs to.
+    /// </summary>
+    public ChildId ChildId { get; }
+
+    /// <summary>
+    /// Parent-facing description of what is being encouraged.
+    /// </summary>
+    public string Title { get; private set; }
+
+    /// <summary>
+    /// Planning horizon that distinguishes short-term intentions from longer development aims.
+    /// </summary>
+    public GoalTypeEnum Type { get; }
+
+    /// <summary>
+    /// Lifecycle state used to keep active, completed, and archived goals separate.
+    /// </summary>
+    public GoalStatusEnum Status { get; private set; }
+
+    /// <summary>
+    /// Date window in which the carer intends to focus on this goal.
+    /// </summary>
+    public DateRange Timeframe { get; }
+
+    /// <summary>
+    /// School-readiness areas this goal is intended to support.
+    /// </summary>
+    public IReadOnlyCollection<ReadinessDomainCode> ReadinessDomains => _readinessDomains.AsReadOnly();
+
+    public static Goal Create(
+        HouseholdId householdId,
+        ChildId childId,
+        string title,
+        GoalTypeEnum type,
+        DateRange timeframe,
+        IEnumerable<ReadinessDomainCode> readinessDomains)
+    {
+        return new Goal(new GoalId(Guid.NewGuid()), householdId, childId, title, type, timeframe, readinessDomains);
+    }
+
+    public void Rename(string title)
+    {
+        Title = Required(title, nameof(title));
+    }
+
+    public void Complete()
+    {
+        if (Status == GoalStatusEnum.Completed) return;
+        Status = GoalStatusEnum.Completed;
+    }
+
+    private static string Required(string value, string name)
+    {
+        if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} is required.");
+        return value.Trim();
+    }
+}

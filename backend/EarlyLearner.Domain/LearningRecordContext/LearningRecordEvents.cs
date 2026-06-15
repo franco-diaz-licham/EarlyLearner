@@ -1,0 +1,9 @@
+using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.Common;
+
+namespace EarlyLearner.Domain.LearningRecordContext;
+
+public sealed record LearningActivityLogged(DailyLogId DailyLogId, CompletedActivityId ActivityId, DateTimeOffset OccurredAt) : IDomainEvent;
+
+public sealed record ObservationRecorded(ObservationId ObservationId, ChildId ChildId, DateTimeOffset OccurredAt) : IDomainEvent;

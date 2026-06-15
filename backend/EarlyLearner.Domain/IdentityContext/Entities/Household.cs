@@ -22,6 +22,8 @@ public sealed class Household : Entity<HouseholdId>
     /// </summary>
     public string Name { get; private set; }
 
+    #region Nav props
+
     /// <summary>
     /// Adults who can access or manage the household according to their assigned role.
     /// </summary>
@@ -31,6 +33,8 @@ public sealed class Household : Entity<HouseholdId>
     /// Child profiles whose learning records are owned by this household.
     /// </summary>
     public IReadOnlyCollection<Child> Children => _children.AsReadOnly();
+
+    #endregion
 
     public static Household Create(string name, UserId ownerUserId, string ownerFirstName, string ownerLastName)
     {
