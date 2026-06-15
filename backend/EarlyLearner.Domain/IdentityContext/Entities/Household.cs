@@ -37,7 +37,6 @@ public sealed class Household : Entity<HouseholdId>
         var household = new Household(new HouseholdId(Guid.NewGuid()), name);
         var owner = new Carer(new CarerId(Guid.NewGuid()), ownerUserId, ownerFirstName, ownerLastName, HouseholdRoleEnum.Owner);
         household._carers.Add(owner);
-        household.RaiseDomainEvent(new HouseholdCreated(household.Id, owner.Id, ownerUserId, ownerFirstName, ownerLastName, DateTimeOffset.UtcNow));
         return household;
     }
 
@@ -46,7 +45,6 @@ public sealed class Household : Entity<HouseholdId>
         if (_carers.Any(carer => carer.UserId == userId)) throw new DomainException("Carer already belongs to this household.");
         var carer = new Carer(new CarerId(Guid.NewGuid()), userId, firstName, lastName, role);
         _carers.Add(carer);
-        RaiseDomainEvent(new CarerJoinedHousehold(Id, carer.Id, userId, firstName, lastName, role, DateTimeOffset.UtcNow));
     }
 
     public Child AddChild(string givenName, DateOnly dateOfBirth)
@@ -63,7 +61,6 @@ public sealed class Household : Entity<HouseholdId>
         if (child is null) throw new DomainException("Child does not belong to this household.");
 
         child.Archive();
-        RaiseDomainEvent(new ChildArchived(Id, childId, DateTimeOffset.UtcNow));
     }
 
     private static string Required(string value, string name)
