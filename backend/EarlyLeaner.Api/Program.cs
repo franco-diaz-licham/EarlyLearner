@@ -1,41 +1,38 @@
-var builder = WebApplication.CreateBuilder(args);
+using EarlyLearner.Api.Configuration;
+using EarlyLearner.Infrastructure.Configuration;
+using Serilog;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+try {
+    var builder = WebApplication.CreateBuilder(args);
+    builder.AddSerilog();
 
-var app = builder.Build();
+    try {
+        ApiAppServices.AddAppServices(builder);
+        // InfraAppServices.AddAppServices(builder);
+    } catch (Exception ex) {
+        Log.Fatal(ex, "Exception thrown during InfraAppServices.AddAppServices");
+        throw;
+    }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    var app = builder.Build();
+    if (app.Environment.IsDevelopment()) {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+    app.UseHttpsRedirection();
+    app.UseRouting();
+    app.UseCors("AllowAll");
+    app.UseAuthentication();
+    // app.UseMiddleware<UserClaimsMiddleware>();
+    app.UseAuthorization();
+    // app.UseMiddleware<ExceptionMiddleware>();
+    // app.MapApiHealthChecks();
+    app.MapControllers();
+    // await app.ConfigureApp();
+    await app.RunAsync();
+} catch (Exception ex) {
+    Log.Fatal(ex, "Application startup failed");
+    throw;
+} finally {
+    Log.CloseAndFlush();
 }
