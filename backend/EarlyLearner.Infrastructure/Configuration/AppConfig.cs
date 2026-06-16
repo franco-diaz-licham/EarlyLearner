@@ -1,7 +1,8 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EarlyLearner.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace EarlyLearner.Infrastructure.Configuration;
@@ -12,20 +13,14 @@ public static class AppConfig
     private static readonly TimeSpan DatabaseMigrationInitialRetryDelay = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan DatabaseMigrationMaxRetryDelay = TimeSpan.FromSeconds(30);
 
-    /// <summary>
-    /// Configures, migrates and seed any data to the database.
-    /// </summary>
-    public static async Task ConfigureApp(this WebApplication app)
+    public static async Task ConfigureApp(this IServiceProvider services)
     {
-        await app.ConfigureDatabase();
-        await app.ConfigureAzureContainer();
+        await services.ConfigureDatabase();
+        await services.ConfigureAzureContainer();
     }
 
-    public static async Task ConfigureDatabase(this WebApplication app)
+    public static async Task ConfigureDatabase(this IServiceProvider services)
     {
-        using var scope = app.Services.CreateScope();
-
-        var services = scope.ServiceProvider;
         var logger = services.GetRequiredService<ILogger<DatabaseContext>>();
 
         for (var attempt = 1; attempt <= DatabaseMigrationMaxAttempts; attempt++) {
@@ -53,14 +48,12 @@ public static class AppConfig
         var delaySeconds = Math.Min(
             DatabaseMigrationInitialRetryDelay.TotalSeconds * Math.Pow(2, attempt - 1),
             DatabaseMigrationMaxRetryDelay.TotalSeconds);
-
         return TimeSpan.FromSeconds(delaySeconds);
     }
 
-    public static async Task ConfigureAzureContainer(this WebApplication app)
+    public static async Task ConfigureAzureContainer(this IServiceProvider services)
     {
-        using var scope = app.Services.CreateScope();
-        var container = scope.ServiceProvider.GetRequiredService<BlobContainerClient>();
+        var container = services.GetRequiredService<BlobContainerClient>();
         await container.CreateIfNotExistsAsync(PublicAccessType.None);
     }
 }

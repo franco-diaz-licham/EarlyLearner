@@ -1,4 +1,4 @@
-using EarlyLeaner.Api.Configuration;
+using EarlyLearner.Api.Configuration;
 using Microsoft.OpenApi;
 using System;
 using System.Collections.Generic;
@@ -138,5 +138,3 @@ public static class ApiAppServices
         return services;
     }
 }
-
-

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace EarlyLeaner.Api.Configuration;
+namespace EarlyLearner.Api.Configuration;
 
 public sealed class RouteTransformer : IOutboundParameterTransformer
 {
@@ -28,4 +28,3 @@ public sealed class RouteTransformer : IOutboundParameterTransformer
         return result;
     }
 }
-

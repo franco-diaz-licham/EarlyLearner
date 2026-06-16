@@ -23,12 +23,9 @@ try {
     app.UseRouting();
     app.UseCors("AllowAll");
     app.UseAuthentication();
-    // app.UseMiddleware<UserClaimsMiddleware>();
     app.UseAuthorization();
-    // app.UseMiddleware<ExceptionMiddleware>();
-    // app.MapApiHealthChecks();
     app.MapControllers();
-    // await app.ConfigureApp();
+    await app.Services.ConfigureApp();
     await app.RunAsync();
 } catch (Exception ex) {
     Log.Fatal(ex, "Application startup failed");
