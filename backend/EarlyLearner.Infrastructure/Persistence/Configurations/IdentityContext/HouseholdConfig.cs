@@ -1,5 +1,6 @@
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,28 +10,26 @@ public sealed class HouseholdConfig : IEntityTypeConfiguration<Household>
 {
     public void Configure(EntityTypeBuilder<Household> builder)
     {
-        builder.ToTable("households");
+        builder.ToTable(StringHelpers.Pluralise(nameof(Household)));
 
         builder.HasKey(household => household.Id);
 
         builder.Property(household => household.Id)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(household => household.Name)
             .HasMaxLength(160)
-            .IsRequired()
-            .HasColumnName("name");
+            .IsRequired();
 
         builder.HasMany(household => household.Carers)
-            .WithOne()
-            .HasForeignKey("HouseholdId")
+            .WithOne(carer => carer.Household)
+            .HasForeignKey(carer => carer.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(household => household.Children)
-            .WithOne()
-            .HasForeignKey("HouseholdId")
+            .WithOne(child => child.Household)
+            .HasForeignKey(child => child.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(household => household.Carers).UsePropertyAccessMode(PropertyAccessMode.Field);

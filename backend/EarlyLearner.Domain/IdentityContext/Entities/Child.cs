@@ -9,12 +9,23 @@ namespace EarlyLearner.Domain.IdentityContext.Entities;
 /// </summary>
 public sealed class Child : Entity<ChildId>
 {
-    internal Child(ChildId id, string givenName, DateOnly dateOfBirth) : base(id)
+    internal Child(ChildId id, HouseholdId householdId, string givenName, DateOnly dateOfBirth) : base(id)
     {
+        HouseholdId = householdId;
         GivenName = Required(givenName, nameof(givenName));
         DateOfBirth = dateOfBirth;
         IsArchived = false;
     }
+
+    /// <summary>
+    /// Household this child profile belongs to.
+    /// </summary>
+    public HouseholdId HouseholdId { get; }
+
+    /// <summary>
+    /// Household navigation for persistence and graph loading.
+    /// </summary>
+    public Household Household { get; private set; } = null!;
 
     /// <summary>
     /// Name used by carers when planning and recording this child's learning.

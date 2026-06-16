@@ -39,7 +39,7 @@ public sealed class Household : Entity<HouseholdId>
     public static Household Create(string name, UserId ownerUserId, string ownerFirstName, string ownerLastName)
     {
         var household = new Household(new HouseholdId(Guid.NewGuid()), name);
-        var owner = new Carer(new CarerId(Guid.NewGuid()), ownerUserId, ownerFirstName, ownerLastName, HouseholdRoleEnum.Owner);
+        var owner = new Carer(new CarerId(Guid.NewGuid()), household.Id, ownerUserId, ownerFirstName, ownerLastName, HouseholdRoleEnum.Owner);
         household._carers.Add(owner);
         return household;
     }
@@ -47,13 +47,13 @@ public sealed class Household : Entity<HouseholdId>
     public void AddCarer(UserId userId, string firstName, string lastName, HouseholdRoleEnum role)
     {
         if (_carers.Any(carer => carer.UserId == userId)) throw new DomainException("Carer already belongs to this household.");
-        var carer = new Carer(new CarerId(Guid.NewGuid()), userId, firstName, lastName, role);
+        var carer = new Carer(new CarerId(Guid.NewGuid()), Id, userId, firstName, lastName, role);
         _carers.Add(carer);
     }
 
     public Child AddChild(string givenName, DateOnly dateOfBirth)
     {
-        var child = new Child(new ChildId(Guid.NewGuid()), givenName, dateOfBirth);
+        var child = new Child(new ChildId(Guid.NewGuid()), Id, givenName, dateOfBirth);
         _children.Add(child);
         RaiseDomainEvent(new ChildCreated(Id, child.Id, DateTimeOffset.UtcNow));
         return child;

@@ -1,6 +1,7 @@
 using EarlyLearner.Domain.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,17 +11,15 @@ public sealed class EvidenceReferenceConfig : IEntityTypeConfiguration<EvidenceR
 {
     public void Configure(EntityTypeBuilder<EvidenceReference> builder)
     {
-        builder.ToTable("evidence_references");
+        builder.ToTable(StringHelpers.Pluralise(nameof(EvidenceReference)));
 
         builder.HasKey(evidence => evidence.Id);
 
         builder.Property(evidence => evidence.Id)
             .HasConversion(id => id.Value, value => new EvidenceReferenceId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property<int>("ReadinessOutcomeProgressId")
-            .HasColumnName("readiness_outcome_progress_id")
             .IsRequired();
 
         builder.HasOne<ReadinessOutcomeProgress>()
@@ -36,18 +35,16 @@ public sealed class EvidenceReferenceConfig : IEntityTypeConfiguration<EvidenceR
 
         builder.Property<ReadinessOutcomeId>("ReadinessOutcomeId")
             .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value))
-            .HasColumnName("readiness_outcome_id")
             .IsRequired();
 
         builder.Property(evidence => evidence.SourceType)
             .HasConversion<string>()
             .HasMaxLength(60)
-            .IsRequired()
-            .HasColumnName("source_type");
+            .IsRequired();
 
-        builder.Property(evidence => evidence.EvidenceRecordId).HasColumnName("evidence_record_id").IsRequired();
-        builder.Property(evidence => evidence.ObservedOn).HasColumnName("observed_on").IsRequired();
-        builder.Property(evidence => evidence.Summary).HasMaxLength(800).IsRequired().HasColumnName("summary");
+        builder.Property(evidence => evidence.EvidenceRecordId).IsRequired();
+        builder.Property(evidence => evidence.ObservedOn).IsRequired();
+        builder.Property(evidence => evidence.Summary).HasMaxLength(800).IsRequired();
         builder.Ignore(evidence => evidence.DomainEvents);
     }
 }

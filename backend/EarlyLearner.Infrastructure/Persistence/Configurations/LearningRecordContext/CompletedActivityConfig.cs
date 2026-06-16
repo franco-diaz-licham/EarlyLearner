@@ -2,6 +2,7 @@ using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,18 +12,16 @@ public sealed class CompletedActivityConfig : IEntityTypeConfiguration<Completed
 {
     public void Configure(EntityTypeBuilder<CompletedActivity> builder)
     {
-        builder.ToTable("completed_activities");
+        builder.ToTable(StringHelpers.Pluralise(nameof(CompletedActivity)));
 
         builder.HasKey(activity => activity.Id);
 
         builder.Property(activity => activity.Id)
             .HasConversion(id => id.Value, value => new CompletedActivityId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property<DailyLogId>("DailyLogId")
             .HasConversion(id => id.Value, value => new DailyLogId(value))
-            .HasColumnName("daily_log_id")
             .IsRequired();
 
         builder.HasOne<DailyLog>()
@@ -30,7 +29,7 @@ public sealed class CompletedActivityConfig : IEntityTypeConfiguration<Completed
             .HasForeignKey("DailyLogId")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(activity => activity.Title).HasMaxLength(220).IsRequired().HasColumnName("title");
+        builder.Property(activity => activity.Title).HasMaxLength(220).IsRequired();
 
         builder.HasMany(activity => activity.ReadinessOutcomes)
             .WithMany()
@@ -44,8 +43,7 @@ public sealed class CompletedActivityConfig : IEntityTypeConfiguration<Completed
                     .WithMany()
                     .HasForeignKey("completed_activity_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("completed_activity_readiness_outcomes");
                     join.HasKey("completed_activity_id", "readiness_outcome_id");
                 });
@@ -62,8 +60,7 @@ public sealed class CompletedActivityConfig : IEntityTypeConfiguration<Completed
                     .WithMany()
                     .HasForeignKey("completed_activity_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("completed_activity_stored_files");
                     join.HasKey("completed_activity_id", "stored_file_id");
                 });

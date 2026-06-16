@@ -1,9 +1,9 @@
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.PlanningContext;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,18 +13,16 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
 {
     public void Configure(EntityTypeBuilder<Goal> builder)
     {
-        builder.ToTable("goals");
+        builder.ToTable(StringHelpers.Pluralise(nameof(Goal)));
 
         builder.HasKey(goal => goal.Id);
 
         builder.Property(goal => goal.Id)
             .HasConversion(id => id.Value, value => new GoalId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(goal => goal.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
         builder.HasOne<Household>()
@@ -34,7 +32,6 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
 
         builder.Property(goal => goal.ChildId)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .HasColumnName("child_id")
             .IsRequired();
 
         builder.HasOne<Child>()
@@ -44,27 +41,23 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
 
         builder.Property(goal => goal.Title)
             .HasMaxLength(220)
-            .IsRequired()
-            .HasColumnName("title");
+            .IsRequired();
 
         builder.Property(goal => goal.Type)
             .HasConversion<string>()
             .HasMaxLength(40)
-            .IsRequired()
-            .HasColumnName("type");
+            .IsRequired();
 
         builder.Property(goal => goal.Status)
             .HasConversion<string>()
             .HasMaxLength(40)
-            .IsRequired()
-            .HasColumnName("status");
+            .IsRequired();
 
         builder.OwnsOne(
             goal => goal.Timeframe,
-            timeframe =>
-            {
-                timeframe.Property(range => range.StartDate).HasColumnName("start_date").IsRequired();
-                timeframe.Property(range => range.EndDate).HasColumnName("end_date").IsRequired();
+            timeframe => {
+                timeframe.Property(range => range.StartDate).IsRequired();
+                timeframe.Property(range => range.EndDate).IsRequired();
             });
 
         builder.HasMany(goal => goal.ReadinessOutcomes)
@@ -79,8 +72,7 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
                     .WithMany()
                     .HasForeignKey("goal_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("goal_readiness_outcomes");
                     join.HasKey("goal_id", "readiness_outcome_id");
                 });

@@ -1,5 +1,6 @@
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,39 +10,34 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
 {
     public void Configure(EntityTypeBuilder<Child> builder)
     {
-        builder.ToTable("children");
+        builder.ToTable(StringHelpers.Pluralise(nameof(Child)));
 
         builder.HasKey(child => child.Id);
 
         builder.Property(child => child.Id)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
-        builder.Property<HouseholdId>("HouseholdId")
+        builder.Property(child => child.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
-        builder.HasOne<Household>()
+        builder.HasOne(child => child.Household)
             .WithMany(household => household.Children)
-            .HasForeignKey("HouseholdId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(child => child.HouseholdId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(child => child.GivenName)
             .HasMaxLength(120)
-            .IsRequired()
-            .HasColumnName("given_name");
+            .IsRequired();
 
         builder.Property(child => child.DateOfBirth)
-            .HasColumnName("date_of_birth")
             .IsRequired();
 
         builder.Property(child => child.IsArchived)
-            .HasColumnName("is_archived")
             .IsRequired();
 
-        builder.HasIndex("HouseholdId", nameof(Child.GivenName));
+        builder.HasIndex(child => new { child.HouseholdId, child.GivenName });
         builder.Ignore(child => child.DomainEvents);
     }
 }

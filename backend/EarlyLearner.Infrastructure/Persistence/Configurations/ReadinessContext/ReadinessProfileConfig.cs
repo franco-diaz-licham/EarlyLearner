@@ -2,6 +2,7 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,18 +12,16 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
 {
     public void Configure(EntityTypeBuilder<ReadinessProfile> builder)
     {
-        builder.ToTable("readiness_profiles");
+        builder.ToTable(StringHelpers.Pluralise(nameof(ReadinessProfile)));
 
         builder.HasKey(profile => profile.Id);
 
         builder.Property(profile => profile.Id)
             .HasConversion(id => id.Value, value => new ReadinessProfileId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(profile => profile.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
         builder.HasOne<Household>()
@@ -32,7 +31,6 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
 
         builder.Property(profile => profile.ChildId)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .HasColumnName("child_id")
             .IsRequired();
 
         builder.HasOne<Child>()

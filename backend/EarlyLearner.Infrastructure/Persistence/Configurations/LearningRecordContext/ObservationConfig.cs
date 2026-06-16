@@ -4,6 +4,7 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,18 +14,16 @@ public sealed class ObservationConfig : IEntityTypeConfiguration<Observation>
 {
     public void Configure(EntityTypeBuilder<Observation> builder)
     {
-        builder.ToTable("observations");
+        builder.ToTable(StringHelpers.Pluralise(nameof(Observation)));
 
         builder.HasKey(observation => observation.Id);
 
         builder.Property(observation => observation.Id)
             .HasConversion(id => id.Value, value => new ObservationId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(observation => observation.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
         builder.HasOne<Household>()
@@ -34,7 +33,6 @@ public sealed class ObservationConfig : IEntityTypeConfiguration<Observation>
 
         builder.Property(observation => observation.ChildId)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .HasColumnName("child_id")
             .IsRequired();
 
         builder.HasOne<Child>()
@@ -42,8 +40,8 @@ public sealed class ObservationConfig : IEntityTypeConfiguration<Observation>
             .HasForeignKey(observation => observation.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(observation => observation.ObservedOn).HasColumnName("observed_on").IsRequired();
-        builder.Property(observation => observation.Note).HasMaxLength(2400).IsRequired().HasColumnName("note");
+        builder.Property(observation => observation.ObservedOn).IsRequired();
+        builder.Property(observation => observation.Note).HasMaxLength(2400).IsRequired();
 
         builder.HasMany(observation => observation.ReadinessOutcomes)
             .WithMany()
@@ -57,8 +55,7 @@ public sealed class ObservationConfig : IEntityTypeConfiguration<Observation>
                     .WithMany()
                     .HasForeignKey("observation_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("observation_readiness_outcomes");
                     join.HasKey("observation_id", "readiness_outcome_id");
                 });
@@ -75,8 +72,7 @@ public sealed class ObservationConfig : IEntityTypeConfiguration<Observation>
                     .WithMany()
                     .HasForeignKey("observation_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("observation_stored_files");
                     join.HasKey("observation_id", "stored_file_id");
                 });

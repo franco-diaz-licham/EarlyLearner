@@ -10,14 +10,24 @@ namespace EarlyLearner.Domain.IdentityContext.Entities;
 /// </summary>
 public sealed class Carer : Entity<CarerId>
 {
-    internal Carer(CarerId id, UserId userId, string firstName, string lastName, HouseholdRoleEnum role)
-        : base(id)
+    internal Carer(CarerId id, HouseholdId householdId, UserId userId, string firstName, string lastName, HouseholdRoleEnum role) : base(id)
     {
+        HouseholdId = householdId;
         UserId = userId;
         FirstName = Required(firstName, nameof(firstName));
         LastName = Required(lastName, nameof(lastName));
         Role = role;
     }
+
+    /// <summary>
+    /// Household this carer belongs to.
+    /// </summary>
+    public HouseholdId HouseholdId { get; }
+
+    /// <summary>
+    /// Household navigation for persistence and graph loading.
+    /// </summary>
+    public Household Household { get; private set; } = null!;
 
     /// <summary>
     /// Authentication account linked to this carer profile.

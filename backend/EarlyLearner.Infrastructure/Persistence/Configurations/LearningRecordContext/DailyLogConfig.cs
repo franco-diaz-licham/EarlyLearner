@@ -3,6 +3,7 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,18 +13,16 @@ public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
 {
     public void Configure(EntityTypeBuilder<DailyLog> builder)
     {
-        builder.ToTable("daily_logs");
+        builder.ToTable(StringHelpers.Pluralise(nameof(DailyLog)));
 
         builder.HasKey(log => log.Id);
 
         builder.Property(log => log.Id)
             .HasConversion(id => id.Value, value => new DailyLogId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(log => log.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
         builder.HasOne<Household>()
@@ -33,7 +32,6 @@ public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
 
         builder.Property(log => log.ChildId)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .HasColumnName("child_id")
             .IsRequired();
 
         builder.HasOne<Child>()
@@ -41,7 +39,7 @@ public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
             .HasForeignKey(log => log.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(log => log.LogDate).HasColumnName("log_date").IsRequired();
+        builder.Property(log => log.LogDate).IsRequired();
 
         builder.HasMany(log => log.CompletedActivities)
             .WithOne()
@@ -70,8 +68,7 @@ public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
                     .WithMany()
                     .HasForeignKey("daily_log_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("daily_log_stored_files");
                     join.HasKey("daily_log_id", "stored_file_id");
                 });

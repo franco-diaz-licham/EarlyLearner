@@ -1,6 +1,6 @@
-using EarlyLearner.Domain.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,14 +10,13 @@ public sealed class ReadinessOutcomeProgressConfig : IEntityTypeConfiguration<Re
 {
     public void Configure(EntityTypeBuilder<ReadinessOutcomeProgress> builder)
     {
-        builder.ToTable("readiness_outcome_progress");
+        builder.ToTable(StringHelpers.Pluralise(nameof(ReadinessOutcomeProgress)));
 
         builder.Property<int>("Id").ValueGeneratedOnAdd();
         builder.HasKey("Id");
 
         builder.Property<ReadinessProfileId>("ReadinessProfileId")
             .HasConversion(id => id.Value, value => new ReadinessProfileId(value))
-            .HasColumnName("readiness_profile_id")
             .IsRequired();
 
         builder.HasOne<ReadinessProfile>()
@@ -33,14 +32,12 @@ public sealed class ReadinessOutcomeProgressConfig : IEntityTypeConfiguration<Re
 
         builder.Property<ReadinessOutcomeId>("ReadinessOutcomeId")
             .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value))
-            .HasColumnName("readiness_outcome_id")
             .IsRequired();
 
         builder.Property(progress => progress.Status)
             .HasConversion<string>()
             .HasMaxLength(40)
-            .IsRequired()
-            .HasColumnName("status");
+            .IsRequired();
 
         builder.HasMany(progress => progress.Evidence)
             .WithOne()

@@ -1,9 +1,9 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,18 +13,16 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
 {
     public void Configure(EntityTypeBuilder<PortfolioItem> builder)
     {
-        builder.ToTable("portfolio_items");
+        builder.ToTable(StringHelpers.Pluralise(nameof(PortfolioItem)));
 
         builder.HasKey(item => item.Id);
 
         builder.Property(item => item.Id)
             .HasConversion(id => id.Value, value => new PortfolioItemId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(item => item.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
         builder.HasOne<Household>()
@@ -34,7 +32,6 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
 
         builder.Property(item => item.ChildId)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .HasColumnName("child_id")
             .IsRequired();
 
         builder.HasOne<Child>()
@@ -42,20 +39,18 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
             .HasForeignKey(item => item.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(item => item.CapturedOn).HasColumnName("captured_on").IsRequired();
-        builder.Property(item => item.Caption).HasMaxLength(1200).IsRequired().HasColumnName("caption");
+        builder.Property(item => item.CapturedOn).IsRequired();
+        builder.Property(item => item.Caption).HasMaxLength(1200).IsRequired();
 
         builder.OwnsOne(
             item => item.Source,
-            source =>
-            {
+            source => {
                 source.Property(value => value.SourceType)
                     .HasConversion<string>()
-                    .HasMaxLength(60)
-                    .HasColumnName("source_type");
+                    .HasMaxLength(60);
 
-                source.Property(value => value.EvidenceRecordId).HasColumnName("source_evidence_record_id");
-                source.Property(value => value.SourceDate).HasColumnName("source_date");
+                source.Property(value => value.EvidenceRecordId);
+                source.Property(value => value.SourceDate);
             });
 
         builder.HasMany(item => item.ReadinessOutcomes)
@@ -70,8 +65,7 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
                     .WithMany()
                     .HasForeignKey("portfolio_item_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("portfolio_item_readiness_outcomes");
                     join.HasKey("portfolio_item_id", "readiness_outcome_id");
                 });
@@ -88,8 +82,7 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
                     .WithMany()
                     .HasForeignKey("portfolio_item_id")
                     .OnDelete(DeleteBehavior.Cascade),
-                join =>
-                {
+                join => {
                     join.ToTable("portfolio_item_stored_files");
                     join.HasKey("portfolio_item_id", "stored_file_id");
                 });

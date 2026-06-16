@@ -2,6 +2,7 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
+using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,18 +12,16 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
 {
     public void Configure(EntityTypeBuilder<LearningPlan> builder)
     {
-        builder.ToTable("learning_plans");
+        builder.ToTable(StringHelpers.Pluralise(nameof(LearningPlan)));
 
         builder.HasKey(plan => plan.Id);
 
         builder.Property(plan => plan.Id)
             .HasConversion(id => id.Value, value => new LearningPlanId(value))
-            .ValueGeneratedNever()
-            .HasColumnName("id");
+            .ValueGeneratedNever();
 
         builder.Property(plan => plan.HouseholdId)
             .HasConversion(id => id.Value, value => new HouseholdId(value))
-            .HasColumnName("household_id")
             .IsRequired();
 
         builder.HasOne<Household>()
@@ -32,7 +31,6 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
 
         builder.Property(plan => plan.ChildId)
             .HasConversion(id => id.Value, value => new ChildId(value))
-            .HasColumnName("child_id")
             .IsRequired();
 
         builder.HasOne<Child>()
@@ -42,15 +40,13 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
 
         builder.Property(plan => plan.Focus)
             .HasMaxLength(260)
-            .IsRequired()
-            .HasColumnName("focus");
+            .IsRequired();
 
         builder.OwnsOne(
             plan => plan.Period,
-            period =>
-            {
-                period.Property(range => range.StartDate).HasColumnName("start_date").IsRequired();
-                period.Property(range => range.EndDate).HasColumnName("end_date").IsRequired();
+            period => {
+                period.Property(range => range.StartDate).IsRequired();
+                period.Property(range => range.EndDate).IsRequired();
             });
 
         builder.HasMany(plan => plan.Sessions)
