@@ -12,12 +12,17 @@ public sealed class ReadingEntry : Entity<ReadingEntryId>
 {
     private readonly List<StoredFile> _storedFiles = [];
 
-    internal ReadingEntry(ReadingEntryId id, string title, string author, string childResponse) : base(id)
+    internal ReadingEntry(ReadingEntryId id, DailyLogId dailyLogId, string title, string author, string childResponse) : base(id)
     {
+        DailyLogId = dailyLogId;
         Title = Required(title, nameof(title));
         Author = Required(author, nameof(author));
         ChildResponse = Required(childResponse, nameof(childResponse));
     }
+
+    public DailyLogId DailyLogId { get; }
+
+    public DailyLog DailyLog { get; private set; } = null!;
 
     /// <summary>
     /// Book title read with the child.

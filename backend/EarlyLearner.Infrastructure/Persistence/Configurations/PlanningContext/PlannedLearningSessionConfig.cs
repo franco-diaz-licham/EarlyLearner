@@ -2,6 +2,7 @@ using EarlyLearner.Domain.PlanningContext;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -22,14 +23,14 @@ public sealed class PlannedLearningSessionConfig : IEntityTypeConfiguration<Plan
             .HasConversion(id => id.Value, value => new PlannedLearningSessionId(value))
             .ValueGeneratedNever();
 
-        builder.Property<LearningPlanId>("LearningPlanId")
+        builder.Property(session => session.LearningPlanId)
             .HasConversion(id => id.Value, value => new LearningPlanId(value))
             .IsRequired();
 
-        builder.HasOne<LearningPlan>()
+        builder.HasOne(session => session.LearningPlan)
             .WithMany(plan => plan.Sessions)
-            .HasForeignKey("LearningPlanId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(session => session.LearningPlanId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(session => session.PlannedDate)
             .IsRequired();
@@ -56,23 +57,37 @@ public sealed class PlannedLearningSessionConfig : IEntityTypeConfiguration<Plan
 
         builder.HasMany(session => session.ReadinessOutcomes)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "planned_session_readiness_outcomes",
-                right => right.HasOne<ReadinessOutcome>()
+            .UsingEntity<PlannedLearningSessionReadinessOutcome>(
+                right => right
+                    .HasOne(join => join.ReadinessOutcome)
                     .WithMany()
-                    .HasForeignKey("readiness_outcome_id")
+                    .HasForeignKey(join => join.ReadinessOutcomeId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<PlannedLearningSession>()
+                left => left
+                    .HasOne(join => join.PlannedLearningSession)
                     .WithMany()
-                    .HasForeignKey("planned_learning_session_id")
+                    .HasForeignKey(join => join.PlannedLearningSessionId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("planned_session_readiness_outcomes");
-                    join.HasKey("planned_learning_session_id", "readiness_outcome_id");
+                    join.HasKey(item => new { item.PlannedLearningSessionId, item.ReadinessOutcomeId });
+                    join.HasIndex(item => item.ReadinessOutcomeId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(PlannedLearningSessionReadinessOutcome)));
+                    join.Property(item => item.PlannedLearningSessionId)
+                        .HasConversion(id => id.Value, value => new PlannedLearningSessionId(value));
+                    join.Property(item => item.ReadinessOutcomeId)
+                        .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value));
                 });
 
         builder.Navigation(session => session.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.HasIndex("LearningPlanId", nameof(PlannedLearningSession.PlannedDate));
+        builder.HasIndex(session => new { session.LearningPlanId, session.PlannedDate });
         builder.Ignore(session => session.DomainEvents);
+    }
+
+    private sealed class PlannedLearningSessionReadinessOutcome
+    {
+        public PlannedLearningSessionId PlannedLearningSessionId { get; set; }
+        public PlannedLearningSession PlannedLearningSession { get; set; } = null!;
+        public ReadinessOutcomeId ReadinessOutcomeId { get; set; }
+        public ReadinessOutcome ReadinessOutcome { get; set; } = null!;
     }
 }

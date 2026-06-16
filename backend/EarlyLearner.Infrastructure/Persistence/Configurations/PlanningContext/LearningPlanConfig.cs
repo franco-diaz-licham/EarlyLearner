@@ -24,7 +24,7 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
             .HasConversion(id => id.Value, value => new HouseholdId(value))
             .IsRequired();
 
-        builder.HasOne<Household>()
+        builder.HasOne(plan => plan.Household)
             .WithMany()
             .HasForeignKey(plan => plan.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -33,7 +33,7 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
             .HasConversion(id => id.Value, value => new ChildId(value))
             .IsRequired();
 
-        builder.HasOne<Child>()
+        builder.HasOne(plan => plan.Child)
             .WithMany()
             .HasForeignKey(plan => plan.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -50,8 +50,8 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
             });
 
         builder.HasMany(plan => plan.Sessions)
-            .WithOne()
-            .HasForeignKey("LearningPlanId")
+            .WithOne(session => session.LearningPlan)
+            .HasForeignKey(session => session.LearningPlanId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(plan => plan.Sessions).UsePropertyAccessMode(PropertyAccessMode.Field);

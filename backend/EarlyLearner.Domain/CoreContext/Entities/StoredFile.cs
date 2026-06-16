@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.CoreContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 
 namespace EarlyLearner.Domain.CoreContext.Entities;
@@ -20,8 +21,7 @@ public sealed class StoredFile : Entity<StoredFileId>
         DateTimeOffset uploadedAt)
         : base(id)
     {
-        if (sizeInBytes <= 0)
-        {
+        if (sizeInBytes <= 0) {
             throw new DomainException("Stored file size must be greater than zero.");
         }
 
@@ -112,11 +112,14 @@ public sealed class StoredFile : Entity<StoredFileId>
 
     private static string Required(string value, string name)
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
+        if (string.IsNullOrWhiteSpace(value)) {
             throw new DomainException($"{name} is required.");
         }
 
         return value.Trim();
     }
+
+    #region Nav props
+    public Household Household { get; private set; } = null!;
+    #endregion
 }

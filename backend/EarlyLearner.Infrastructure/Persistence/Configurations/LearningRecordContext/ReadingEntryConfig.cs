@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Shared;
@@ -19,14 +20,14 @@ public sealed class ReadingEntryConfig : IEntityTypeConfiguration<ReadingEntry>
             .HasConversion(id => id.Value, value => new ReadingEntryId(value))
             .ValueGeneratedNever();
 
-        builder.Property<DailyLogId>("DailyLogId")
+        builder.Property(entry => entry.DailyLogId)
             .HasConversion(id => id.Value, value => new DailyLogId(value))
             .IsRequired();
 
-        builder.HasOne<DailyLog>()
+        builder.HasOne(entry => entry.DailyLog)
             .WithMany(log => log.ReadingEntries)
-            .HasForeignKey("DailyLogId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(entry => entry.DailyLogId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(entry => entry.Title).HasMaxLength(220).IsRequired();
         builder.Property(entry => entry.Author).HasMaxLength(160).IsRequired();
@@ -34,22 +35,36 @@ public sealed class ReadingEntryConfig : IEntityTypeConfiguration<ReadingEntry>
 
         builder.HasMany(entry => entry.StoredFiles)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "reading_entry_stored_files",
-                right => right.HasOne<StoredFile>()
+            .UsingEntity<ReadingEntryStoredFile>(
+                right => right
+                    .HasOne(join => join.StoredFile)
                     .WithMany()
-                    .HasForeignKey("stored_file_id")
+                    .HasForeignKey(join => join.StoredFileId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<ReadingEntry>()
+                left => left
+                    .HasOne(join => join.ReadingEntry)
                     .WithMany()
-                    .HasForeignKey("reading_entry_id")
+                    .HasForeignKey(join => join.ReadingEntryId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("reading_entry_stored_files");
-                    join.HasKey("reading_entry_id", "stored_file_id");
+                    join.HasKey(item => new { item.ReadingEntryId, item.StoredFileId });
+                    join.HasIndex(item => item.StoredFileId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(ReadingEntryStoredFile)));
+                    join.Property(item => item.ReadingEntryId)
+                        .HasConversion(id => id.Value, value => new ReadingEntryId(value));
+                    join.Property(item => item.StoredFileId)
+                        .HasConversion(id => id.Value, value => new StoredFileId(value));
                 });
 
         builder.Navigation(entry => entry.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Ignore(entry => entry.DomainEvents);
+    }
+
+    private sealed class ReadingEntryStoredFile
+    {
+        public ReadingEntryId ReadingEntryId { get; set; }
+        public ReadingEntry ReadingEntry { get; set; } = null!;
+        public StoredFileId StoredFileId { get; set; }
+        public StoredFile StoredFile { get; set; } = null!;
     }
 }

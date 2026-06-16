@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
@@ -45,10 +46,14 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
     /// </summary>
     public HouseholdId HouseholdId { get; }
 
+    public Household Household { get; private set; } = null!;
+
     /// <summary>
     /// Child this preserved evidence belongs to.
     /// </summary>
     public ChildId ChildId { get; }
+
+    public Child Child { get; private set; } = null!;
 
     /// <summary>
     /// Date the evidence was captured or selected for the portfolio.

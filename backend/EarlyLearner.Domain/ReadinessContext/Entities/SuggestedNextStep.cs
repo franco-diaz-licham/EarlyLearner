@@ -9,11 +9,19 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
 {
-    private SuggestedNextStep(SuggestedNextStepId id, ReadinessOutcome readinessOutcome, string text) : base(id)
+    private SuggestedNextStep(SuggestedNextStepId id, ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome, string text) : base(id)
     {
+        ReadinessProfileId = readinessProfileId;
+        ReadinessOutcomeId = readinessOutcome.Id;
         ReadinessOutcome = readinessOutcome;
         Text = text;
     }
+
+    public ReadinessProfileId ReadinessProfileId { get; }
+
+    public ReadinessProfile ReadinessProfile { get; private set; } = null!;
+
+    public ReadinessOutcomeId ReadinessOutcomeId { get; }
 
     /// <summary>
     /// Readiness area this recommendation is intended to strengthen.
@@ -25,10 +33,11 @@ public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
     /// </summary>
     public string Text { get; }
 
-    internal static SuggestedNextStep Create(ReadinessOutcome readinessOutcome, string text)
+    internal static SuggestedNextStep Create(ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome, string text)
     {
         return new SuggestedNextStep(
             new SuggestedNextStepId(Guid.NewGuid()),
+            readinessProfileId,
             readinessOutcome,
             Required(text, nameof(text)));
     }

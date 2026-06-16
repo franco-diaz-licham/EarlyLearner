@@ -18,22 +18,22 @@ public sealed class SuggestedNextStepConfig : IEntityTypeConfiguration<Suggested
             .HasConversion(id => id.Value, value => new SuggestedNextStepId(value))
             .ValueGeneratedNever();
 
-        builder.Property<ReadinessProfileId>("ReadinessProfileId")
+        builder.Property(step => step.ReadinessProfileId)
             .HasConversion(id => id.Value, value => new ReadinessProfileId(value))
             .IsRequired();
 
-        builder.HasOne<ReadinessProfile>()
+        builder.HasOne(step => step.ReadinessProfile)
             .WithMany(profile => profile.SuggestedNextSteps)
-            .HasForeignKey("ReadinessProfileId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(step => step.ReadinessProfileId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(step => step.ReadinessOutcome)
             .WithMany()
-            .HasForeignKey("ReadinessOutcomeId")
+            .HasForeignKey(step => step.ReadinessOutcomeId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        builder.Property<ReadinessOutcomeId>("ReadinessOutcomeId")
+        builder.Property(step => step.ReadinessOutcomeId)
             .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value))
             .IsRequired();
 

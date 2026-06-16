@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Shared;
@@ -19,36 +20,50 @@ public sealed class RoutineEntryConfig : IEntityTypeConfiguration<RoutineEntry>
             .HasConversion(id => id.Value, value => new RoutineEntryId(value))
             .ValueGeneratedNever();
 
-        builder.Property<DailyLogId>("DailyLogId")
+        builder.Property(entry => entry.DailyLogId)
             .HasConversion(id => id.Value, value => new DailyLogId(value))
             .IsRequired();
 
-        builder.HasOne<DailyLog>()
+        builder.HasOne(entry => entry.DailyLog)
             .WithMany(log => log.RoutineEntries)
-            .HasForeignKey("DailyLogId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(entry => entry.DailyLogId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(entry => entry.RoutineName).HasMaxLength(180).IsRequired();
         builder.Property(entry => entry.Notes).HasMaxLength(1200).IsRequired();
 
         builder.HasMany(entry => entry.StoredFiles)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "routine_entry_stored_files",
-                right => right.HasOne<StoredFile>()
+            .UsingEntity<RoutineEntryStoredFile>(
+                right => right
+                    .HasOne(join => join.StoredFile)
                     .WithMany()
-                    .HasForeignKey("stored_file_id")
+                    .HasForeignKey(join => join.StoredFileId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<RoutineEntry>()
+                left => left
+                    .HasOne(join => join.RoutineEntry)
                     .WithMany()
-                    .HasForeignKey("routine_entry_id")
+                    .HasForeignKey(join => join.RoutineEntryId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("routine_entry_stored_files");
-                    join.HasKey("routine_entry_id", "stored_file_id");
+                    join.HasKey(item => new { item.RoutineEntryId, item.StoredFileId });
+                    join.HasIndex(item => item.StoredFileId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(RoutineEntryStoredFile)));
+                    join.Property(item => item.RoutineEntryId)
+                        .HasConversion(id => id.Value, value => new RoutineEntryId(value));
+                    join.Property(item => item.StoredFileId)
+                        .HasConversion(id => id.Value, value => new StoredFileId(value));
                 });
 
         builder.Navigation(entry => entry.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Ignore(entry => entry.DomainEvents);
+    }
+
+    private sealed class RoutineEntryStoredFile
+    {
+        public RoutineEntryId RoutineEntryId { get; set; }
+        public RoutineEntry RoutineEntry { get; set; } = null!;
+        public StoredFileId StoredFileId { get; set; }
+        public StoredFile StoredFile { get; set; } = null!;
     }
 }

@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.CoreContext;
@@ -32,10 +33,14 @@ public sealed class LearningPlan : Entity<LearningPlanId>
     /// </summary>
     public HouseholdId HouseholdId { get; }
 
+    public Household Household { get; private set; } = null!;
+
     /// <summary>
     /// Child the planned learning period is designed for.
     /// </summary>
     public ChildId ChildId { get; }
+
+    public Child Child { get; private set; } = null!;
 
     /// <summary>
     /// Calendar period covered by this plan.
@@ -71,6 +76,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
 
         var session = new PlannedLearningSession(
             new PlannedLearningSessionId(Guid.NewGuid()),
+            Id,
             plannedDate,
             title,
             goalIds,

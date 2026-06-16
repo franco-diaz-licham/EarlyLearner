@@ -23,11 +23,6 @@ public sealed class Child : Entity<ChildId>
     public HouseholdId HouseholdId { get; }
 
     /// <summary>
-    /// Household navigation for persistence and graph loading.
-    /// </summary>
-    public Household Household { get; private set; } = null!;
-
-    /// <summary>
     /// Name used by carers when planning and recording this child's learning.
     /// </summary>
     public string GivenName { get; private set; }
@@ -57,4 +52,9 @@ public sealed class Child : Entity<ChildId>
         if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} is required.");
         return value.Trim();
     }
+
+
+    #region Nav props
+    public Household Household { get; private set; } = null!;
+    #endregion
 }

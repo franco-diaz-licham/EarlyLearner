@@ -18,12 +18,19 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
         string summary)
         : base(id)
     {
+        ReadinessOutcomeId = readinessOutcome.Id;
         ReadinessOutcome = readinessOutcome;
         SourceType = sourceType;
         EvidenceRecordId = evidenceRecordId;
         ObservedOn = observedOn;
         Summary = summary;
     }
+
+    public int ReadinessOutcomeProgressId { get; private set; }
+
+    public ReadinessOutcomeProgress ReadinessOutcomeProgress { get; private set; } = null!;
+
+    public ReadinessOutcomeId ReadinessOutcomeId { get; }
 
     /// <summary>
     /// Readiness area supported by this evidence.

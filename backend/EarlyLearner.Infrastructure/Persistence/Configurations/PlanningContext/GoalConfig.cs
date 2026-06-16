@@ -3,6 +3,7 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,7 +26,7 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
             .HasConversion(id => id.Value, value => new HouseholdId(value))
             .IsRequired();
 
-        builder.HasOne<Household>()
+        builder.HasOne(goal => goal.Household)
             .WithMany()
             .HasForeignKey(goal => goal.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -34,7 +35,7 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
             .HasConversion(id => id.Value, value => new ChildId(value))
             .IsRequired();
 
-        builder.HasOne<Child>()
+        builder.HasOne(goal => goal.Child)
             .WithMany()
             .HasForeignKey(goal => goal.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -62,23 +63,37 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
 
         builder.HasMany(goal => goal.ReadinessOutcomes)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "goal_readiness_outcomes",
-                right => right.HasOne<ReadinessOutcome>()
+            .UsingEntity<GoalReadinessOutcome>(
+                right => right
+                    .HasOne(join => join.ReadinessOutcome)
                     .WithMany()
-                    .HasForeignKey("readiness_outcome_id")
+                    .HasForeignKey(join => join.ReadinessOutcomeId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<Goal>()
+                left => left
+                    .HasOne(join => join.Goal)
                     .WithMany()
-                    .HasForeignKey("goal_id")
+                    .HasForeignKey(join => join.GoalId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("goal_readiness_outcomes");
-                    join.HasKey("goal_id", "readiness_outcome_id");
+                    join.HasKey(item => new { item.GoalId, item.ReadinessOutcomeId });
+                    join.HasIndex(item => item.ReadinessOutcomeId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(GoalReadinessOutcome)));
+                    join.Property(item => item.GoalId)
+                        .HasConversion(id => id.Value, value => new GoalId(value));
+                    join.Property(item => item.ReadinessOutcomeId)
+                        .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value));
                 });
 
         builder.Navigation(goal => goal.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(goal => new { goal.HouseholdId, goal.ChildId, goal.Status });
         builder.Ignore(goal => goal.DomainEvents);
+    }
+
+    private sealed class GoalReadinessOutcome
+    {
+        public GoalId GoalId { get; set; }
+        public Goal Goal { get; set; } = null!;
+        public ReadinessOutcomeId ReadinessOutcomeId { get; set; }
+        public ReadinessOutcome ReadinessOutcome { get; set; } = null!;
     }
 }

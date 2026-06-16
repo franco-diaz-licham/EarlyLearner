@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
 
 /// <summary>
@@ -9,11 +10,21 @@ public sealed class ReadinessOutcomeProgress
 {
     private readonly List<EvidenceReference> _evidence = [];
 
-    internal ReadinessOutcomeProgress(ReadinessOutcome readinessOutcome)
+    internal ReadinessOutcomeProgress(ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome)
     {
+        ReadinessProfileId = readinessProfileId;
+        ReadinessOutcomeId = readinessOutcome.Id;
         ReadinessOutcome = readinessOutcome;
         Status = ReadinessStatusEnum.NotYetObserved;
     }
+
+    public int Id { get; private set; }
+
+    public ReadinessProfileId ReadinessProfileId { get; }
+
+    public ReadinessProfile ReadinessProfile { get; private set; } = null!;
+
+    public ReadinessOutcomeId ReadinessOutcomeId { get; }
 
     /// <summary>
     /// Readiness area being tracked within the child's profile.

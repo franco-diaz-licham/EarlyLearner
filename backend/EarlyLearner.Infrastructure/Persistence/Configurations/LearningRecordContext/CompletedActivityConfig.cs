@@ -1,7 +1,9 @@
 using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -20,53 +22,81 @@ public sealed class CompletedActivityConfig : IEntityTypeConfiguration<Completed
             .HasConversion(id => id.Value, value => new CompletedActivityId(value))
             .ValueGeneratedNever();
 
-        builder.Property<DailyLogId>("DailyLogId")
+        builder.Property(activity => activity.DailyLogId)
             .HasConversion(id => id.Value, value => new DailyLogId(value))
             .IsRequired();
 
-        builder.HasOne<DailyLog>()
+        builder.HasOne(activity => activity.DailyLog)
             .WithMany(log => log.CompletedActivities)
-            .HasForeignKey("DailyLogId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(activity => activity.DailyLogId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(activity => activity.Title).HasMaxLength(220).IsRequired();
 
         builder.HasMany(activity => activity.ReadinessOutcomes)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "completed_activity_readiness_outcomes",
-                right => right.HasOne<ReadinessOutcome>()
+            .UsingEntity<CompletedActivityReadinessOutcome>(
+                right => right
+                    .HasOne(join => join.ReadinessOutcome)
                     .WithMany()
-                    .HasForeignKey("readiness_outcome_id")
+                    .HasForeignKey(join => join.ReadinessOutcomeId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<CompletedActivity>()
+                left => left
+                    .HasOne(join => join.CompletedActivity)
                     .WithMany()
-                    .HasForeignKey("completed_activity_id")
+                    .HasForeignKey(join => join.CompletedActivityId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("completed_activity_readiness_outcomes");
-                    join.HasKey("completed_activity_id", "readiness_outcome_id");
+                    join.HasKey(item => new { item.CompletedActivityId, item.ReadinessOutcomeId });
+                    join.HasIndex(item => item.ReadinessOutcomeId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(CompletedActivityReadinessOutcome)));
+                    join.Property(item => item.CompletedActivityId)
+                        .HasConversion(id => id.Value, value => new CompletedActivityId(value));
+                    join.Property(item => item.ReadinessOutcomeId)
+                        .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value));
                 });
 
         builder.HasMany(activity => activity.StoredFiles)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "completed_activity_stored_files",
-                right => right.HasOne<StoredFile>()
+            .UsingEntity<CompletedActivityStoredFile>(
+                right => right
+                    .HasOne(join => join.StoredFile)
                     .WithMany()
-                    .HasForeignKey("stored_file_id")
+                    .HasForeignKey(join => join.StoredFileId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<CompletedActivity>()
+                left => left
+                    .HasOne(join => join.CompletedActivity)
                     .WithMany()
-                    .HasForeignKey("completed_activity_id")
+                    .HasForeignKey(join => join.CompletedActivityId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("completed_activity_stored_files");
-                    join.HasKey("completed_activity_id", "stored_file_id");
+                    join.HasKey(item => new { item.CompletedActivityId, item.StoredFileId });
+                    join.HasIndex(item => item.StoredFileId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(CompletedActivityStoredFile)));
+                    join.Property(item => item.CompletedActivityId)
+                        .HasConversion(id => id.Value, value => new CompletedActivityId(value));
+                    join.Property(item => item.StoredFileId)
+                        .HasConversion(id => id.Value, value => new StoredFileId(value));
                 });
 
         builder.Navigation(activity => activity.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(activity => activity.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Ignore(activity => activity.DomainEvents);
+    }
+
+    private sealed class CompletedActivityReadinessOutcome
+    {
+        public CompletedActivityId CompletedActivityId { get; set; }
+        public CompletedActivity CompletedActivity { get; set; } = null!;
+        public ReadinessOutcomeId ReadinessOutcomeId { get; set; }
+        public ReadinessOutcome ReadinessOutcome { get; set; } = null!;
+    }
+
+    private sealed class CompletedActivityStoredFile
+    {
+        public CompletedActivityId CompletedActivityId { get; set; }
+        public CompletedActivity CompletedActivity { get; set; } = null!;
+        public StoredFileId StoredFileId { get; set; }
+        public StoredFile StoredFile { get; set; } = null!;
     }
 }

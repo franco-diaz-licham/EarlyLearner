@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 
@@ -18,7 +19,7 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     {
         HouseholdId = householdId;
         ChildId = childId;
-        _outcomeProgress.AddRange(readinessOutcomes.Select(readinessOutcome => new ReadinessOutcomeProgress(readinessOutcome)));
+        _outcomeProgress.AddRange(readinessOutcomes.Select(readinessOutcome => new ReadinessOutcomeProgress(Id, readinessOutcome)));
     }
 
     /// <summary>
@@ -26,10 +27,14 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     /// </summary>
     public HouseholdId HouseholdId { get; }
 
+    public Household Household { get; private set; } = null!;
+
     /// <summary>
     /// Child whose school-readiness picture is being summarised.
     /// </summary>
     public ChildId ChildId { get; }
+
+    public Child Child { get; private set; } = null!;
 
     #region Nav props
 
@@ -78,7 +83,7 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     public SuggestedNextStep AddSuggestedNextStep(ReadinessOutcome readinessOutcome, string text)
     {
         if (_outcomeProgress.All(item => item.ReadinessOutcome.Id != readinessOutcome.Id)) throw new DomainException("Suggested next step must target a tracked readiness outcome.");
-        var nextStep = SuggestedNextStep.Create(readinessOutcome, text);
+        var nextStep = SuggestedNextStep.Create(Id, readinessOutcome, text);
         _suggestedNextSteps.Add(nextStep);
         return nextStep;
     }

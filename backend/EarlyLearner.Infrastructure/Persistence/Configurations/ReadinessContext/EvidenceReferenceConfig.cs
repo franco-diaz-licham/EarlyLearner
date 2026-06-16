@@ -19,21 +19,21 @@ public sealed class EvidenceReferenceConfig : IEntityTypeConfiguration<EvidenceR
             .HasConversion(id => id.Value, value => new EvidenceReferenceId(value))
             .ValueGeneratedNever();
 
-        builder.Property<int>("ReadinessOutcomeProgressId")
+        builder.Property(evidence => evidence.ReadinessOutcomeProgressId)
             .IsRequired();
 
-        builder.HasOne<ReadinessOutcomeProgress>()
+        builder.HasOne(evidence => evidence.ReadinessOutcomeProgress)
             .WithMany(progress => progress.Evidence)
-            .HasForeignKey("ReadinessOutcomeProgressId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(evidence => evidence.ReadinessOutcomeProgressId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(evidence => evidence.ReadinessOutcome)
             .WithMany()
-            .HasForeignKey("ReadinessOutcomeId")
+            .HasForeignKey(evidence => evidence.ReadinessOutcomeId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        builder.Property<ReadinessOutcomeId>("ReadinessOutcomeId")
+        builder.Property(evidence => evidence.ReadinessOutcomeId)
             .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value))
             .IsRequired();
 

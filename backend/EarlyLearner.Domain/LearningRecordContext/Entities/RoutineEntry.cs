@@ -12,11 +12,16 @@ public sealed class RoutineEntry : Entity<RoutineEntryId>
 {
     private readonly List<StoredFile> _storedFiles = [];
 
-    internal RoutineEntry(RoutineEntryId id, string routineName, string notes) : base(id)
+    internal RoutineEntry(RoutineEntryId id, DailyLogId dailyLogId, string routineName, string notes) : base(id)
     {
+        DailyLogId = dailyLogId;
         RoutineName = Required(routineName, nameof(routineName));
         Notes = Required(notes, nameof(notes));
     }
+
+    public DailyLogId DailyLogId { get; }
+
+    public DailyLog DailyLog { get; private set; } = null!;
 
     /// <summary>
     /// Name of the routine or life skill practised by the child.

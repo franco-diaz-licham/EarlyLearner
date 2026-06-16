@@ -15,12 +15,14 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
 
     internal PlannedLearningSession(
         PlannedLearningSessionId id,
+        LearningPlanId learningPlanId,
         DateOnly plannedDate,
         string title,
         IEnumerable<GoalId> goalIds,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
     {
+        LearningPlanId = learningPlanId;
         PlannedDate = plannedDate;
         Title = Required(title, nameof(title));
         Status = SessionStatusEnum.Planned;
@@ -30,6 +32,10 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
 
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
     }
+
+    public LearningPlanId LearningPlanId { get; }
+
+    public LearningPlan LearningPlan { get; private set; } = null!;
 
     /// <summary>
     /// Date the carer intends to do this activity or learning moment.

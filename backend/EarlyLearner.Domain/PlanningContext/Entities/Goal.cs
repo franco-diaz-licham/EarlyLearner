@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.PlanningContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.CoreContext;
@@ -43,10 +44,14 @@ public sealed class Goal : Entity<GoalId>
     /// </summary>
     public HouseholdId HouseholdId { get; }
 
+    public Household Household { get; private set; } = null!;
+
     /// <summary>
     /// Child this intentional learning or development aim belongs to.
     /// </summary>
     public ChildId ChildId { get; }
+
+    public Child Child { get; private set; } = null!;
 
     /// <summary>
     /// Parent-facing description of what is being encouraged.

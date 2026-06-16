@@ -12,25 +12,25 @@ public sealed class ReadinessOutcomeProgressConfig : IEntityTypeConfiguration<Re
     {
         builder.ToTable(StringHelpers.Pluralise(nameof(ReadinessOutcomeProgress)));
 
-        builder.Property<int>("Id").ValueGeneratedOnAdd();
-        builder.HasKey("Id");
+        builder.HasKey(progress => progress.Id);
+        builder.Property(progress => progress.Id).ValueGeneratedOnAdd();
 
-        builder.Property<ReadinessProfileId>("ReadinessProfileId")
+        builder.Property(progress => progress.ReadinessProfileId)
             .HasConversion(id => id.Value, value => new ReadinessProfileId(value))
             .IsRequired();
 
-        builder.HasOne<ReadinessProfile>()
+        builder.HasOne(progress => progress.ReadinessProfile)
             .WithMany(profile => profile.OutcomeProgress)
-            .HasForeignKey("ReadinessProfileId")
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(progress => progress.ReadinessProfileId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(progress => progress.ReadinessOutcome)
             .WithMany()
-            .HasForeignKey("ReadinessOutcomeId")
+            .HasForeignKey(progress => progress.ReadinessOutcomeId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        builder.Property<ReadinessOutcomeId>("ReadinessOutcomeId")
+        builder.Property(progress => progress.ReadinessOutcomeId)
             .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value))
             .IsRequired();
 
@@ -40,11 +40,11 @@ public sealed class ReadinessOutcomeProgressConfig : IEntityTypeConfiguration<Re
             .IsRequired();
 
         builder.HasMany(progress => progress.Evidence)
-            .WithOne()
-            .HasForeignKey("ReadinessOutcomeProgressId")
+            .WithOne(evidence => evidence.ReadinessOutcomeProgress)
+            .HasForeignKey(evidence => evidence.ReadinessOutcomeProgressId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(progress => progress.Evidence).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.HasIndex("ReadinessProfileId", "ReadinessOutcomeId").IsUnique();
+        builder.HasIndex(progress => new { progress.ReadinessProfileId, progress.ReadinessOutcomeId }).IsUnique();
     }
 }

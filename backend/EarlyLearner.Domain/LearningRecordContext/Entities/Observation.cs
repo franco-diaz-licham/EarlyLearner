@@ -1,5 +1,6 @@
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
@@ -42,10 +43,14 @@ public sealed class Observation : Entity<ObservationId>
     /// </summary>
     public HouseholdId HouseholdId { get; }
 
+    public Household Household { get; private set; } = null!;
+
     /// <summary>
     /// Child the observation is about.
     /// </summary>
     public ChildId ChildId { get; }
+
+    public Child Child { get; private set; } = null!;
 
     /// <summary>
     /// Date the carer noticed or recorded the learning moment.

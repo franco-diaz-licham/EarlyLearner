@@ -1,6 +1,5 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
-using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +23,7 @@ public sealed class StoredFileConfig : IEntityTypeConfiguration<StoredFile>
             .HasConversion(id => id.Value, value => new HouseholdId(value))
             .IsRequired();
 
-        builder.HasOne<Household>()
+        builder.HasOne(x => x.Household)
             .WithMany()
             .HasForeignKey(file => file.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);

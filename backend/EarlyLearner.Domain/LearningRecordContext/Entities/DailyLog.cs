@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.CoreContext;
@@ -29,10 +30,14 @@ public sealed class DailyLog : Entity<DailyLogId>
     /// </summary>
     public HouseholdId HouseholdId { get; }
 
+    public Household Household { get; private set; } = null!;
+
     /// <summary>
     /// Child whose day is being recorded.
     /// </summary>
     public ChildId ChildId { get; }
+
+    public Child Child { get; private set; } = null!;
 
     /// <summary>
     /// Calendar date the recorded activities and routines happened.
@@ -70,7 +75,7 @@ public sealed class DailyLog : Entity<DailyLogId>
 
     public CompletedActivity LogCompletedActivity(string title, IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
-        var activity = new CompletedActivity(new CompletedActivityId(Guid.NewGuid()), title, readinessOutcomes);
+        var activity = new CompletedActivity(new CompletedActivityId(Guid.NewGuid()), Id, title, readinessOutcomes);
         _completedActivities.Add(activity);
         RaiseDomainEvent(new LearningActivityLogged(Id, activity.Id, DateTimeOffset.UtcNow));
         return activity;
@@ -78,14 +83,14 @@ public sealed class DailyLog : Entity<DailyLogId>
 
     public ReadingEntry AddReadingEntry(string title, string author, string childResponse)
     {
-        var readingEntry = new ReadingEntry(new ReadingEntryId(Guid.NewGuid()), title, author, childResponse);
+        var readingEntry = new ReadingEntry(new ReadingEntryId(Guid.NewGuid()), Id, title, author, childResponse);
         _readingEntries.Add(readingEntry);
         return readingEntry;
     }
 
     public RoutineEntry AddRoutineEntry(string routineName, string notes)
     {
-        var routineEntry = new RoutineEntry(new RoutineEntryId(Guid.NewGuid()), routineName, notes);
+        var routineEntry = new RoutineEntry(new RoutineEntryId(Guid.NewGuid()), Id, routineName, notes);
         _routineEntries.Add(routineEntry);
         return routineEntry;
     }

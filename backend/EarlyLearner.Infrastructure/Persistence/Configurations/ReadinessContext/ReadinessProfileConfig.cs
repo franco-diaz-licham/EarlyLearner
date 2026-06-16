@@ -24,7 +24,7 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
             .HasConversion(id => id.Value, value => new HouseholdId(value))
             .IsRequired();
 
-        builder.HasOne<Household>()
+        builder.HasOne(profile => profile.Household)
             .WithMany()
             .HasForeignKey(profile => profile.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -33,19 +33,19 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
             .HasConversion(id => id.Value, value => new ChildId(value))
             .IsRequired();
 
-        builder.HasOne<Child>()
+        builder.HasOne(profile => profile.Child)
             .WithMany()
             .HasForeignKey(profile => profile.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(profile => profile.OutcomeProgress)
-            .WithOne()
-            .HasForeignKey("ReadinessProfileId")
+            .WithOne(progress => progress.ReadinessProfile)
+            .HasForeignKey(progress => progress.ReadinessProfileId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(profile => profile.SuggestedNextSteps)
-            .WithOne()
-            .HasForeignKey("ReadinessProfileId")
+            .WithOne(step => step.ReadinessProfile)
+            .HasForeignKey(step => step.ReadinessProfileId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(profile => profile.OutcomeProgress).UsePropertyAccessMode(PropertyAccessMode.Field);

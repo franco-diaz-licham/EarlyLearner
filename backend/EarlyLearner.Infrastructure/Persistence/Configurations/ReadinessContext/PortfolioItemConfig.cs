@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
@@ -25,7 +26,7 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
             .HasConversion(id => id.Value, value => new HouseholdId(value))
             .IsRequired();
 
-        builder.HasOne<Household>()
+        builder.HasOne(item => item.Household)
             .WithMany()
             .HasForeignKey(item => item.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -34,7 +35,7 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
             .HasConversion(id => id.Value, value => new ChildId(value))
             .IsRequired();
 
-        builder.HasOne<Child>()
+        builder.HasOne(item => item.Child)
             .WithMany()
             .HasForeignKey(item => item.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -55,41 +56,69 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
 
         builder.HasMany(item => item.ReadinessOutcomes)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "portfolio_item_readiness_outcomes",
-                right => right.HasOne<ReadinessOutcome>()
+            .UsingEntity<PortfolioItemReadinessOutcome>(
+                right => right
+                    .HasOne(join => join.ReadinessOutcome)
                     .WithMany()
-                    .HasForeignKey("readiness_outcome_id")
+                    .HasForeignKey(join => join.ReadinessOutcomeId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<PortfolioItem>()
+                left => left
+                    .HasOne(join => join.PortfolioItem)
                     .WithMany()
-                    .HasForeignKey("portfolio_item_id")
+                    .HasForeignKey(join => join.PortfolioItemId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("portfolio_item_readiness_outcomes");
-                    join.HasKey("portfolio_item_id", "readiness_outcome_id");
+                    join.HasKey(item => new { item.PortfolioItemId, item.ReadinessOutcomeId });
+                    join.HasIndex(item => item.ReadinessOutcomeId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(PortfolioItemReadinessOutcome)));
+                    join.Property(item => item.PortfolioItemId)
+                        .HasConversion(id => id.Value, value => new PortfolioItemId(value));
+                    join.Property(item => item.ReadinessOutcomeId)
+                        .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value));
                 });
 
         builder.HasMany(item => item.StoredFiles)
             .WithMany()
-            .UsingEntity<Dictionary<string, object>>(
-                "portfolio_item_stored_files",
-                right => right.HasOne<StoredFile>()
+            .UsingEntity<PortfolioItemStoredFile>(
+                right => right
+                    .HasOne(join => join.StoredFile)
                     .WithMany()
-                    .HasForeignKey("stored_file_id")
+                    .HasForeignKey(join => join.StoredFileId)
                     .OnDelete(DeleteBehavior.Restrict),
-                left => left.HasOne<PortfolioItem>()
+                left => left
+                    .HasOne(join => join.PortfolioItem)
                     .WithMany()
-                    .HasForeignKey("portfolio_item_id")
+                    .HasForeignKey(join => join.PortfolioItemId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.ToTable("portfolio_item_stored_files");
-                    join.HasKey("portfolio_item_id", "stored_file_id");
+                    join.HasKey(item => new { item.PortfolioItemId, item.StoredFileId });
+                    join.HasIndex(item => item.StoredFileId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(PortfolioItemStoredFile)));
+                    join.Property(item => item.PortfolioItemId)
+                        .HasConversion(id => id.Value, value => new PortfolioItemId(value));
+                    join.Property(item => item.StoredFileId)
+                        .HasConversion(id => id.Value, value => new StoredFileId(value));
                 });
 
         builder.Navigation(item => item.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(item => item.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(item => new { item.HouseholdId, item.ChildId, item.CapturedOn });
         builder.Ignore(item => item.DomainEvents);
+    }
+
+    private sealed class PortfolioItemReadinessOutcome
+    {
+        public PortfolioItemId PortfolioItemId { get; set; }
+        public PortfolioItem PortfolioItem { get; set; } = null!;
+        public ReadinessOutcomeId ReadinessOutcomeId { get; set; }
+        public ReadinessOutcome ReadinessOutcome { get; set; } = null!;
+    }
+
+    private sealed class PortfolioItemStoredFile
+    {
+        public PortfolioItemId PortfolioItemId { get; set; }
+        public PortfolioItem PortfolioItem { get; set; } = null!;
+        public StoredFileId StoredFileId { get; set; }
+        public StoredFile StoredFile { get; set; } = null!;
     }
 }
