@@ -1,5 +1,7 @@
 using EarlyLearner.Api.Configuration.Options;
+using EarlyLearner.Api.Endpoints;
 using EarlyLearner.Infrastructure.Configuration.Options;
+using FluentValidation;
 using Microsoft.OpenApi;
 using Serilog;
 using Serilog.Events;
@@ -14,6 +16,7 @@ public static class ApiAppServices
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddPermissionAuthorization();
+        builder.Services.AddRequestValidators();
 
         builder.Services
             .AddUseCaseServices()
@@ -121,6 +124,24 @@ public static class ApiAppServices
 
     public static IServiceCollection AddPortServices(this IServiceCollection services)
     {
+
+        return services;
+    }
+
+    private static IServiceCollection AddRequestValidators(this IServiceCollection services)
+    {
+        services.AddScoped<IValidator<CreateStoredFileRequest>, CreateStoredFileRequestValidator>();
+        services.AddScoped<IValidator<UpdateStoredFileStatusRequest>, UpdateStoredFileStatusRequestValidator>();
+        services.AddScoped<IValidator<CreateHouseholdRequest>, CreateHouseholdRequestValidator>();
+        services.AddScoped<IValidator<UpdateHouseholdRequest>, UpdateHouseholdRequestValidator>();
+        services.AddScoped<IValidator<CreateDailyLogRequest>, CreateDailyLogRequestValidator>();
+        services.AddScoped<IValidator<CreateGoalRequest>, CreateGoalRequestValidator>();
+        services.AddScoped<IValidator<UpdateGoalRequest>, UpdateGoalRequestValidator>();
+        services.AddScoped<IValidator<CreateLearningPlanRequest>, CreateLearningPlanRequestValidator>();
+        services.AddScoped<IValidator<UpdateLearningPlanRequest>, UpdateLearningPlanRequestValidator>();
+        services.AddScoped<IValidator<CreateReadinessOutcomeRequest>, CreateReadinessOutcomeRequestValidator>();
+        services.AddScoped<IValidator<UpdateReadinessOutcomeRequest>, UpdateReadinessOutcomeRequestValidator>();
+        services.AddScoped<IValidator<CreateReadinessProfileRequest>, CreateReadinessProfileRequestValidator>();
 
         return services;
     }

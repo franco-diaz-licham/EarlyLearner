@@ -5,8 +5,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.ReadinessContext;
 
-public sealed class EfReadinessOutcomeCommandRepository(DatabaseContext db) : IReadinessOutcomeCommandRepository
+public sealed class ReadinessOutcomeRepository(DatabaseContext db) : IReadinessOutcomeQueryRepository, IReadinessOutcomeCommandRepository
 {
+    public async Task<List<ReadinessOutcomeResponse>> ListAsync(CancellationToken cancellationToken)
+    {
+        return await db.ReadinessOutcomes
+            .AsNoTracking()
+            .OrderBy(outcome => outcome.SortOrder)
+            .Select(outcome => new ReadinessOutcomeResponse(
+                ReadinessOutcomeId: outcome.Id.Value,
+                Code: outcome.Code,
+                Name: outcome.Name,
+                Description: outcome.Description,
+                Category: outcome.Category,
+                SortOrder: outcome.SortOrder,
+                Status: outcome.Status))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<ReadinessOutcome?> GetAsync(Guid readinessOutcomeId, CancellationToken cancellationToken)
     {
         return db.ReadinessOutcomes.SingleOrDefaultAsync(item => item.Id.Value == readinessOutcomeId, cancellationToken);

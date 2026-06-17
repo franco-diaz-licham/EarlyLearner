@@ -6,8 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.ReadinessContext;
 
-public sealed class EfReadinessProfileCommandRepository(DatabaseContext db) : IReadinessProfileCommandRepository
+public sealed class ReadinessProfileRepository(DatabaseContext db) : IReadinessProfileQueryRepository, IReadinessProfileCommandRepository
 {
+    public async Task<List<ReadinessProfileResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    {
+        return await db.ReadinessProfiles
+            .AsNoTracking()
+            .Where(profile => profile.HouseholdId.Value == householdId)
+            .OrderBy(profile => profile.ChildId.Value)
+            .Select(profile => new ReadinessProfileResponse(
+                ReadinessProfileId: profile.Id.Value,
+                HouseholdId: profile.HouseholdId.Value,
+                ChildId: profile.ChildId.Value,
+                ReadinessOutcomeIds: profile.OutcomeProgress.Select(progress => progress.ReadinessOutcome.Id.Value).ToList()))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken)
     {
         return db.Children.AnyAsync(child => child.Id.Value == childId && child.HouseholdId.Value == householdId, cancellationToken);

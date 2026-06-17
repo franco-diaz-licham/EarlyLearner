@@ -14,12 +14,14 @@ public static class ApiEndpointMappings
 
         var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");
 
-        api.MapCoreEndpoints();
+        api.MapStoredFileEndpoints();
         api.MapDashboardEndpoints();
-        api.MapIdentityEndpoints();
-        api.MapLearningRecordEndpoints();
-        api.MapPlanningEndpoints();
-        api.MapReadinessEndpoints();
+        api.MapHouseholdEndpoints();
+        api.MapDailyLogEndpoints();
+        api.MapGoalEndpoints();
+        api.MapLearningPlanEndpoints();
+        api.MapReadinessOutcomeEndpoints();
+        api.MapReadinessProfileEndpoints();
 
         return endpoints;
     }

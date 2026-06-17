@@ -5,8 +5,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.IdentityContext;
 
-public sealed class EfHouseholdCommandRepository(DatabaseContext db) : IHouseholdCommandRepository
+public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRepository, IHouseholdCommandRepository
 {
+    public async Task<List<HouseholdResponse>> ListAsync(CancellationToken cancellationToken)
+    {
+        return await db.Households
+            .AsNoTracking()
+            .OrderBy(household => household.Name)
+            .Select(household => new HouseholdResponse(
+                HouseholdId: household.Id.Value,
+                Name: household.Name))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<Household?> GetAsync(Guid householdId, CancellationToken cancellationToken)
     {
         return db.Households.SingleOrDefaultAsync(item => item.Id.Value == householdId, cancellationToken);

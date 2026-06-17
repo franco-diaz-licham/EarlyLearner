@@ -1,10 +1,11 @@
 using EarlyLearner.Application.Features.CoreContext;
+using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.CoreContext;
 
-public sealed class EfStoredFileQueryRepository(DatabaseContext db) : IStoredFileQueryRepository
+public sealed class StoredFileRepository(DatabaseContext db) : IStoredFileQueryRepository, IStoredFileCommandRepository
 {
     public async Task<List<StoredFileResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
     {
@@ -25,6 +26,16 @@ public sealed class EfStoredFileQueryRepository(DatabaseContext db) : IStoredFil
             .ToListAsync(cancellationToken);
     }
 
+    public Task<bool> HouseholdExistsAsync(Guid householdId, CancellationToken cancellationToken)
+    {
+        return db.Households.AnyAsync(household => household.Id.Value == householdId, cancellationToken);
+    }
+
+    public Task<StoredFile?> GetAsync(Guid storedFileId, CancellationToken cancellationToken)
+    {
+        return db.StoredFiles.SingleOrDefaultAsync(item => item.Id.Value == storedFileId, cancellationToken);
+    }
+
     public async Task<StoredFileResponse?> GetResponseAsync(Guid storedFileId, CancellationToken cancellationToken)
     {
         return await db.StoredFiles
@@ -41,5 +52,10 @@ public sealed class EfStoredFileQueryRepository(DatabaseContext db) : IStoredFil
                 Status: item.Status,
                 UploadedAt: item.UploadedAt))
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public void Add(StoredFile storedFile)
+    {
+        db.StoredFiles.Add(storedFile);
     }
 }

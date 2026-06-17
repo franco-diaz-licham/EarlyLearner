@@ -1,6 +1,7 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.Dashboard;
-using Microsoft.AspNetCore.Mvc;
+using EarlyLearner.Shared.Enums;
+using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -13,9 +14,7 @@ public static class DashboardEndpoints
             .WithTags("Dashboard");
 
         group.MapGet("/home", GetHomeDashboardAsync)
-            .WithName("GetHomeDashboard")
-            .Produces<GetHomeDashboardResponse>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .WithName(nameof(GetHomeDashboardAsync));
 
         return endpoints;
     }
@@ -27,11 +26,9 @@ public static class DashboardEndpoints
         CancellationToken cancellationToken)
     {
         if (householdId == Guid.Empty) {
-            return TypedResults.BadRequest(new ProblemDetails {
-                Title = "Invalid household id",
-                Detail = "A household id is required to load the dashboard.",
-                Status = StatusCodes.Status400BadRequest
-            });
+            return Result<GetHomeDashboardResponse>
+                .Fail("A household id is required to load the dashboard.", ResultTypeEnum.Invalid)
+                .ToApiResult();
         }
 
         var query = new GetHomeDashboardQuery(householdId, today ?? DateOnly.FromDateTime(DateTime.UtcNow));

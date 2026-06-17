@@ -1,10 +1,11 @@
 using EarlyLearner.Application.Features.LearningRecordContext;
+using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.LearningRecordContext;
 
-public sealed class EfDailyLogQueryRepository(DatabaseContext db) : IDailyLogQueryRepository
+public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepository, IDailyLogCommandRepository
 {
     public async Task<List<DailyLogResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
     {
@@ -23,6 +24,16 @@ public sealed class EfDailyLogQueryRepository(DatabaseContext db) : IDailyLogQue
             .ToListAsync(cancellationToken);
     }
 
+    public Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken)
+    {
+        return db.Children.AnyAsync(child => child.Id.Value == childId && child.HouseholdId.Value == householdId, cancellationToken);
+    }
+
+    public Task<DailyLog?> GetAsync(Guid dailyLogId, CancellationToken cancellationToken)
+    {
+        return db.DailyLogs.SingleOrDefaultAsync(item => item.Id.Value == dailyLogId, cancellationToken);
+    }
+
     public async Task<DailyLogResponse?> GetResponseAsync(Guid dailyLogId, CancellationToken cancellationToken)
     {
         return await db.DailyLogs
@@ -37,5 +48,15 @@ public sealed class EfDailyLogQueryRepository(DatabaseContext db) : IDailyLogQue
                 ReadingEntryCount: item.ReadingEntries.Count,
                 RoutineEntryCount: item.RoutineEntries.Count))
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public void Add(DailyLog dailyLog)
+    {
+        db.DailyLogs.Add(dailyLog);
+    }
+
+    public void Remove(DailyLog dailyLog)
+    {
+        db.DailyLogs.Remove(dailyLog);
     }
 }
