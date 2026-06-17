@@ -20,6 +20,20 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
         HouseholdId householdId,
         ChildId childId,
         DateOnly capturedOn,
+        string caption)
+        : base(id)
+    {
+        HouseholdId = householdId;
+        ChildId = childId;
+        CapturedOn = capturedOn;
+        Caption = caption;
+    }
+
+    private PortfolioItem(
+        PortfolioItemId id,
+        HouseholdId householdId,
+        ChildId childId,
+        DateOnly capturedOn,
         string caption,
         PortfolioEvidenceSource? source,
         IEnumerable<StoredFile> storedFiles,
@@ -68,7 +82,7 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
     /// <summary>
     /// Optional captured evidence record this portfolio item was selected from.
     /// </summary>
-    public PortfolioEvidenceSource? Source { get; }
+    public PortfolioEvidenceSource? Source { get; private set; }
 
     /// <summary>
     /// Readiness areas this portfolio item may support as evidence.

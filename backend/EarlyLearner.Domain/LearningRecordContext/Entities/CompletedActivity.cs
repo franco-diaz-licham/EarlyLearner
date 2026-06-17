@@ -14,6 +14,12 @@ public sealed class CompletedActivity : Entity<CompletedActivityId>
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
     private readonly List<StoredFile> _storedFiles = [];
 
+    private CompletedActivity(CompletedActivityId id, DailyLogId dailyLogId, string title) : base(id)
+    {
+        DailyLogId = dailyLogId;
+        Title = title;
+    }
+
     internal CompletedActivity(CompletedActivityId id, DailyLogId dailyLogId, string title, IEnumerable<ReadinessOutcome> readinessOutcomes) : base(id)
     {
         DailyLogId = dailyLogId;

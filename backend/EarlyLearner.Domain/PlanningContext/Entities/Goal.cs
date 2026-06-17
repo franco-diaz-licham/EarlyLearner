@@ -20,6 +20,23 @@ public sealed class Goal : Entity<GoalId>
         ChildId childId,
         string title,
         GoalTypeEnum type,
+        GoalStatusEnum status)
+        : base(id)
+    {
+        HouseholdId = householdId;
+        ChildId = childId;
+        Title = title;
+        Type = type;
+        Status = status;
+        Timeframe = null!;
+    }
+
+    private Goal(
+        GoalId id,
+        HouseholdId householdId,
+        ChildId childId,
+        string title,
+        GoalTypeEnum type,
         DateRange timeframe,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
@@ -71,7 +88,7 @@ public sealed class Goal : Entity<GoalId>
     /// <summary>
     /// Date window in which the carer intends to focus on this goal.
     /// </summary>
-    public DateRange Timeframe { get; }
+    public DateRange Timeframe { get; private set; }
 
     /// <summary>
     /// School-readiness areas this goal is intended to support.

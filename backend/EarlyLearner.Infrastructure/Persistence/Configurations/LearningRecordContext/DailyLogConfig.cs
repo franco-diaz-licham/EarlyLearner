@@ -1,6 +1,5 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
-using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningRecordContext.Entities;
 using EarlyLearner.Domain.LearningRecordContext.ValueObjects;

@@ -26,7 +26,8 @@ public static class AppConfig
         for (var attempt = 1; attempt <= DatabaseMigrationMaxAttempts; attempt++) {
             try {
                 logger.LogWarning("STARTING DATABASE MIGRATION... Attempt {Attempt}/{MaxAttempts}", attempt, DatabaseMigrationMaxAttempts);
-                var db = services.GetRequiredService<DatabaseContext>() ?? throw new InvalidOperationException("No data context...");
+                using var scope = services.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
                 var pendingMigrations = (await db.Database.GetPendingMigrationsAsync()).ToArray();
                 logger.LogWarning("PENDING DATABASE MIGRATIONS: {PendingMigrations}", pendingMigrations.Length == 0 ? "none" : string.Join(", ", pendingMigrations));
                 await db.Database.MigrateAsync();

@@ -11,6 +11,23 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
 {
     private EvidenceReference(
         EvidenceReferenceId id,
+        ReadinessOutcomeId readinessOutcomeId,
+        EvidenceSourceTypeEnum sourceType,
+        Guid evidenceRecordId,
+        DateOnly observedOn,
+        string summary)
+        : base(id)
+    {
+        ReadinessOutcomeId = readinessOutcomeId;
+        ReadinessOutcome = null!;
+        SourceType = sourceType;
+        EvidenceRecordId = evidenceRecordId;
+        ObservedOn = observedOn;
+        Summary = summary;
+    }
+
+    private EvidenceReference(
+        EvidenceReferenceId id,
         ReadinessOutcome readinessOutcome,
         EvidenceSourceTypeEnum sourceType,
         Guid evidenceRecordId,
@@ -35,7 +52,7 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     /// <summary>
     /// Readiness area supported by this evidence.
     /// </summary>
-    public ReadinessOutcome ReadinessOutcome { get; }
+    public ReadinessOutcome ReadinessOutcome { get; private set; }
 
     /// <summary>
     /// Kind of record that produced the evidence.

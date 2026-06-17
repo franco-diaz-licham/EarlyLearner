@@ -9,6 +9,14 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
 {
+    private SuggestedNextStep(SuggestedNextStepId id, ReadinessProfileId readinessProfileId, ReadinessOutcomeId readinessOutcomeId, string text) : base(id)
+    {
+        ReadinessProfileId = readinessProfileId;
+        ReadinessOutcomeId = readinessOutcomeId;
+        ReadinessOutcome = null!;
+        Text = text;
+    }
+
     private SuggestedNextStep(SuggestedNextStepId id, ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome, string text) : base(id)
     {
         ReadinessProfileId = readinessProfileId;
@@ -26,7 +34,7 @@ public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
     /// <summary>
     /// Readiness area this recommendation is intended to strengthen.
     /// </summary>
-    public ReadinessOutcome ReadinessOutcome { get; }
+    public ReadinessOutcome ReadinessOutcome { get; private set; }
 
     /// <summary>
     /// Practical action a carer can try next at home.

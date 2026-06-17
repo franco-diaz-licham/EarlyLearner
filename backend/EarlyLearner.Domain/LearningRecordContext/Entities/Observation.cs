@@ -21,6 +21,20 @@ public sealed class Observation : Entity<ObservationId>
         HouseholdId householdId,
         ChildId childId,
         DateOnly observedOn,
+        string note)
+        : base(id)
+    {
+        HouseholdId = householdId;
+        ChildId = childId;
+        ObservedOn = observedOn;
+        Note = note;
+    }
+
+    private Observation(
+        ObservationId id,
+        HouseholdId householdId,
+        ChildId childId,
+        DateOnly observedOn,
         string note,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)

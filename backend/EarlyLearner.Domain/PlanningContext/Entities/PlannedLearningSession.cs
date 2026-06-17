@@ -10,15 +10,29 @@ namespace EarlyLearner.Domain.PlanningContext.Entities;
 /// </summary>
 public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
 {
-    private readonly List<GoalId> _goalIds = [];
+    private readonly List<Goal> _goals = [];
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
+
+    private PlannedLearningSession(
+        PlannedLearningSessionId id,
+        LearningPlanId learningPlanId,
+        DateOnly plannedDate,
+        string title,
+        SessionStatusEnum status)
+        : base(id)
+    {
+        LearningPlanId = learningPlanId;
+        PlannedDate = plannedDate;
+        Title = title;
+        Status = status;
+    }
 
     internal PlannedLearningSession(
         PlannedLearningSessionId id,
         LearningPlanId learningPlanId,
         DateOnly plannedDate,
         string title,
-        IEnumerable<GoalId> goalIds,
+        IEnumerable<Goal> goals,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
         : base(id)
     {
@@ -26,7 +40,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
         PlannedDate = plannedDate;
         Title = Required(title, nameof(title));
         Status = SessionStatusEnum.Planned;
-        _goalIds.AddRange(goalIds.Distinct());
+        _goals.AddRange(goals.Distinct());
         var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
         if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Planned session must target at least one readiness outcome.");
 
@@ -55,7 +69,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
     /// <summary>
     /// Goals this planned session is intended to support.
     /// </summary>
-    public IReadOnlyCollection<GoalId> GoalIds => _goalIds.AsReadOnly();
+    public IReadOnlyCollection<Goal> Goals => _goals.AsReadOnly();
 
     /// <summary>
     /// Readiness areas expected to be practised or observed during this session.

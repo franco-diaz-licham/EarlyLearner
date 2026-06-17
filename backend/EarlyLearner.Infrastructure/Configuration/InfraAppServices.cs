@@ -1,5 +1,7 @@
 using Azure.Storage.Blobs;
+using EarlyLearner.Application.Features.Dashboard;
 using EarlyLearner.Infrastructure.Configuration.Options;
+using EarlyLearner.Infrastructure.Features.Dashboard;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -15,7 +17,8 @@ public static class InfraAppServices
     {
         services
             .AddDbServices(config)
-            .AddFileStorageServices(config);
+            .AddFileStorageServices(config)
+            .AddApplicationReadServices();
     }
 
 
@@ -69,6 +72,13 @@ public static class InfraAppServices
         //     var containerClient = sp.GetRequiredService<BlobContainerClient>();
         //     return new AzureFileStorageService(containerClient);
         // });
+
+        return services;
+    }
+
+    public static IServiceCollection AddApplicationReadServices(this IServiceCollection services)
+    {
+        services.AddScoped<IGetHomeDashboardQueryHandler, EfGetHomeDashboardQueryHandler>();
 
         return services;
     }

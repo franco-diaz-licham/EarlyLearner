@@ -92,8 +92,7 @@ public sealed class ReadinessOutcome : Entity<ReadinessOutcomeId>
 
     private static string Required(string value, string name)
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
+        if (string.IsNullOrWhiteSpace(value)) {
             throw new DomainException($"{name} is required.");
         }
 

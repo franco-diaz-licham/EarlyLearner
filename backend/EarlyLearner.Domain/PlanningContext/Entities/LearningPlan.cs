@@ -18,6 +18,19 @@ public sealed class LearningPlan : Entity<LearningPlanId>
         LearningPlanId id,
         HouseholdId householdId,
         ChildId childId,
+        string focus)
+        : base(id)
+    {
+        HouseholdId = householdId;
+        ChildId = childId;
+        Period = null!;
+        Focus = focus;
+    }
+
+    private LearningPlan(
+        LearningPlanId id,
+        HouseholdId householdId,
+        ChildId childId,
         DateRange period,
         string focus)
         : base(id)
@@ -45,7 +58,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
     /// <summary>
     /// Calendar period covered by this plan.
     /// </summary>
-    public DateRange Period { get; }
+    public DateRange Period { get; private set; }
 
     /// <summary>
     /// Parent-friendly statement of the main learning intention for the period.
@@ -69,7 +82,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
     public PlannedLearningSession AddSession(
         DateOnly plannedDate,
         string title,
-        IEnumerable<GoalId> goalIds,
+        IEnumerable<Goal> goals,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
         if (!Period.Contains(plannedDate)) throw new DomainException("Planned session date must be inside the plan period.");
@@ -79,7 +92,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
             Id,
             plannedDate,
             title,
-            goalIds,
+            goals,
             readinessOutcomes);
 
         _sessions.Add(session);

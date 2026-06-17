@@ -15,6 +15,12 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     private readonly List<ReadinessOutcomeProgress> _outcomeProgress = [];
     private readonly List<SuggestedNextStep> _suggestedNextSteps = [];
 
+    private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId) : base(id)
+    {
+        HouseholdId = householdId;
+        ChildId = childId;
+    }
+
     private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId, IEnumerable<ReadinessOutcome> readinessOutcomes) : base(id)
     {
         HouseholdId = householdId;

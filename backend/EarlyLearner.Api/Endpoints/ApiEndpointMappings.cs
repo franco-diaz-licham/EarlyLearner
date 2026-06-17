@@ -11,6 +11,7 @@ public static class ApiEndpointMappings
             .WithTags(tags: "Health")
             .Produces<ApiResponse>(StatusCodes.Status200OK);
 
+        endpoints.MapDashboardEndpoints();
         return endpoints;
     }
 }
