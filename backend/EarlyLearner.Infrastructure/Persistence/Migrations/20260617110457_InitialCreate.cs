@@ -64,7 +64,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "childs",
+                name: "children",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -75,9 +75,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_childs", x => x.id);
+                    table.PrimaryKey("pk_children", x => x.id);
                     table.ForeignKey(
-                        name: "fk_childs_households_household_id",
+                        name: "fk_children_households_household_id",
                         column: x => x.household_id,
                         principalTable: "households",
                         principalColumn: "id",
@@ -122,9 +122,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_daily_logs", x => x.id);
                     table.ForeignKey(
-                        name: "fk_daily_logs_childs_child_id",
+                        name: "fk_daily_logs_children_child_id",
                         column: x => x.child_id,
-                        principalTable: "childs",
+                        principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -152,9 +152,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_goals", x => x.id);
                     table.ForeignKey(
-                        name: "fk_goals_childs_child_id",
+                        name: "fk_goals_children_child_id",
                         column: x => x.child_id,
-                        principalTable: "childs",
+                        principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -180,9 +180,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_learning_plans", x => x.id);
                     table.ForeignKey(
-                        name: "fk_learning_plans_childs_child_id",
+                        name: "fk_learning_plans_children_child_id",
                         column: x => x.child_id,
-                        principalTable: "childs",
+                        principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -207,9 +207,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_observations", x => x.id);
                     table.ForeignKey(
-                        name: "fk_observations_childs_child_id",
+                        name: "fk_observations_children_child_id",
                         column: x => x.child_id,
-                        principalTable: "childs",
+                        principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -237,9 +237,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_portfolio_items", x => x.id);
                     table.ForeignKey(
-                        name: "fk_portfolio_items_childs_child_id",
+                        name: "fk_portfolio_items_children_child_id",
                         column: x => x.child_id,
-                        principalTable: "childs",
+                        principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -262,9 +262,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_readiness_profiles", x => x.id);
                     table.ForeignKey(
-                        name: "fk_readiness_profiles_childs_child_id",
+                        name: "fk_readiness_profiles_children_child_id",
                         column: x => x.child_id,
-                        principalTable: "childs",
+                        principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -733,8 +733,8 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_childs_household_id_given_name",
-                table: "childs",
+                name: "ix_children_household_id_given_name",
+                table: "children",
                 columns: new[] { "household_id", "given_name" });
 
             migrationBuilder.CreateIndex(
@@ -1016,7 +1016,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 name: "daily_logs");
 
             migrationBuilder.DropTable(
-                name: "childs");
+                name: "children");
 
             migrationBuilder.DropTable(
                 name: "households");

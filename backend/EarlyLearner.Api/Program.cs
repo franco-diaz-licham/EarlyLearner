@@ -22,8 +22,8 @@ try {
     }
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");
-    app.UseAuthentication();
-    app.UseAuthorization();
+    // app.UseAuthentication();
+    // app.UseAuthorization();
     app.MapApiEndpoints();
     await app.Services.ConfigureApp();
     await app.RunAsync();

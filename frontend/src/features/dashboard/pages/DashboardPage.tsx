@@ -37,10 +37,7 @@ export const DashboardPage = () => (
 
         <div className="grid gap-4 md:grid-cols-3">
             {metrics.map((metric) => (
-                <article
-                    className="rounded-md border border-brand-border bg-brand-white p-5 shadow-app-card"
-                    key={metric.label}
-                >
+                <article className="rounded-md border border-brand-border bg-brand-white p-5 shadow-app-card" key={metric.label}>
                     <p className="text-sm font-medium text-brand-muted">{metric.label}</p>
                     <p className="mt-3 text-3xl font-semibold text-brand-heading">{metric.value}</p>
                     <p className="mt-2 text-sm text-brand-muted">{metric.detail}</p>

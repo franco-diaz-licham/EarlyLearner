@@ -1,0 +1,96 @@
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: blob-mock
+    command: ["azurite", "--skipApiVersionCheck", "--blobHost", "0.0.0.0"]
+    ports:
+      - 10000:10000
+      - 10001:10001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/devstoreaccount1?comp=list"]
+      interval: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "local-dev"
+      RABBITMQ_DEFAULT_PASS: "local-dev"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:17-alpine
+    container_name: db
+    hostname: db
+    environment:
+      POSTGRES_DB: "early_learner"
+      POSTGRES_USER: "local-dev"
+      POSTGRES_PASSWORD: "local-dev"
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U local-dev -d early_learner"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-seeder:
+    image: db-seeder-early-learner
+    container_name: db-seeder-early-learner
+    build:
+      context: ..
+      dockerfile: docker/db-seeder.dockerfile
+    depends_on:
+      - db
+      - early-learner-api
+    environment:
+      POSTGRES_HOST: "db"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "early_learner"
+      POSTGRES_USER: "local-dev"
+      POSTGRES_PASSWORD: "local-dev"
+      SEED_FILE: "/scripts/seed.sql"
+
+  early-learner-api:
+    build:
+      context: ..
+      dockerfile: docker/early-learner-api.dockerfile
+    image: early-learner-api:local
+    container_name: early-learner-api
+    ports:
+      - "5136:80"
+    depends_on:
+      - azurite
+      - db
+      - rabbitmq
+    environment:
+      ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
+      AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;"
+      RabbitMq__HostUri: "rabbitmq://rabbitmq"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/health/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "blobmock.localhost.me:host-gateway"
+
+volumes:
+  azurite-data:
+    driver: local
+  postgres-data:
+    name: early_learner-postgres-data
+    driver: local

@@ -147,12 +147,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasColumnName("is_archived");
 
                     b.HasKey("Id")
-                        .HasName("pk_childs");
+                        .HasName("pk_children");
 
                     b.HasIndex("HouseholdId", "GivenName")
-                        .HasDatabaseName("ix_childs_household_id_given_name");
+                        .HasDatabaseName("ix_children_household_id_given_name");
 
-                    b.ToTable("childs", (string)null);
+                    b.ToTable("children", (string)null);
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.Household", b =>
@@ -933,7 +933,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("HouseholdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_childs_households_household_id");
+                        .HasConstraintName("fk_children_households_household_id");
 
                     b.Navigation("Household");
                 });
@@ -957,7 +957,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_daily_logs_childs_child_id");
+                        .HasConstraintName("fk_daily_logs_children_child_id");
 
                     b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
                         .WithMany()
@@ -978,7 +978,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_observations_childs_child_id");
+                        .HasConstraintName("fk_observations_children_child_id");
 
                     b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
                         .WithMany()
@@ -1023,7 +1023,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_goals_childs_child_id");
+                        .HasConstraintName("fk_goals_children_child_id");
 
                     b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
                         .WithMany()
@@ -1070,7 +1070,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_learning_plans_childs_child_id");
+                        .HasConstraintName("fk_learning_plans_children_child_id");
 
                     b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
                         .WithMany()
@@ -1150,7 +1150,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_portfolio_items_childs_child_id");
+                        .HasConstraintName("fk_portfolio_items_children_child_id");
 
                     b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
                         .WithMany()
@@ -1223,7 +1223,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ChildId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_readiness_profiles_childs_child_id");
+                        .HasConstraintName("fk_readiness_profiles_children_child_id");
 
                     b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
                         .WithMany()

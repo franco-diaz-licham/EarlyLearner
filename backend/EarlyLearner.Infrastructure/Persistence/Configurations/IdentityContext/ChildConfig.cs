@@ -1,6 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +9,7 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
 {
     public void Configure(EntityTypeBuilder<Child> builder)
     {
-        builder.ToTable(StringHelpers.Pluralise(nameof(Child)));
+        builder.ToTable("children");
 
         builder.HasKey(child => child.Id);
 
