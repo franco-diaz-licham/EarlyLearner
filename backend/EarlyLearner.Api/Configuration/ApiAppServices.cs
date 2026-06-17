@@ -1,3 +1,4 @@
+using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Infrastructure.Configuration.Options;
 using Microsoft.OpenApi;
 using Serilog;
@@ -13,11 +14,32 @@ public static class ApiAppServices
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddPermissionAuthorization();
-        builder.Services.AddCors(options => {
-            options.AddPolicy(name: "AllowAll", configurePolicy: policy => {
+
+        builder.Services
+            .AddUseCaseServices()
+            .AddRepositoryServices()
+            .AddPortServices()
+            .AddCorsPolicy(builder.Configuration)
+            .AddApiMessagingServices(builder.Configuration);
+
+        builder.Services.AddMemoryCache();
+    }
+
+    private static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<CorsOptions>()
+            .Bind(configuration.GetSection(CorsOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var corsOptions = configuration.GetSection(CorsOptions.SECTION_NAME).Get<CorsOptions>()!;
+
+        services.AddCors(options => {
+            options.AddPolicy(name: corsOptions.PolicyName, configurePolicy: policy => {
                 policy.WithOrigins(
                     origins: [
-                        "http://localhost:5173",
+                        corsOptions.Origin,
                     ])
                     .AllowAnyHeader()
                     .AllowAnyMethod()
@@ -25,13 +47,7 @@ public static class ApiAppServices
             });
         });
 
-        builder.Services
-            .AddUseCaseServices()
-            .AddRepositoryServices()
-            .AddPortServices()
-            .AddApiMessagingServices(builder.Configuration);
-
-        builder.Services.AddMemoryCache();
+        return services;
     }
 
     private static IServiceCollection AddApiMessagingServices(this IServiceCollection services, IConfiguration configuration)

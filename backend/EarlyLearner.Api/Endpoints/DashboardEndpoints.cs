@@ -1,5 +1,5 @@
+using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.Dashboard;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EarlyLearner.Api.Endpoints;
@@ -9,18 +9,18 @@ public static class DashboardEndpoints
     public static IEndpointRouteBuilder MapDashboardEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
-            .MapGroup("/api/v1/dashboard")
+            .MapGroup("/dashboard")
             .WithTags("Dashboard");
 
         group.MapGet("/home", GetHomeDashboardAsync)
             .WithName("GetHomeDashboard")
-            .Produces<GetHomeDashboardResult>(StatusCodes.Status200OK)
+            .Produces<GetHomeDashboardResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
         return endpoints;
     }
 
-    private static async Task<Results<Ok<GetHomeDashboardResult>, BadRequest<ProblemDetails>>> GetHomeDashboardAsync(
+    private static async Task<IResult> GetHomeDashboardAsync(
         Guid householdId,
         DateOnly? today,
         IGetHomeDashboardQueryHandler handler,
@@ -36,6 +36,6 @@ public static class DashboardEndpoints
 
         var query = new GetHomeDashboardQuery(householdId, today ?? DateOnly.FromDateTime(DateTime.UtcNow));
         var dashboard = await handler.HandleAsync(query, cancellationToken);
-        return TypedResults.Ok(dashboard);
+        return dashboard.ToApiResult();
     }
 }

@@ -1,4 +1,5 @@
 using EarlyLearner.Api.Configuration;
+using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Api.Endpoints;
 using EarlyLearner.Infrastructure.Configuration;
 using Serilog;
@@ -20,10 +21,12 @@ try {
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+
+    var corsOptions = builder.Configuration.GetSection(CorsOptions.SECTION_NAME).Get<CorsOptions>()!;
+
     app.UseHttpsRedirection();
-    app.UseCors("AllowAll");
-    // app.UseAuthentication();
-    // app.UseAuthorization();
+    app.UseCors(corsOptions.PolicyName);
+    app.UseMiddleware<ExceptionMiddleware>();
     app.MapApiEndpoints();
     await app.Services.ConfigureApp();
     await app.RunAsync();

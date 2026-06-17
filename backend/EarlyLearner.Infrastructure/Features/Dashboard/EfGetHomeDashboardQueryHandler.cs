@@ -1,19 +1,21 @@
 using EarlyLearner.Application.Features.Dashboard;
 using EarlyLearner.Domain.PlanningContext;
 using EarlyLearner.Infrastructure.Persistence;
+using EarlyLearner.Shared.Enums;
+using EarlyLearner.Shared.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.Dashboard;
 
 public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHomeDashboardQueryHandler
 {
-    public async Task<GetHomeDashboardResult> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken)
+    public async Task<Result<GetHomeDashboardResponse>> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken)
     {
         var children = await db.Children
             .AsNoTracking()
             .Where(child => child.HouseholdId.Value == query.HouseholdId && !child.IsArchived)
             .OrderBy(child => child.GivenName)
-            .Select(child => new HomeDashboardChildResult(
+            .Select(child => new HomeDashboardChildResponse(
                 child.Id.Value,
                 child.GivenName,
                 child.DateOfBirth))
@@ -48,7 +50,7 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
                 session.PlannedDate >= query.Today)
             .OrderBy(session => session.PlannedDate)
             .ThenBy(session => session.Title)
-            .Select(session => new HomeDashboardPlannedSessionResult(
+            .Select(session => new HomeDashboardPlannedSessionResponse(
                 session.Id.Value,
                 session.LearningPlanId.Value,
                 session.PlannedDate,
@@ -61,7 +63,7 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
             .AsNoTracking()
             .Where(log => log.HouseholdId.Value == query.HouseholdId)
             .OrderByDescending(log => log.LogDate)
-            .Select(log => new HomeDashboardRecentActivityResult(
+            .Select(log => new HomeDashboardRecentActivityResponse(
                 log.Id.Value,
                 log.ChildId.Value,
                 log.LogDate,
@@ -71,13 +73,15 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
             .Take(5)
             .ToListAsync(cancellationToken);
 
-        var metrics = new List<HomeDashboardMetricResult> {
+        var metrics = new List<HomeDashboardMetricResponse> {
             new("Active children", children.Count, "Children currently visible in this household"),
             new("Active goals", activeGoalCount, "Goals available for planning and evidence"),
             new("Upcoming sessions", plannedSessionCount, "Planned learning sessions from today onward"),
             new("Records this week", weeklyRecordCount, "Daily logs captured in the last seven days")
         };
 
-        return new GetHomeDashboardResult(children, metrics, upcomingSessions, recentActivities);
+        return Result<GetHomeDashboardResponse>.Success(
+            new GetHomeDashboardResponse(children, metrics, upcomingSessions, recentActivities),
+            ResultTypeEnum.Success);
     }
 }

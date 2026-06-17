@@ -1,4 +1,5 @@
 using EarlyLearner.Api.Models;
+using EarlyLearner.Api.Configuration;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -11,7 +12,9 @@ public static class ApiEndpointMappings
             .WithTags(tags: "Health")
             .Produces<ApiResponse>(StatusCodes.Status200OK);
 
-        endpoints.MapDashboardEndpoints();
+        var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");
+
+        api.MapDashboardEndpoints();
         return endpoints;
     }
 }

@@ -1,31 +1,33 @@
+using EarlyLearner.Shared.Utilities;
+
 namespace EarlyLearner.Application.Features.Dashboard;
 
 public sealed record GetHomeDashboardQuery(Guid HouseholdId, DateOnly Today);
 
-public sealed record GetHomeDashboardResult(
-    IReadOnlyList<HomeDashboardChildResult> Children,
-    IReadOnlyList<HomeDashboardMetricResult> Metrics,
-    IReadOnlyList<HomeDashboardPlannedSessionResult> UpcomingSessions,
-    IReadOnlyList<HomeDashboardRecentActivityResult> RecentActivities);
+public sealed record GetHomeDashboardResponse(
+    IReadOnlyList<HomeDashboardChildResponse> Children,
+    IReadOnlyList<HomeDashboardMetricResponse> Metrics,
+    IReadOnlyList<HomeDashboardPlannedSessionResponse> UpcomingSessions,
+    IReadOnlyList<HomeDashboardRecentActivityResponse> RecentActivities);
 
-public sealed record HomeDashboardChildResult(
+public sealed record HomeDashboardChildResponse(
     Guid ChildId,
     string GivenName,
     DateOnly DateOfBirth);
 
-public sealed record HomeDashboardMetricResult(
+public sealed record HomeDashboardMetricResponse(
     string Label,
     int Value,
     string Detail);
 
-public sealed record HomeDashboardPlannedSessionResult(
+public sealed record HomeDashboardPlannedSessionResponse(
     Guid SessionId,
     Guid LearningPlanId,
     DateOnly PlannedDate,
     string Title,
     string Status);
 
-public sealed record HomeDashboardRecentActivityResult(
+public sealed record HomeDashboardRecentActivityResponse(
     Guid DailyLogId,
     Guid ChildId,
     DateOnly LogDate,
@@ -35,5 +37,5 @@ public sealed record HomeDashboardRecentActivityResult(
 
 public interface IGetHomeDashboardQueryHandler
 {
-    Task<GetHomeDashboardResult> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken);
+    Task<Result<GetHomeDashboardResponse>> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken);
 }
