@@ -1,7 +1,18 @@
 using Azure.Storage.Blobs;
+using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Application.Features.Dashboard;
+using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Application.Features.LearningRecordContext;
+using EarlyLearner.Application.Features.PlanningContext;
+using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Infrastructure.Configuration.Options;
+using EarlyLearner.Infrastructure.Features.CoreContext;
 using EarlyLearner.Infrastructure.Features.Dashboard;
+using EarlyLearner.Infrastructure.Features.IdentityContext;
+using EarlyLearner.Infrastructure.Features.LearningRecordContext;
+using EarlyLearner.Infrastructure.Features.PlanningContext;
+using EarlyLearner.Infrastructure.Features.ReadinessContext;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -79,9 +90,36 @@ public static class InfraAppServices
     public static IServiceCollection AddApplicationReadServices(this IServiceCollection services)
     {
         services.AddScoped<IGetHomeDashboardQueryHandler, EfGetHomeDashboardQueryHandler>();
+        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddScoped<IHouseholdQueryService, HouseholdQueryService>();
+        services.AddScoped<IHouseholdCommandService, HouseholdCommandService>();
+        services.AddScoped<IHouseholdQueryRepository, EfHouseholdQueryRepository>();
+        services.AddScoped<IHouseholdCommandRepository, EfHouseholdCommandRepository>();
+        services.AddScoped<IStoredFileQueryService, StoredFileQueryService>();
+        services.AddScoped<IStoredFileCommandService, StoredFileCommandService>();
+        services.AddScoped<IStoredFileQueryRepository, EfStoredFileQueryRepository>();
+        services.AddScoped<IStoredFileCommandRepository, EfStoredFileCommandRepository>();
+        services.AddScoped<IReadinessOutcomeQueryService, ReadinessOutcomeQueryService>();
+        services.AddScoped<IReadinessOutcomeCommandService, ReadinessOutcomeCommandService>();
+        services.AddScoped<IReadinessOutcomeQueryRepository, EfReadinessOutcomeQueryRepository>();
+        services.AddScoped<IReadinessOutcomeCommandRepository, EfReadinessOutcomeCommandRepository>();
+        services.AddScoped<IReadinessProfileQueryService, ReadinessProfileQueryService>();
+        services.AddScoped<IReadinessProfileCommandService, ReadinessProfileCommandService>();
+        services.AddScoped<IReadinessProfileQueryRepository, EfReadinessProfileQueryRepository>();
+        services.AddScoped<IReadinessProfileCommandRepository, EfReadinessProfileCommandRepository>();
+        services.AddScoped<IGoalQueryService, GoalQueryService>();
+        services.AddScoped<IGoalCommandService, GoalCommandService>();
+        services.AddScoped<IGoalQueryRepository, EfGoalQueryRepository>();
+        services.AddScoped<IGoalCommandRepository, EfGoalCommandRepository>();
+        services.AddScoped<ILearningPlanQueryService, LearningPlanQueryService>();
+        services.AddScoped<ILearningPlanCommandService, LearningPlanCommandService>();
+        services.AddScoped<ILearningPlanQueryRepository, EfLearningPlanQueryRepository>();
+        services.AddScoped<ILearningPlanCommandRepository, EfLearningPlanCommandRepository>();
+        services.AddScoped<IDailyLogQueryService, DailyLogQueryService>();
+        services.AddScoped<IDailyLogCommandService, DailyLogCommandService>();
+        services.AddScoped<IDailyLogQueryRepository, EfDailyLogQueryRepository>();
+        services.AddScoped<IDailyLogCommandRepository, EfDailyLogCommandRepository>();
 
         return services;
     }
 }
-
-

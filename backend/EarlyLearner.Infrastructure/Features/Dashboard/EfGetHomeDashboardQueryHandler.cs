@@ -16,9 +16,9 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
             .Where(child => child.HouseholdId.Value == query.HouseholdId && !child.IsArchived)
             .OrderBy(child => child.GivenName)
             .Select(child => new HomeDashboardChildResponse(
-                child.Id.Value,
-                child.GivenName,
-                child.DateOfBirth))
+                ChildId: child.Id.Value,
+                GivenName: child.GivenName,
+                DateOfBirth: child.DateOfBirth))
             .ToListAsync(cancellationToken);
 
         var activeGoalCount = await db.Goals
@@ -51,11 +51,11 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
             .OrderBy(session => session.PlannedDate)
             .ThenBy(session => session.Title)
             .Select(session => new HomeDashboardPlannedSessionResponse(
-                session.Id.Value,
-                session.LearningPlanId.Value,
-                session.PlannedDate,
-                session.Title,
-                session.Status.ToString()))
+                SessionId: session.Id.Value,
+                LearningPlanId: session.LearningPlanId.Value,
+                PlannedDate: session.PlannedDate,
+                Title: session.Title,
+                Status: session.Status.ToString()))
             .Take(5)
             .ToListAsync(cancellationToken);
 
@@ -64,24 +64,28 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
             .Where(log => log.HouseholdId.Value == query.HouseholdId)
             .OrderByDescending(log => log.LogDate)
             .Select(log => new HomeDashboardRecentActivityResponse(
-                log.Id.Value,
-                log.ChildId.Value,
-                log.LogDate,
-                log.CompletedActivities.Count,
-                log.ReadingEntries.Count,
-                log.RoutineEntries.Count))
+                DailyLogId: log.Id.Value,
+                ChildId: log.ChildId.Value,
+                LogDate: log.LogDate,
+                CompletedActivityCount: log.CompletedActivities.Count,
+                ReadingEntryCount: log.ReadingEntries.Count,
+                RoutineEntryCount: log.RoutineEntries.Count))
             .Take(5)
             .ToListAsync(cancellationToken);
 
         var metrics = new List<HomeDashboardMetricResponse> {
-            new("Active children", children.Count, "Children currently visible in this household"),
-            new("Active goals", activeGoalCount, "Goals available for planning and evidence"),
-            new("Upcoming sessions", plannedSessionCount, "Planned learning sessions from today onward"),
-            new("Records this week", weeklyRecordCount, "Daily logs captured in the last seven days")
+            new(Label: "Active children", Value: children.Count, Detail: "Children currently visible in this household"),
+            new(Label: "Active goals", Value: activeGoalCount, Detail: "Goals available for planning and evidence"),
+            new(Label: "Upcoming sessions", Value: plannedSessionCount, Detail: "Planned learning sessions from today onward"),
+            new(Label: "Records this week", Value: weeklyRecordCount, Detail: "Daily logs captured in the last seven days")
         };
 
         return Result<GetHomeDashboardResponse>.Success(
-            new GetHomeDashboardResponse(children, metrics, upcomingSessions, recentActivities),
+            new GetHomeDashboardResponse(
+                Children: children,
+                Metrics: metrics,
+                UpcomingSessions: upcomingSessions,
+                RecentActivities: recentActivities),
             ResultTypeEnum.Success);
     }
 }

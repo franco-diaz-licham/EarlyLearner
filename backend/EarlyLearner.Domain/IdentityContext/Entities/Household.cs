@@ -44,6 +44,11 @@ public sealed class Household : Entity<HouseholdId>
         return household;
     }
 
+    public void Rename(string name)
+    {
+        Name = Required(name, nameof(name));
+    }
+
     public void AddCarer(UserId userId, string firstName, string lastName, HouseholdRoleEnum role)
     {
         if (_carers.Any(carer => carer.UserId == userId)) throw new DomainException("Carer already belongs to this household.");

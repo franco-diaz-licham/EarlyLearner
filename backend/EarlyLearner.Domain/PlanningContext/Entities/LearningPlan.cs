@@ -79,6 +79,12 @@ public sealed class LearningPlan : Entity<LearningPlanId>
         return new LearningPlan(new LearningPlanId(Guid.NewGuid()), householdId, childId, period, focus);
     }
 
+    public void UpdateDetails(DateRange period, string focus)
+    {
+        Period = period;
+        Focus = Required(focus, nameof(focus));
+    }
+
     public PlannedLearningSession AddSession(
         DateOnly plannedDate,
         string title,

@@ -1,0 +1,36 @@
+using EarlyLearner.Domain.PlanningContext;
+using EarlyLearner.Shared.Enums;
+using EarlyLearner.Shared.Utilities;
+
+namespace EarlyLearner.Application.Features.PlanningContext;
+
+public sealed record GoalResponse(Guid GoalId, Guid HouseholdId, Guid ChildId, string Title, GoalTypeEnum Type, GoalStatusEnum Status, DateOnly StartDate, DateOnly EndDate, IReadOnlyList<Guid> ReadinessOutcomeIds);
+
+public interface IGoalQueryService
+{
+    Task<Result<List<GoalResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Result<GoalResponse>> GetAsync(Guid goalId, CancellationToken cancellationToken);
+}
+
+public interface IGoalQueryRepository
+{
+    Task<List<GoalResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<GoalResponse?> GetResponseAsync(Guid goalId, CancellationToken cancellationToken);
+}
+
+public sealed class GoalQueryService(IGoalQueryRepository goalRepo) : IGoalQueryService
+{
+    public async Task<Result<List<GoalResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    {
+        var goals = await goalRepo.ListAsync(householdId, cancellationToken);
+        return Result<List<GoalResponse>>.Success(goals, ResultTypeEnum.Success, goals.Count);
+    }
+
+    public async Task<Result<GoalResponse>> GetAsync(Guid goalId, CancellationToken cancellationToken)
+    {
+        var goal = await goalRepo.GetResponseAsync(goalId, cancellationToken);
+        return goal is null
+            ? Result<GoalResponse>.Fail("Goal was not found.", ResultTypeEnum.NotFound)
+            : Result<GoalResponse>.Success(goal, ResultTypeEnum.Success);
+    }
+}

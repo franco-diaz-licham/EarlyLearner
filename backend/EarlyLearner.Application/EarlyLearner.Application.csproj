@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\EarlyLearner.Domain\EarlyLearner.Domain.csproj" />
     <ProjectReference Include="..\EarlyLearner.Shared\EarlyLearner.Shared.csproj" />
   </ItemGroup>
 
