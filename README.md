@@ -36,7 +36,7 @@ The project is built as a technical showcase for a production-style modular mono
 - PostgreSQL with Npgsql
 - Clean Architecture project split
 - Domain-driven design style entities and value objects
-- CQRS-style application query handlers where useful
+- CQRS-style application commands and queries
 - Serilog
 - Swagger / OpenAPI
 
@@ -219,37 +219,3 @@ npm run lint
 npm run test
 npm run typecheck
 ```
-
----
-
-## 🔌 Current API Slice
-
-The first application-layer query slice exposes a dashboard summary endpoint:
-
-```http
-GET /api/v1/dashboard/home?householdId={householdId}&today=2026-06-17
-```
-
-The seeded demo household id is:
-
-```text
-11111111-1111-1111-1111-111111111111
-```
-
----
-
-## 🗺️ Roadmap
-
-- Add full command-side application workflows
-- Add authentication and household-scoped authorization
-- Expand API endpoints for children, goals, plans, logs, observations, and portfolios
-- Build the React product experience on top of the API
-- Add backend application/domain tests
-- Add frontend workflow and component tests
-- Add CI checks for build, lint, tests, and migrations
-
----
-
-## 📌 Status
-
-This project is under active development. The backend domain and EF Core infrastructure are being wired into application use cases, and the frontend foundation is being prepared for feature delivery.
