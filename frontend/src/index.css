@@ -1,73 +1,73 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
-@import "tailwindcss";
-@import "tailwindcss-primeui";
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 @theme {
-    /* Primary brand palette - blue #1E6DCA */
-    --color-brand-blue-50: #ebf3fd;
-    --color-brand-blue-100: #ccdff8;
-    --color-brand-blue-200: #9dc4f0;
-    --color-brand-blue-300: #67a5e8;
-    --color-brand-blue-400: #3082dc;
-    --color-brand-blue-500: #1e6dca;
-    --color-brand-blue-600: #185aaa;
-    --color-brand-blue-700: #124880;
-    --color-brand-blue-800: #0d345c;
-    --color-brand-blue-900: #08213b;
-    --color-brand-blue-950: #051628;
+  /* Primary brand palette - blue #1E6DCA */
+  --color-brand-blue-50: #ebf3fd;
+  --color-brand-blue-100: #ccdff8;
+  --color-brand-blue-200: #9dc4f0;
+  --color-brand-blue-300: #67a5e8;
+  --color-brand-blue-400: #3082dc;
+  --color-brand-blue-500: #1e6dca;
+  --color-brand-blue-600: #185aaa;
+  --color-brand-blue-700: #124880;
+  --color-brand-blue-800: #0d345c;
+  --color-brand-blue-900: #08213b;
+  --color-brand-blue-950: #051628;
 
-    /* Secondary highlight - teal #63BDD4 */
-    --color-brand-teal: #63bdd4;
+  /* Secondary highlight - teal #63BDD4 */
+  --color-brand-teal: #63bdd4;
 
-    /* Accent - purple #C042D8 */
-    --color-brand-purple: #c042d8;
+  /* Accent - purple #C042D8 */
+  --color-brand-purple: #c042d8;
 
-    /* Semantic status colours */
-    --color-brand-success: #22c55e;
-    --color-brand-error: #ef4444;
-    --color-brand-warning: #f59e0b;
-    --color-brand-neutral: #6b7280;
-    --color-brand-surface: #f9fafb;
-    --color-brand-white: #ffffffe6;
+  /* Semantic status colours */
+  --color-brand-success: #22c55e;
+  --color-brand-error: #ef4444;
+  --color-brand-warning: #f59e0b;
+  --color-brand-neutral: #6b7280;
+  --color-brand-surface: #f9fafb;
+  --color-brand-white: #ffffffe6;
 
-    /* App interface tokens */
-    --color-brand-text: #273142;
-    --color-brand-muted: #657285;
-    --color-brand-heading: #101828;
-    --color-brand-border: #d8dee8;
-    --color-brand-surface-muted: #eef2f7;
-    --font-sans: "Nunito", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --shadow-app-card: 0 10px 24px rgba(16, 24, 40, 0.08);
+  /* App interface tokens */
+  --color-brand-text: #273142;
+  --color-brand-muted: #657285;
+  --color-brand-heading: #101828;
+  --color-brand-border: #d8dee8;
+  --color-brand-surface-muted: #eef2f7;
+  --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --shadow-app-card: 0 10px 24px rgba(16, 24, 40, 0.08);
 }
 
 :root {
-    font-family: var(--font-sans);
-    color: var(--color-brand-text);
-    background: var(--color-brand-surface);
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-sans);
+  color: var(--color-brand-text);
+  background: var(--color-brand-surface);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body,
 #root {
-    margin: 0;
-    min-height: 100vh;
+  margin: 0;
+  min-height: 100vh;
 }
 
 button,
 input,
 select,
 textarea {
-    font: inherit;
+  font: inherit;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
