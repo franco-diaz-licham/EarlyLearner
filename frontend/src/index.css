@@ -1,43 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import 'tailwindcss';
 @import 'tailwindcss-primeui';
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 @theme {
-  /* Primary brand palette - blue #1E6DCA */
-  --color-brand-blue-50: #ebf3fd;
-  --color-brand-blue-100: #ccdff8;
-  --color-brand-blue-200: #9dc4f0;
-  --color-brand-blue-300: #67a5e8;
-  --color-brand-blue-400: #3082dc;
-  --color-brand-blue-500: #1e6dca;
-  --color-brand-blue-600: #185aaa;
-  --color-brand-blue-700: #124880;
-  --color-brand-blue-800: #0d345c;
-  --color-brand-blue-900: #08213b;
-  --color-brand-blue-950: #051628;
+  /* Primary warm coral */
+  --color-brand-coral-50: #fff1ef;
+  --color-brand-coral-100: #ffe0dc;
+  --color-brand-coral-200: #ffc4bd;
+  --color-brand-coral-300: #f99b91;
+  --color-brand-coral-400: #f06f66;
+  --color-brand-coral-500: #e85f5a;
+  --color-brand-coral-600: #d94a46;
 
-  /* Secondary highlight - teal #63BDD4 */
-  --color-brand-teal: #63bdd4;
+  /* Soft mint */
+  --color-brand-mint-50: #f0f8f2;
+  --color-brand-mint-100: #dcefe1;
+  --color-brand-mint-200: #c7e3cf;
+  --color-brand-mint-300: #a9d2b6;
+  --color-brand-mint-400: #7fbd94;
+  --color-brand-mint-500: #6aaa82;
 
-  /* Accent - purple #C042D8 */
-  --color-brand-purple: #c042d8;
+  /* Soft sky blue */
+  --color-brand-sky-50: #eef7ff;
+  --color-brand-sky-100: #d9edff;
+  --color-brand-sky-200: #b9dcfb;
+  --color-brand-sky-300: #8fc6f4;
+  --color-brand-sky-400: #6aaee8;
+  --color-brand-sky-500: #4c98d8;
+
+  /* Warm yellow */
+  --color-brand-yellow-50: #fff8e7;
+  --color-brand-yellow-100: #ffefc2;
+  --color-brand-yellow-200: #ffe39a;
+  --color-brand-yellow-300: #ffd66e;
+  --color-brand-yellow-400: #f6bd45;
+  --color-brand-yellow-500: #e9a933;
+
+  /* Gentle purple */
+  --color-brand-lavender-50: #f7f2ff;
+  --color-brand-lavender-100: #ede2ff;
+  --color-brand-lavender-200: #dcc8ff;
+  --color-brand-lavender-300: #c9a9f4;
+  --color-brand-lavender-400: #b58be7;
+  --color-brand-lavender-500: #9d6fd1;
 
   /* Semantic status colours */
-  --color-brand-success: #22c55e;
-  --color-brand-error: #ef4444;
-  --color-brand-warning: #f59e0b;
-  --color-brand-neutral: #6b7280;
-  --color-brand-surface: #f9fafb;
-  --color-brand-white: #ffffffe6;
+  --color-brand-success: #74b86f;
+  --color-brand-warning: #f6bd45;
+  --color-brand-error: #e85f5a;
+  --color-brand-info: #6aaee8;
+  --color-brand-neutral: #8a8f98;
 
   /* App interface tokens */
-  --color-brand-text: #273142;
-  --color-brand-muted: #657285;
-  --color-brand-heading: #101828;
-  --color-brand-border: #d8dee8;
-  --color-brand-surface-muted: #eef2f7;
+  --color-brand-background: #fbfaf7;
+  --color-brand-surface: #ffffff;
+  --color-brand-surface-soft: #f7f3ee;
+  --color-brand-surface-muted: #f1eee9;
+  --color-brand-border: #ebe4dc;
+
+  --color-brand-heading: #171923;
+  --color-brand-text: #2d3442;
+  --color-brand-muted: #697386;
+
+  /* Main action */
+  --color-brand-primary: #e85f5a;
+  --color-brand-primary-hover: #d94a46;
+  --color-brand-primary-soft: #fff1ef;
+
+  /* Logo colours */
+  --color-logo-pink: #f4b6b6;
+  --color-logo-mint: #cfe7d6;
+  --color-logo-yellow: #ffe39a;
+  --color-logo-blue: #b8d7f4;
+
   --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --shadow-app-card: 0 10px 24px rgba(16, 24, 40, 0.08);
+
+  --shadow-app-card: 0 10px 24px rgba(23, 25, 35, 0.06);
 }
 
 :root {
@@ -60,14 +98,65 @@ body,
   min-height: 100vh;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
+/* ========================================== Pv OVERRIDES ========================================== */
+.p-treetable-tbody > tr > td {
+  border-width: 0 !important;
+  padding: 0.25rem 0 !important;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.p-treetable-header {
+  border-width: 0 !important;
+}
+
+.p-treetable-header-cell {
+  border-width: 0 !important;
+}
+
+.p-treetable.p-treetable-sm .p-treetable-header {
+  padding: 0 !important;
+}
+
+.p-tieredmenu-root-list {
+  font-size: 0.875rem; /* Same font as search small*/
+}
+
+.p-select-list-container {
+  font-size: 0.875rem; /* Same font as search small*/
+}
+
+.p-menu {
+  border: none !important;
+}
+
+.p-menu-submenu-label {
+  padding: 0 0 0 10px !important;
+  font-weight: 700 !important;
+}
+
+.p-menu-item {
+  padding: 0 !important;
+}
+
+.p-paginator {
+  padding: 0.2rem 0 0.2rem 0 !important;
+}
+
+.p-dialog-header-actions {
+  display: none !important;
+}
+
+.p-toast-message-content {
+  padding: 0.5rem !important;
+}
+
+.p-card {
+  border-radius: 0.375rem !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  vertical-align: middle;
+}
+
+.p-overflow-hidden {
+  padding-right: 0 !important;
 }

@@ -1,13 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
-import { DashboardPage } from './DashboardPage';
+import { HomePage } from './HomePage';
 
-describe('DashboardPage', () => {
-  test('renders the simple parent dashboard', () => {
-    render(<DashboardPage />);
+describe('HomePage', () => {
+  test('renders the simple parent home', () => {
+    render(<HomePage />);
 
     expect(screen.getByRole('heading', { name: 'Good morning, Franco!' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /log a moment/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Recent Moments' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'School Readiness' })).toBeInTheDocument();
   });
 });

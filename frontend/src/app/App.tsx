@@ -1,9 +1,9 @@
-import { RouterProvider } from "react-router-dom";
-import { AppProviders } from "./providers/AppProviders";
-import { router } from "./router";
+import { RouterProvider } from 'react-router-dom';
+import { AppProviders } from './providers/AppProviders';
+import { router } from './router';
 
 export const App = () => (
-    <AppProviders>
-        <RouterProvider router={router} />
-    </AppProviders>
+  <AppProviders>
+    <RouterProvider router={router} />
+  </AppProviders>
 );
