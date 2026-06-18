@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
-import { API_BASE_URL } from './apiBaseUrl';
+import { appConfig } from '../config/appConfig';
 import type { QueryFilter } from './api.types';
 
 // Custom params serializer: encode `filters` (QueryFilter[]) as repeated
@@ -33,7 +33,7 @@ const serializeParams = (params: Record<string, unknown>): string => {
 };
 
 const http: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: appConfig.apiBaseUrl,
   timeout: 30_000,
   headers: { 'Content-Type': 'application/json' },
   paramsSerializer: { serialize: serializeParams }

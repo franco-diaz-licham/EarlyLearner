@@ -8,11 +8,14 @@ declare module '@iconscout/react-unicons' {
 
   export type UniconComponent = (props: UniconProps) => JSX.Element;
 
+  export const UilAngleDown: UniconComponent;
+  export const UilBell: UniconComponent;
   export const UilBookOpen: UniconComponent;
   export const UilCalendarAlt: UniconComponent;
   export const UilClipboardNotes: UniconComponent;
   export const UilEstate: UniconComponent;
   export const UilFileAlt: UniconComponent;
   export const UilPlus: UniconComponent;
+  export const UilSearch: UniconComponent;
   export const UilShieldCheck: UniconComponent;
 }

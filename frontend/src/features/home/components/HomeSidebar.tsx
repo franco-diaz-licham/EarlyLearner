@@ -28,7 +28,7 @@ export const HomeSidebar = () => {
           {readinessAreas.map((area) => (
             <div className="flex items-center justify-between gap-3" key={area.label}>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-brand-blue-500">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-sky-50 text-brand-sky-500">
                   <UilShieldCheck aria-hidden="true" size={17} />
                 </div>
                 <span className="text-sm font-semibold text-brand-heading">{area.label}</span>
@@ -65,21 +65,21 @@ export const HomeSidebar = () => {
 
       <section className="rounded-md bg-[#f5efff] p-6 shadow-app-card">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/80 text-brand-purple">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/80 text-brand-lavender-500">
             <UilBookOpen aria-hidden="true" size={22} />
           </div>
           <h2 className="text-base font-bold text-brand-heading">Suggested Next Activity</h2>
         </div>
         <h3 className="mt-6 text-xl font-bold leading-7 text-brand-heading">Create a butterfly life cycle poster</h3>
         <p className="mt-3 text-sm leading-6 text-brand-muted">Great for science, talking and fine motor skills.</p>
-        <button className="mt-5 rounded-md bg-white/80 px-6 py-3 text-sm font-bold text-brand-purple" type="button">
+        <button className="mt-5 rounded-md bg-white/80 px-6 py-3 text-sm font-bold text-brand-lavender-500" type="button">
           See idea
         </button>
       </section>
 
       <section className="rounded-md bg-white p-6 shadow-app-card">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-blue-50 text-brand-blue-500">
+          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-brand-sky-50 text-brand-sky-500">
             <UilCalendarAlt aria-hidden="true" size={21} />
           </div>
           <div>

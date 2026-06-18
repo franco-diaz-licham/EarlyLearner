@@ -5,7 +5,10 @@ const readEnvValue = (key: string, fallback = ''): string => {
   return value;
 };
 
+const rootUrl = readEnvValue('VITE_API_BASE_URL', '').replace(/\/+$/, '');
+const apiVersion = readEnvValue('VITE_API_VERSION', 'v1').replace(/^\/+|\/+$/g, '');
+
 export const appConfig = {
-  apiBaseUrl: readEnvValue('VITE_API_BASE_URL', '/api'),
+  apiBaseUrl: `${rootUrl}/api/${apiVersion}`,
   appName: readEnvValue('VITE_APP_NAME', 'EarlyLearner')
 } as const;

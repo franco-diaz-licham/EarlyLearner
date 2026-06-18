@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface CurrentUserModel {
   displayName: string;
@@ -13,11 +13,11 @@ interface SessionState {
 
 export const useSessionStore = create<SessionState>((set) => ({
   currentUser: {
-    displayName: "Early learner team",
-    organisationName: "Bright Start Centre",
-    roleLabel: "Educator",
+    displayName: 'Early learner team',
+    organisationName: 'Bright Start Centre',
+    roleLabel: 'Educator'
   },
   setCurrentUser: (currentUser) => {
     set({ currentUser });
-  },
+  }
 }));

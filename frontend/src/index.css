@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import 'tailwindcss';
 @import 'tailwindcss-primeui';
+@import 'primereact/resources/primereact.min.css';
 
 @theme {
   /* Primary warm coral */
@@ -99,64 +100,3 @@ body,
 }
 
 /* ========================================== Pv OVERRIDES ========================================== */
-.p-treetable-tbody > tr > td {
-  border-width: 0 !important;
-  padding: 0.25rem 0 !important;
-}
-
-.p-treetable-header {
-  border-width: 0 !important;
-}
-
-.p-treetable-header-cell {
-  border-width: 0 !important;
-}
-
-.p-treetable.p-treetable-sm .p-treetable-header {
-  padding: 0 !important;
-}
-
-.p-tieredmenu-root-list {
-  font-size: 0.875rem; /* Same font as search small*/
-}
-
-.p-select-list-container {
-  font-size: 0.875rem; /* Same font as search small*/
-}
-
-.p-menu {
-  border: none !important;
-}
-
-.p-menu-submenu-label {
-  padding: 0 0 0 10px !important;
-  font-weight: 700 !important;
-}
-
-.p-menu-item {
-  padding: 0 !important;
-}
-
-.p-paginator {
-  padding: 0.2rem 0 0.2rem 0 !important;
-}
-
-.p-dialog-header-actions {
-  display: none !important;
-}
-
-.p-toast-message-content {
-  padding: 0.5rem !important;
-}
-
-.p-card {
-  border-radius: 0.375rem !important;
-}
-
-.p-datatable .p-datatable-tbody > tr > td {
-  vertical-align: middle;
-}
-
-.p-overflow-hidden {
-  padding-right: 0 !important;
-}
