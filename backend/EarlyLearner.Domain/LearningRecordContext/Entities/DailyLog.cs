@@ -18,11 +18,15 @@ public sealed class DailyLog : Entity<DailyLogId>
     private readonly List<RoutineEntry> _routineEntries = [];
     private readonly List<StoredFile> _storedFiles = [];
 
-    private DailyLog(DailyLogId id, HouseholdId householdId, ChildId childId, DateOnly logDate) : base(id)
+    private DailyLog() { }
+
+    private DailyLog(DailyLogId id, HouseholdId householdId, ChildId childId, DateOnly logDate)
     {
+        Id = id;
         HouseholdId = householdId;
         ChildId = childId;
         LogDate = logDate;
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -78,6 +82,7 @@ public sealed class DailyLog : Entity<DailyLogId>
         var activity = new CompletedActivity(new CompletedActivityId(Guid.NewGuid()), Id, title, readinessOutcomes);
         _completedActivities.Add(activity);
         RaiseDomainEvent(new LearningActivityLogged(Id, activity.Id, DateTimeOffset.UtcNow));
+        SetUpdatedOn();
         return activity;
     }
 
@@ -85,6 +90,7 @@ public sealed class DailyLog : Entity<DailyLogId>
     {
         var readingEntry = new ReadingEntry(new ReadingEntryId(Guid.NewGuid()), Id, title, author, childResponse);
         _readingEntries.Add(readingEntry);
+        SetUpdatedOn();
         return readingEntry;
     }
 
@@ -92,14 +98,15 @@ public sealed class DailyLog : Entity<DailyLogId>
     {
         var routineEntry = new RoutineEntry(new RoutineEntryId(Guid.NewGuid()), Id, routineName, notes);
         _routineEntries.Add(routineEntry);
+        SetUpdatedOn();
         return routineEntry;
     }
 
     public void AttachStoredFile(StoredFile storedFile)
     {
-        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
-        {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id)) {
             _storedFiles.Add(storedFile);
+            SetUpdatedOn();
         }
     }
 }

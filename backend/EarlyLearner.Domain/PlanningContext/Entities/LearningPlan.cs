@@ -14,18 +14,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
 {
     private readonly List<PlannedLearningSession> _sessions = [];
 
-    private LearningPlan(
-        LearningPlanId id,
-        HouseholdId householdId,
-        ChildId childId,
-        string focus)
-        : base(id)
-    {
-        HouseholdId = householdId;
-        ChildId = childId;
-        Period = null!;
-        Focus = focus;
-    }
+    private LearningPlan() { }
 
     private LearningPlan(
         LearningPlanId id,
@@ -33,12 +22,13 @@ public sealed class LearningPlan : Entity<LearningPlanId>
         ChildId childId,
         DateRange period,
         string focus)
-        : base(id)
     {
+        Id = id;
         HouseholdId = householdId;
         ChildId = childId;
         Period = period;
         Focus = Required(focus, nameof(focus));
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -58,12 +48,12 @@ public sealed class LearningPlan : Entity<LearningPlanId>
     /// <summary>
     /// Calendar period covered by this plan.
     /// </summary>
-    public DateRange Period { get; private set; }
+    public DateRange Period { get; private set; } = default!;
 
     /// <summary>
     /// Parent-friendly statement of the main learning intention for the period.
     /// </summary>
-    public string Focus { get; private set; }
+    public string Focus { get; private set; } = default!;
 
     #region Nav props
 
@@ -83,6 +73,7 @@ public sealed class LearningPlan : Entity<LearningPlanId>
     {
         Period = period;
         Focus = Required(focus, nameof(focus));
+        SetUpdatedOn();
     }
 
     public PlannedLearningSession AddSession(

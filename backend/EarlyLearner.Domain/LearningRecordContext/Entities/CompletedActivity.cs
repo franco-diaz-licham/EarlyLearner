@@ -14,19 +14,17 @@ public sealed class CompletedActivity : Entity<CompletedActivityId>
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
     private readonly List<StoredFile> _storedFiles = [];
 
-    private CompletedActivity(CompletedActivityId id, DailyLogId dailyLogId, string title) : base(id)
-    {
-        DailyLogId = dailyLogId;
-        Title = title;
-    }
+    private CompletedActivity() { }
 
-    internal CompletedActivity(CompletedActivityId id, DailyLogId dailyLogId, string title, IEnumerable<ReadinessOutcome> readinessOutcomes) : base(id)
+    internal CompletedActivity(CompletedActivityId id, DailyLogId dailyLogId, string title, IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
+        Id = id;
         DailyLogId = dailyLogId;
         Title = Required(title, nameof(title));
         var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
         if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Completed activity must target at least one readiness outcome.");
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
+        SetCreatedOn();
     }
 
     public DailyLogId DailyLogId { get; }
@@ -36,7 +34,7 @@ public sealed class CompletedActivity : Entity<CompletedActivityId>
     /// <summary>
     /// Parent-facing name of the completed activity.
     /// </summary>
-    public string Title { get; }
+    public string Title { get; } = default!;
 
     /// <summary>
     /// Readiness areas this activity practised or demonstrated.
@@ -56,6 +54,7 @@ public sealed class CompletedActivity : Entity<CompletedActivityId>
     {
         if (!_storedFiles.Any(file => file.Id == storedFile.Id)) {
             _storedFiles.Add(storedFile);
+            SetUpdatedOn();
         }
     }
 

@@ -10,6 +10,8 @@ namespace EarlyLearner.Domain.CoreContext.Entities;
 /// </summary>
 public sealed class StoredFile : Entity<StoredFileId>
 {
+    private StoredFile() { }
+
     private StoredFile(
         StoredFileId id,
         HouseholdId householdId,
@@ -19,8 +21,8 @@ public sealed class StoredFile : Entity<StoredFileId>
         long sizeInBytes,
         StoredFileMediaTypeEnum mediaType,
         DateTimeOffset uploadedAt)
-        : base(id)
     {
+        Id = id;
         if (sizeInBytes <= 0) {
             throw new DomainException("Stored file size must be greater than zero.");
         }
@@ -33,6 +35,7 @@ public sealed class StoredFile : Entity<StoredFileId>
         MediaType = mediaType;
         UploadedAt = uploadedAt;
         Status = StoredFileStatusEnum.Pending;
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -43,17 +46,17 @@ public sealed class StoredFile : Entity<StoredFileId>
     /// <summary>
     /// Provider-specific object key used by infrastructure to retrieve the file.
     /// </summary>
-    public string StorageKey { get; }
+    public string StorageKey { get; } = default!;
 
     /// <summary>
     /// Original or display file name shown to carers.
     /// </summary>
-    public string FileName { get; }
+    public string FileName { get; } = default!;
 
     /// <summary>
     /// MIME content type captured when the file was uploaded.
     /// </summary>
-    public string ContentType { get; }
+    public string ContentType { get; } = default!;
 
     /// <summary>
     /// File size recorded at upload time.
@@ -98,16 +101,19 @@ public sealed class StoredFile : Entity<StoredFileId>
     public void MarkAvailable()
     {
         Status = StoredFileStatusEnum.Available;
+        SetUpdatedOn();
     }
 
     public void Reject()
     {
         Status = StoredFileStatusEnum.Rejected;
+        SetUpdatedOn();
     }
 
     public void Delete()
     {
         Status = StoredFileStatusEnum.Deleted;
+        SetUpdatedOn();
     }
 
     private static string Required(string value, string name)

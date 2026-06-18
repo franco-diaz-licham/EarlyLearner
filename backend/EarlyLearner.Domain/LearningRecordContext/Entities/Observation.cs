@@ -16,19 +16,7 @@ public sealed class Observation : Entity<ObservationId>
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
     private readonly List<StoredFile> _storedFiles = [];
 
-    private Observation(
-        ObservationId id,
-        HouseholdId householdId,
-        ChildId childId,
-        DateOnly observedOn,
-        string note)
-        : base(id)
-    {
-        HouseholdId = householdId;
-        ChildId = childId;
-        ObservedOn = observedOn;
-        Note = note;
-    }
+    private Observation() { }
 
     private Observation(
         ObservationId id,
@@ -37,19 +25,19 @@ public sealed class Observation : Entity<ObservationId>
         DateOnly observedOn,
         string note,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
-        : base(id)
     {
+        Id = id;
         HouseholdId = householdId;
         ChildId = childId;
         ObservedOn = observedOn;
         Note = Required(note, nameof(note));
         var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
-        if (requiredReadinessOutcomes.Length == 0)
-        {
+        if (requiredReadinessOutcomes.Length == 0) {
             throw new DomainException("Observation must target at least one readiness outcome.");
         }
 
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -74,7 +62,7 @@ public sealed class Observation : Entity<ObservationId>
     /// <summary>
     /// Parent-written description of the behaviour, interest, question, or breakthrough.
     /// </summary>
-    public string Note { get; private set; }
+    public string Note { get; private set; } = default!;
 
     /// <summary>
     /// Readiness areas this observation may support as evidence.
@@ -111,9 +99,9 @@ public sealed class Observation : Entity<ObservationId>
 
     public void AttachStoredFile(StoredFile storedFile)
     {
-        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
-        {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id)) {
             _storedFiles.Add(storedFile);
+            SetUpdatedOn();
         }
     }
 

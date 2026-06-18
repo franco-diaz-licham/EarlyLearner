@@ -9,20 +9,16 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
 {
-    private SuggestedNextStep(SuggestedNextStepId id, ReadinessProfileId readinessProfileId, ReadinessOutcomeId readinessOutcomeId, string text) : base(id)
-    {
-        ReadinessProfileId = readinessProfileId;
-        ReadinessOutcomeId = readinessOutcomeId;
-        ReadinessOutcome = null!;
-        Text = text;
-    }
+    private SuggestedNextStep() { }
 
-    private SuggestedNextStep(SuggestedNextStepId id, ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome, string text) : base(id)
+    private SuggestedNextStep(SuggestedNextStepId id, ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome, string text)
     {
+        Id = id;
         ReadinessProfileId = readinessProfileId;
         ReadinessOutcomeId = readinessOutcome.Id;
         ReadinessOutcome = readinessOutcome;
         Text = text;
+        SetCreatedOn();
     }
 
     public ReadinessProfileId ReadinessProfileId { get; }
@@ -34,12 +30,12 @@ public sealed class SuggestedNextStep : Entity<SuggestedNextStepId>
     /// <summary>
     /// Readiness area this recommendation is intended to strengthen.
     /// </summary>
-    public ReadinessOutcome ReadinessOutcome { get; private set; }
+    public ReadinessOutcome ReadinessOutcome { get; private set; } = default!;
 
     /// <summary>
     /// Practical action a carer can try next at home.
     /// </summary>
-    public string Text { get; }
+    public string Text { get; } = default!;
 
     internal static SuggestedNextStep Create(ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome, string text)
     {

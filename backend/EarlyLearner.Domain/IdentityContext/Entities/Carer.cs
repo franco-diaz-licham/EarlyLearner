@@ -10,13 +10,17 @@ namespace EarlyLearner.Domain.IdentityContext.Entities;
 /// </summary>
 public sealed class Carer : Entity<CarerId>
 {
-    internal Carer(CarerId id, HouseholdId householdId, UserId userId, string firstName, string lastName, HouseholdRoleEnum role) : base(id)
+    private Carer() { }
+
+    internal Carer(CarerId id, HouseholdId householdId, UserId userId, string firstName, string lastName, HouseholdRoleEnum role)
     {
+        Id = id;
         HouseholdId = householdId;
         UserId = userId;
         FirstName = Required(firstName, nameof(firstName));
         LastName = Required(lastName, nameof(lastName));
         Role = role;
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -37,12 +41,12 @@ public sealed class Carer : Entity<CarerId>
     /// <summary>
     /// Given name shown in household and parent-facing screens.
     /// </summary>
-    public string FirstName { get; private set; }
+    public string FirstName { get; private set; } = default!;
 
     /// <summary>
     /// Family name shown in household and parent-facing screens.
     /// </summary>
-    public string LastName { get; private set; }
+    public string LastName { get; private set; } = default!;
 
     /// <summary>
     /// Household permission level for this carer.
@@ -58,11 +62,13 @@ public sealed class Carer : Entity<CarerId>
     {
         FirstName = Required(firstName, nameof(firstName));
         LastName = Required(lastName, nameof(lastName));
+        SetUpdatedOn();
     }
 
     internal void ChangeRole(HouseholdRoleEnum role)
     {
         Role = role;
+        SetUpdatedOn();
     }
 
     private static string Required(string value, string name)

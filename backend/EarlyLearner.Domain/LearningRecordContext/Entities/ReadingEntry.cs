@@ -12,12 +12,16 @@ public sealed class ReadingEntry : Entity<ReadingEntryId>
 {
     private readonly List<StoredFile> _storedFiles = [];
 
-    internal ReadingEntry(ReadingEntryId id, DailyLogId dailyLogId, string title, string author, string childResponse) : base(id)
+    private ReadingEntry() { }
+
+    internal ReadingEntry(ReadingEntryId id, DailyLogId dailyLogId, string title, string author, string childResponse)
     {
+        Id = id;
         DailyLogId = dailyLogId;
         Title = Required(title, nameof(title));
         Author = Required(author, nameof(author));
         ChildResponse = Required(childResponse, nameof(childResponse));
+        SetCreatedOn();
     }
 
     public DailyLogId DailyLogId { get; }
@@ -27,17 +31,17 @@ public sealed class ReadingEntry : Entity<ReadingEntryId>
     /// <summary>
     /// Book title read with the child.
     /// </summary>
-    public string Title { get; }
+    public string Title { get; } = default!;
 
     /// <summary>
     /// Author credited for the book, used for the reading record and future summaries.
     /// </summary>
-    public string Author { get; }
+    public string Author { get; } = default!;
 
     /// <summary>
     /// Parent-recorded response, question, interest, or comment from the child.
     /// </summary>
-    public string ChildResponse { get; }
+    public string ChildResponse { get; } = default!;
 
     #region Nav props
 
@@ -50,9 +54,9 @@ public sealed class ReadingEntry : Entity<ReadingEntryId>
 
     public void AttachStoredFile(StoredFile storedFile)
     {
-        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
-        {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id)) {
             _storedFiles.Add(storedFile);
+            SetUpdatedOn();
         }
     }
 

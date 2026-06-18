@@ -13,19 +13,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
     private readonly List<Goal> _goals = [];
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
 
-    private PlannedLearningSession(
-        PlannedLearningSessionId id,
-        LearningPlanId learningPlanId,
-        DateOnly plannedDate,
-        string title,
-        SessionStatusEnum status)
-        : base(id)
-    {
-        LearningPlanId = learningPlanId;
-        PlannedDate = plannedDate;
-        Title = title;
-        Status = status;
-    }
+    private PlannedLearningSession() { }
 
     internal PlannedLearningSession(
         PlannedLearningSessionId id,
@@ -34,8 +22,8 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
         string title,
         IEnumerable<Goal> goals,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
-        : base(id)
     {
+        Id = id;
         LearningPlanId = learningPlanId;
         PlannedDate = plannedDate;
         Title = Required(title, nameof(title));
@@ -45,6 +33,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
         if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Planned session must target at least one readiness outcome.");
 
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
+        SetCreatedOn();
     }
 
     public LearningPlanId LearningPlanId { get; }
@@ -59,7 +48,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
     /// <summary>
     /// Parent-facing activity or intention name.
     /// </summary>
-    public string Title { get; private set; }
+    public string Title { get; private set; } = default!;
 
     /// <summary>
     /// Current lifecycle state of the planned session.
@@ -80,6 +69,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
     {
         if (Status != SessionStatusEnum.Planned) throw new DomainException("Only planned sessions can be completed.");
         Status = SessionStatusEnum.Completed;
+        SetUpdatedOn();
     }
 
     internal void Skip()
@@ -87,6 +77,7 @@ public sealed class PlannedLearningSession : Entity<PlannedLearningSessionId>
         if (Status != SessionStatusEnum.Planned) throw new DomainException("Only planned sessions can be skipped.");
 
         Status = SessionStatusEnum.Skipped;
+        SetUpdatedOn();
     }
 
     private static string Required(string value, string name)

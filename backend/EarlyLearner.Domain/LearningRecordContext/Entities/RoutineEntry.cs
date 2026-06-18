@@ -12,11 +12,15 @@ public sealed class RoutineEntry : Entity<RoutineEntryId>
 {
     private readonly List<StoredFile> _storedFiles = [];
 
-    internal RoutineEntry(RoutineEntryId id, DailyLogId dailyLogId, string routineName, string notes) : base(id)
+    private RoutineEntry() { }
+
+    internal RoutineEntry(RoutineEntryId id, DailyLogId dailyLogId, string routineName, string notes)
     {
+        Id = id;
         DailyLogId = dailyLogId;
         RoutineName = Required(routineName, nameof(routineName));
         Notes = Required(notes, nameof(notes));
+        SetCreatedOn();
     }
 
     public DailyLogId DailyLogId { get; }
@@ -26,12 +30,12 @@ public sealed class RoutineEntry : Entity<RoutineEntryId>
     /// <summary>
     /// Name of the routine or life skill practised by the child.
     /// </summary>
-    public string RoutineName { get; }
+    public string RoutineName { get; } = default!;
 
     /// <summary>
     /// Parent notes about how the child approached the routine.
     /// </summary>
-    public string Notes { get; }
+    public string Notes { get; } = default!;
 
     #region Nav props
 
@@ -44,9 +48,9 @@ public sealed class RoutineEntry : Entity<RoutineEntryId>
 
     public void AttachStoredFile(StoredFile storedFile)
     {
-        if (!_storedFiles.Any(file => file.Id == storedFile.Id))
-        {
+        if (!_storedFiles.Any(file => file.Id == storedFile.Id)) {
             _storedFiles.Add(storedFile);
+            SetUpdatedOn();
         }
     }
 

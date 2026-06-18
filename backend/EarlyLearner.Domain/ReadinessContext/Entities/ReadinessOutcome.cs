@@ -9,6 +9,8 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class ReadinessOutcome : Entity<ReadinessOutcomeId>
 {
+    private ReadinessOutcome() { }
+
     private ReadinessOutcome(
         ReadinessOutcomeId id,
         string code,
@@ -16,35 +18,36 @@ public sealed class ReadinessOutcome : Entity<ReadinessOutcomeId>
         string description,
         string category,
         int sortOrder)
-        : base(id)
     {
+        Id = id;
         Code = Required(code, nameof(code)).ToLowerInvariant();
         Name = Required(name, nameof(name));
         Description = Required(description, nameof(description));
         Category = Required(category, nameof(category));
         SortOrder = sortOrder;
         Status = ReadinessOutcomeStatusEnum.Active;
+        SetCreatedOn();
     }
 
     /// <summary>
     /// Stable machine-friendly code used for seed data, imports, and display lookup.
     /// </summary>
-    public string Code { get; private set; }
+    public string Code { get; private set; } = default!;
 
     /// <summary>
     /// Parent-facing label shown when carers select or review this outcome.
     /// </summary>
-    public string Name { get; private set; }
+    public string Name { get; private set; } = default!;
 
     /// <summary>
     /// Short explanation of the outcome and what evidence may support it.
     /// </summary>
-    public string Description { get; private set; }
+    public string Description { get; private set; } = default!;
 
     /// <summary>
     /// Higher-level readiness area used to group outcomes in the product.
     /// </summary>
-    public string Category { get; private set; }
+    public string Category { get; private set; } = default!;
 
     /// <summary>
     /// Display order used when presenting outcomes consistently.
@@ -78,16 +81,19 @@ public sealed class ReadinessOutcome : Entity<ReadinessOutcomeId>
         Description = Required(description, nameof(description));
         Category = Required(category, nameof(category));
         SortOrder = sortOrder;
+        SetUpdatedOn();
     }
 
     public void Deactivate()
     {
         Status = ReadinessOutcomeStatusEnum.Inactive;
+        SetUpdatedOn();
     }
 
     public void Archive()
     {
         Status = ReadinessOutcomeStatusEnum.Archived;
+        SetUpdatedOn();
     }
 
     private static string Required(string value, string name)

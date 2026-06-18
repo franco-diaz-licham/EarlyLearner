@@ -14,22 +14,7 @@ public sealed class Goal : Entity<GoalId>
 {
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
 
-    private Goal(
-        GoalId id,
-        HouseholdId householdId,
-        ChildId childId,
-        string title,
-        GoalTypeEnum type,
-        GoalStatusEnum status)
-        : base(id)
-    {
-        HouseholdId = householdId;
-        ChildId = childId;
-        Title = title;
-        Type = type;
-        Status = status;
-        Timeframe = null!;
-    }
+    private Goal() { }
 
     private Goal(
         GoalId id,
@@ -39,8 +24,8 @@ public sealed class Goal : Entity<GoalId>
         GoalTypeEnum type,
         DateRange timeframe,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
-        : base(id)
     {
+        Id = id;
         HouseholdId = householdId;
         ChildId = childId;
         Title = Required(title, nameof(title));
@@ -48,12 +33,12 @@ public sealed class Goal : Entity<GoalId>
         Timeframe = timeframe;
         Status = GoalStatusEnum.Active;
         var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
-        if (requiredReadinessOutcomes.Length == 0)
-        {
+        if (requiredReadinessOutcomes.Length == 0) {
             throw new DomainException("Goal must target at least one readiness outcome.");
         }
 
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -73,7 +58,7 @@ public sealed class Goal : Entity<GoalId>
     /// <summary>
     /// Parent-facing description of what is being encouraged.
     /// </summary>
-    public string Title { get; private set; }
+    public string Title { get; private set; } = default!;
 
     /// <summary>
     /// Planning horizon that distinguishes short-term intentions from longer development aims.
@@ -88,7 +73,7 @@ public sealed class Goal : Entity<GoalId>
     /// <summary>
     /// Date window in which the carer intends to focus on this goal.
     /// </summary>
-    public DateRange Timeframe { get; private set; }
+    public DateRange Timeframe { get; private set; } = default!;
 
     /// <summary>
     /// School-readiness areas this goal is intended to support.
@@ -109,12 +94,14 @@ public sealed class Goal : Entity<GoalId>
     public void Rename(string title)
     {
         Title = Required(title, nameof(title));
+        SetUpdatedOn();
     }
 
     public void Complete()
     {
         if (Status == GoalStatusEnum.Completed) return;
         Status = GoalStatusEnum.Completed;
+        SetUpdatedOn();
     }
 
     private static string Required(string value, string name)

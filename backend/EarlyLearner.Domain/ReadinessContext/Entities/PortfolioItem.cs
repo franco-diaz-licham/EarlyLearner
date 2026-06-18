@@ -15,19 +15,7 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
     private readonly List<StoredFile> _storedFiles = [];
 
-    private PortfolioItem(
-        PortfolioItemId id,
-        HouseholdId householdId,
-        ChildId childId,
-        DateOnly capturedOn,
-        string caption)
-        : base(id)
-    {
-        HouseholdId = householdId;
-        ChildId = childId;
-        CapturedOn = capturedOn;
-        Caption = caption;
-    }
+    private PortfolioItem() { }
 
     private PortfolioItem(
         PortfolioItemId id,
@@ -38,8 +26,8 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
         PortfolioEvidenceSource? source,
         IEnumerable<StoredFile> storedFiles,
         IEnumerable<ReadinessOutcome> readinessOutcomes)
-        : base(id)
     {
+        Id = id;
         HouseholdId = householdId;
         ChildId = childId;
         CapturedOn = capturedOn;
@@ -47,12 +35,12 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
         Source = source;
         _storedFiles.AddRange(storedFiles.DistinctBy(file => file.Id));
         var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
-        if (requiredReadinessOutcomes.Length == 0)
-        {
+        if (requiredReadinessOutcomes.Length == 0) {
             throw new DomainException("Portfolio item must target at least one readiness outcome.");
         }
 
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -77,7 +65,7 @@ public sealed class PortfolioItem : Entity<PortfolioItemId>
     /// <summary>
     /// Parent-facing note explaining why this item matters.
     /// </summary>
-    public string Caption { get; }
+    public string Caption { get; } = default!;
 
     /// <summary>
     /// Optional captured evidence record this portfolio item was selected from.

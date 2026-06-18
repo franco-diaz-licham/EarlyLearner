@@ -10,13 +10,7 @@ public sealed class ReadinessOutcomeProgress
 {
     private readonly List<EvidenceReference> _evidence = [];
 
-    private ReadinessOutcomeProgress(ReadinessProfileId readinessProfileId, ReadinessOutcomeId readinessOutcomeId, ReadinessStatusEnum status)
-    {
-        ReadinessProfileId = readinessProfileId;
-        ReadinessOutcomeId = readinessOutcomeId;
-        ReadinessOutcome = null!;
-        Status = status;
-    }
+    private ReadinessOutcomeProgress() { }
 
     internal ReadinessOutcomeProgress(ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome)
     {
@@ -37,7 +31,7 @@ public sealed class ReadinessOutcomeProgress
     /// <summary>
     /// Readiness area being tracked within the child's profile.
     /// </summary>
-    public ReadinessOutcome ReadinessOutcome { get; private set; }
+    public ReadinessOutcome ReadinessOutcome { get; private set; } = null!;
 
     /// <summary>
     /// Supportive progress status calculated from the available evidence.
@@ -63,8 +57,7 @@ public sealed class ReadinessOutcomeProgress
 
     private ReadinessStatusEnum CalculateStatus()
     {
-        return _evidence.Count switch
-        {
+        return _evidence.Count switch {
             0 => ReadinessStatusEnum.NotYetObserved,
             1 => ReadinessStatusEnum.Emerging,
             <= 3 => ReadinessStatusEnum.Growing,

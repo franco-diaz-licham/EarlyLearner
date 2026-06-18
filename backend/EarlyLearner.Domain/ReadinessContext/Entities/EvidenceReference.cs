@@ -9,22 +9,7 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class EvidenceReference : Entity<EvidenceReferenceId>
 {
-    private EvidenceReference(
-        EvidenceReferenceId id,
-        ReadinessOutcomeId readinessOutcomeId,
-        EvidenceSourceTypeEnum sourceType,
-        Guid evidenceRecordId,
-        DateOnly observedOn,
-        string summary)
-        : base(id)
-    {
-        ReadinessOutcomeId = readinessOutcomeId;
-        ReadinessOutcome = null!;
-        SourceType = sourceType;
-        EvidenceRecordId = evidenceRecordId;
-        ObservedOn = observedOn;
-        Summary = summary;
-    }
+    private EvidenceReference() { }
 
     private EvidenceReference(
         EvidenceReferenceId id,
@@ -33,14 +18,15 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
         Guid evidenceRecordId,
         DateOnly observedOn,
         string summary)
-        : base(id)
     {
+        Id = id;
         ReadinessOutcomeId = readinessOutcome.Id;
         ReadinessOutcome = readinessOutcome;
         SourceType = sourceType;
         EvidenceRecordId = evidenceRecordId;
         ObservedOn = observedOn;
         Summary = summary;
+        SetCreatedOn();
     }
 
     public int ReadinessOutcomeProgressId { get; private set; }
@@ -52,7 +38,7 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     /// <summary>
     /// Readiness area supported by this evidence.
     /// </summary>
-    public ReadinessOutcome ReadinessOutcome { get; private set; }
+    public ReadinessOutcome ReadinessOutcome { get; private set; } = default!;
 
     /// <summary>
     /// Kind of record that produced the evidence.
@@ -72,7 +58,7 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     /// <summary>
     /// Short explanation shown to parents when reviewing why progress changed.
     /// </summary>
-    public string Summary { get; }
+    public string Summary { get; } = default!;
 
     public static EvidenceReference Create(
         ReadinessOutcome readinessOutcome,

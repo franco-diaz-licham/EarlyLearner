@@ -15,17 +15,15 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     private readonly List<ReadinessOutcomeProgress> _outcomeProgress = [];
     private readonly List<SuggestedNextStep> _suggestedNextSteps = [];
 
-    private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId) : base(id)
-    {
-        HouseholdId = householdId;
-        ChildId = childId;
-    }
+    private ReadinessProfile() { }
 
-    private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId, IEnumerable<ReadinessOutcome> readinessOutcomes) : base(id)
+    private ReadinessProfile(ReadinessProfileId id, HouseholdId householdId, ChildId childId, IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
+        Id = id;
         HouseholdId = householdId;
         ChildId = childId;
         _outcomeProgress.AddRange(readinessOutcomes.Select(readinessOutcome => new ReadinessOutcomeProgress(Id, readinessOutcome)));
+        SetCreatedOn();
     }
 
     /// <summary>
@@ -74,8 +72,7 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     public void AddEvidence(EvidenceReference evidenceReference)
     {
         var progress = _outcomeProgress.SingleOrDefault(item => item.ReadinessOutcome.Id == evidenceReference.ReadinessOutcome.Id);
-        if (progress is null)
-        {
+        if (progress is null) {
             throw new DomainException("readiness outcome is not tracked by this profile.");
         }
 
@@ -84,6 +81,7 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
 
         RaiseDomainEvent(new ReadinessEvidenceAdded(Id, ChildId, evidenceReference.ReadinessOutcome.Id, DateTimeOffset.UtcNow));
         if (previousStatus != progress.Status) RaiseDomainEvent(new ReadinessStatusChanged(Id, ChildId, evidenceReference.ReadinessOutcome.Id, progress.Status, DateTimeOffset.UtcNow));
+        SetUpdatedOn();
     }
 
     public SuggestedNextStep AddSuggestedNextStep(ReadinessOutcome readinessOutcome, string text)
@@ -91,6 +89,7 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
         if (_outcomeProgress.All(item => item.ReadinessOutcome.Id != readinessOutcome.Id)) throw new DomainException("Suggested next step must target a tracked readiness outcome.");
         var nextStep = SuggestedNextStep.Create(Id, readinessOutcome, text);
         _suggestedNextSteps.Add(nextStep);
+        SetUpdatedOn();
         return nextStep;
     }
 }

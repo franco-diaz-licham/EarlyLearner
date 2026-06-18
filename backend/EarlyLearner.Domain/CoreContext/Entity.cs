@@ -5,19 +5,22 @@ namespace EarlyLearner.Domain.CoreContext;
 /// Aggregate roots expose their state through behaviour and collect events for
 /// application/infrastructure dispatch after persistence.
 /// </summary>
-public abstract class Entity<TId> where TId : notnull
+public abstract class Entity
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 
-    protected Entity(TId id)
+    public DateTime CreatedOn { get; private set; }
+    public DateTime? UpdatedOn { get; private set; }
+
+    public void SetCreatedOn()
     {
-        Id = id;
+        CreatedOn = DateTime.UtcNow;
     }
 
-    /// <summary>
-    /// The stable domain identity for this entity.
-    /// </summary>
-    public TId Id { get; }
+    public void SetUpdatedOn()
+    {
+        UpdatedOn = DateTime.UtcNow;
+    }
 
     /// <summary>
     /// Domain events raised by this entity during the current unit of work.
@@ -27,4 +30,12 @@ public abstract class Entity<TId> where TId : notnull
     protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
     public void ClearDomainEvents() => _domainEvents.Clear();
+}
+
+/// <summary>
+/// Entities that has a primary Id.
+/// </summary>
+public abstract class Entity<TId> : Entity where TId : notnull
+{
+    public TId Id { get; protected set; } = default!;
 }
