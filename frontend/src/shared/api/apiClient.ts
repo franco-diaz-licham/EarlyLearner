@@ -3,7 +3,7 @@ import http from './http';
 
 export const apiClient = {
   async getList<T>(url: string, params?: ApiQueryParams): Promise<T[]> {
-    const { data } = await http.get<ApiPaginatedResponse<T>>(url, { params: params });
+    const { data } = await http.get<ApiSingleResponse<T[]>>(url, { params: params });
     return data.data;
   },
 
