@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '../shared/layout/AppShell';
 import { HomePage } from '../features/home/pages/HomePage';
-import { LearningPage } from '../features/learning-records/pages/LearningPage';
+import { LearningPage } from '../features/learning/pages/LearningPage';
 import { PlanningPage } from '../features/planning/pages/PlanningPage';
 import { ReadinessPage } from '../features/readiness/pages/ReadinessPage';
 import { NotFoundPage } from '../shared/pages/NotFoundPage';

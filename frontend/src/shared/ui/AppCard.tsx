@@ -1,3 +1,4 @@
+import { Card } from 'primereact/card';
 import type { PropsWithChildren, ReactNode } from 'react';
 
 interface AppCardProps extends PropsWithChildren {
@@ -12,7 +13,7 @@ export const AppCard = ({ action, children, className, title }: AppCardProps) =>
   if (className) cardClassName = `${cardClassName} ${className}`;
 
   return (
-    <section className={cardClassName}>
+    <Card className={cardClassName}>
       {(title ?? action) && (
         <div className="mb-5 flex items-center justify-between gap-4">
           {title && <h2 className="text-base font-bold text-brand-heading">{title}</h2>}
@@ -20,6 +21,6 @@ export const AppCard = ({ action, children, className, title }: AppCardProps) =>
         </div>
       )}
       {children}
-    </section>
+    </Card>
   );
 };

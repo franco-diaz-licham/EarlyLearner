@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { SelectButtonChangeEvent } from 'primereact/selectbutton';
 import { UilBookOpen, UilCalendarAlt, UilClipboardNotes } from '@iconscout/react-unicons';
-import { InputTextarea } from 'primereact/inputtextarea';
 import { SelectButton } from 'primereact/selectbutton';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppCard } from '../../../shared/ui/AppCard';
+import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 
 const logTypes = ['Moment', 'Reading', 'Routine'];
@@ -42,9 +42,9 @@ export const LearningPage = () => {
         <AppCard title="Today's Learning Log">
           <div className="space-y-4">
             <SelectButton options={logTypes} value={logType} onChange={handleLogTypeChange} />
-            <InputTextarea
+            <AppInputTextArea
               autoResize
-              className="min-h-36 w-full rounded-md border border-brand-border px-4 py-3 text-brand-text placeholder:text-brand-muted"
+              className="min-h-36"
               placeholder="What happened? What did Sophia try, say, notice, or enjoy?"
               rows={6}
               value={note}

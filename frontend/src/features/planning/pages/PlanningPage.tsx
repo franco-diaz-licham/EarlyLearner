@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { UilBookOpen, UilCalendarAlt, UilPlus } from '@iconscout/react-unicons';
-import { InputTextarea } from 'primereact/inputtextarea';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppCard } from '../../../shared/ui/AppCard';
+import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 
 const weeklyFocus = [
@@ -64,9 +64,8 @@ export const PlanningPage = () => {
           </AppCard>
 
           <AppCard title="Parent Note">
-            <InputTextarea
+            <AppInputTextArea
               autoResize
-              className="min-h-32 w-full rounded-md border border-brand-border px-4 py-3 text-brand-text placeholder:text-brand-muted"
               placeholder="Add what worked, what felt hard, or what Sophia asked about..."
               rows={5}
               value={parentNote}
