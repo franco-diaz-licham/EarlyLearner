@@ -1,4 +1,4 @@
-namespace EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+namespace EarlyLearner.Domain.LearningContext.ValueObjects;
 
 /// <summary>
 /// Identifies an activity completed and recorded in a daily log.

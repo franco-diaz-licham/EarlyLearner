@@ -1,10 +1,10 @@
 using EarlyLearner.Application.Common;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.LearningRecordContext.Entities;
+using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.LearningRecordContext;
+namespace EarlyLearner.Application.Features.LearningContext;
 
 public sealed record CreateDailyLogCommand(Guid HouseholdId, Guid ChildId, DateOnly LogDate);
 

@@ -17,7 +17,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false)
+                    name = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -34,7 +36,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     description = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: false),
                     category = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     sort_order = table.Column<int>(type: "integer", nullable: false),
-                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
+                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -50,7 +54,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    role = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
+                    role = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -71,7 +77,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     household_id = table.Column<Guid>(type: "uuid", nullable: false),
                     given_name = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     date_of_birth = table.Column<DateOnly>(type: "date", nullable: false),
-                    is_archived = table.Column<bool>(type: "boolean", nullable: false)
+                    is_archived = table.Column<bool>(type: "boolean", nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -96,7 +104,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     size_in_bytes = table.Column<long>(type: "bigint", nullable: false),
                     media_type = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    uploaded_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    uploaded_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -116,7 +126,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     household_id = table.Column<Guid>(type: "uuid", nullable: false),
                     child_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    log_date = table.Column<DateOnly>(type: "date", nullable: false)
+                    log_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -146,7 +158,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     type = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     timeframe_start_date = table.Column<DateOnly>(type: "date", nullable: false),
-                    timeframe_end_date = table.Column<DateOnly>(type: "date", nullable: false)
+                    timeframe_end_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -174,7 +188,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     child_id = table.Column<Guid>(type: "uuid", nullable: false),
                     period_start_date = table.Column<DateOnly>(type: "date", nullable: false),
                     period_end_date = table.Column<DateOnly>(type: "date", nullable: false),
-                    focus = table.Column<string>(type: "character varying(260)", maxLength: 260, nullable: false)
+                    focus = table.Column<string>(type: "character varying(260)", maxLength: 260, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -201,7 +217,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     household_id = table.Column<Guid>(type: "uuid", nullable: false),
                     child_id = table.Column<Guid>(type: "uuid", nullable: false),
                     observed_on = table.Column<DateOnly>(type: "date", nullable: false),
-                    note = table.Column<string>(type: "character varying(2400)", maxLength: 2400, nullable: false)
+                    note = table.Column<string>(type: "character varying(2400)", maxLength: 2400, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -231,7 +249,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     caption = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: false),
                     source_source_type = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: true),
                     source_evidence_record_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    source_source_date = table.Column<DateOnly>(type: "date", nullable: true)
+                    source_source_date = table.Column<DateOnly>(type: "date", nullable: true),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -256,7 +276,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     household_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    child_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    child_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -281,7 +303,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     daily_log_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    title = table.Column<string>(type: "character varying(220)", maxLength: 220, nullable: false)
+                    title = table.Column<string>(type: "character varying(220)", maxLength: 220, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -326,7 +350,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     daily_log_id = table.Column<Guid>(type: "uuid", nullable: false),
                     title = table.Column<string>(type: "character varying(220)", maxLength: 220, nullable: false),
                     author = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
-                    child_response = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: false)
+                    child_response = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -346,7 +372,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     daily_log_id = table.Column<Guid>(type: "uuid", nullable: false),
                     routine_name = table.Column<string>(type: "character varying(180)", maxLength: 180, nullable: false),
-                    notes = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: false)
+                    notes = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -391,7 +419,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     learning_plan_id = table.Column<Guid>(type: "uuid", nullable: false),
                     planned_date = table.Column<DateOnly>(type: "date", nullable: false),
                     title = table.Column<string>(type: "character varying(220)", maxLength: 220, nullable: false),
-                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
+                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -534,7 +564,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     readiness_profile_id = table.Column<Guid>(type: "uuid", nullable: false),
                     readiness_outcome_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    text = table.Column<string>(type: "character varying(800)", maxLength: 800, nullable: false)
+                    text = table.Column<string>(type: "character varying(800)", maxLength: 800, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -707,7 +739,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     source_type = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),
                     evidence_record_id = table.Column<Guid>(type: "uuid", nullable: false),
                     observed_on = table.Column<DateOnly>(type: "date", nullable: false),
-                    summary = table.Column<string>(type: "character varying(800)", maxLength: 800, nullable: false)
+                    summary = table.Column<string>(type: "character varying(800)", maxLength: 800, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {

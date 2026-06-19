@@ -1,8 +1,8 @@
-using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
 
-namespace EarlyLearner.Domain.LearningRecordContext.Entities;
+namespace EarlyLearner.Domain.LearningContext.Entities;
 
 /// <summary>
 /// Records a routine or life skill practised by the child, such as dressing,

@@ -1,13 +1,13 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.LearningRecordContext.Entities;
-using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext.Entities;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EarlyLearner.Infrastructure.Persistence.Configurations.LearningRecordContext;
+namespace EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext;
 
 public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
 {

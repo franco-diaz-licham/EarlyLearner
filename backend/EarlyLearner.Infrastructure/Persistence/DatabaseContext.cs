@@ -1,6 +1,6 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.IdentityContext.Entities;
-using EarlyLearner.Domain.LearningRecordContext.Entities;
+using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using Microsoft.EntityFrameworkCore;

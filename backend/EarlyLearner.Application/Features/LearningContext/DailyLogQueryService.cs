@@ -1,7 +1,7 @@
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.LearningRecordContext;
+namespace EarlyLearner.Application.Features.LearningContext;
 
 public sealed record DailyLogResponse(
     Guid DailyLogId,

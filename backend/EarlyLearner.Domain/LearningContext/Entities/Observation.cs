@@ -1,11 +1,11 @@
-using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 
-namespace EarlyLearner.Domain.LearningRecordContext.Entities;
+namespace EarlyLearner.Domain.LearningContext.Entities;
 
 /// <summary>
 /// Aggregate root for a meaningful parent observation about the child's

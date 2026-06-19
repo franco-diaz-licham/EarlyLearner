@@ -1,8 +1,8 @@
-using EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.CoreContext;
 
-namespace EarlyLearner.Domain.LearningRecordContext;
+namespace EarlyLearner.Domain.LearningContext;
 
 public sealed record LearningActivityLogged(DailyLogId DailyLogId, CompletedActivityId ActivityId, DateTimeOffset OccurredAt) : IDomainEvent;
 

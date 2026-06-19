@@ -1,4 +1,4 @@
-namespace EarlyLearner.Domain.LearningRecordContext.ValueObjects;
+namespace EarlyLearner.Domain.LearningContext.ValueObjects;
 
 /// <summary>
 /// Identifies an observation about a child's learning or development.
