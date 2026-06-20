@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { householdService } from '../services/household.services';
-import type { CreateHouseholdRequest, UpdateHouseholdRequest } from '../types/household.types';
+import type {
+  AddHouseholdChildRequest,
+  CreateHouseholdRequest,
+  InviteHouseholdCarerRequest,
+  UpdateHouseholdRequest
+} from '../types/household.types';
 
 export const householdKeys = {
   all: ['households'] as const,
@@ -41,7 +46,55 @@ export const useUpdateHouseholdMutation = () => {
     mutationFn: ({ householdId, request }: { householdId: string; request: UpdateHouseholdRequest }) => householdService.update(householdId, request),
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.detail(household.householdId), household);
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
+    }
+  });
+};
+
+export const useInviteHouseholdCarerMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ householdId, request }: { householdId: string; request: InviteHouseholdCarerRequest }) => householdService.inviteCarer(householdId, request),
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
+    }
+  });
+};
+
+export const useRemoveHouseholdCarerMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ householdId, carerId }: { householdId: string; carerId: string }) => householdService.removeCarer(householdId, carerId),
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
+    }
+  });
+};
+
+export const useAddHouseholdChildMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ householdId, request }: { householdId: string; request: AddHouseholdChildRequest }) => householdService.addChild(householdId, request),
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
+    }
+  });
+};
+
+export const useRemoveHouseholdChildMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ householdId, childId }: { householdId: string; childId: string }) => householdService.removeChild(householdId, childId),
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
     }
   });
 };

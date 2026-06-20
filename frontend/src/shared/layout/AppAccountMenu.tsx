@@ -3,6 +3,7 @@ import type { MouseEvent } from 'react';
 import { useRef } from 'react';
 import { Button } from 'primereact/button';
 import { OverlayPanel } from 'primereact/overlaypanel';
+import { useNavigate } from 'react-router-dom';
 import { AppButton } from '../ui/AppButton';
 import { useSessionStore } from '../stores/sessionStore';
 
@@ -12,6 +13,7 @@ interface AppAccountMenuProps {
 
 export const AppAccountMenu = ({ onLogout }: AppAccountMenuProps) => {
   const overlayPanelRef = useRef<OverlayPanel>(null);
+  const navigate = useNavigate();
   const currentUser = useSessionStore((state) => state.currentUser);
 
   const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
@@ -21,6 +23,11 @@ export const AppAccountMenu = ({ onLogout }: AppAccountMenuProps) => {
   const handleLogout = () => {
     overlayPanelRef.current?.hide();
     onLogout?.();
+  };
+
+  const handleManageHouseholds = () => {
+    overlayPanelRef.current?.hide();
+    void navigate('/households');
   };
 
   return (
@@ -41,6 +48,9 @@ export const AppAccountMenu = ({ onLogout }: AppAccountMenuProps) => {
             <p className="mt-1 text-xs font-semibold text-brand-muted">{currentUser.roleLabel}</p>
             <p className="mt-2 text-xs text-brand-muted">{currentUser.organisationName}</p>
           </div>
+          <AppButton className="mt-3 w-full justify-center" variant="secondary" onClick={handleManageHouseholds}>
+            Manage households
+          </AppButton>
           <AppButton className="mt-3 w-full justify-center" variant="secondary" onClick={handleLogout}>
             Log out
           </AppButton>

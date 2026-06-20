@@ -1,7 +1,7 @@
 import type { HouseholdModel, HouseholdResponse } from '../types/household.types';
 
 export const mapHouseholdResponseToModel = (response: HouseholdResponse): HouseholdModel => ({
-  householdId: response.householdId,
+  id: response.id,
   name: response.name
 });
 

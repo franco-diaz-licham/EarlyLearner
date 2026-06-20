@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '../shared/layout/AppShell';
 import { HomePage } from '../features/home/pages/HomePage';
+import { HouseholdsPage } from '../features/households/pages/HouseholdsPage';
 import { LearningPage } from '../features/learning/pages/LearningPage';
 import { PlanningPage } from '../features/planning/pages/PlanningPage';
 import { ReadinessPage } from '../features/readiness/pages/ReadinessPage';
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/home" replace /> },
       { path: 'home', element: <HomePage /> },
+      { path: 'households', element: <HouseholdsPage /> },
       { path: 'planning', element: <PlanningPage /> },
       { path: 'readiness', element: <ReadinessPage /> },
       { path: 'learning', element: <LearningPage /> },
