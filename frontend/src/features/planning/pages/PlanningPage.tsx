@@ -2,8 +2,24 @@ import { useState } from 'react';
 import { UilBookOpen, UilCalendarAlt, UilPlus } from '@iconscout/react-unicons';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppCard } from '../../../shared/ui/AppCard';
+import { AppCardButton } from '../../../shared/ui/AppCardButton';
 import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
+import { LearningPlanDialog } from '../components/LearningPlanDialog';
+import { useCreateLearningPlanMutation } from '../queries/learningPlan.queries';
+import type { LearningPlanModel } from '../types/learningPlan.types';
+
+const demoHouseholdId = '11111111-1111-1111-1111-111111111111';
+const demoChildId = '44444444-4444-4444-4444-444444444441';
+
+const createEmptyLearningPlan = (): LearningPlanModel => ({
+  learningPlanId: '',
+  householdId: demoHouseholdId,
+  childId: demoChildId,
+  startDate: '',
+  endDate: '',
+  focus: ''
+});
 
 const weeklyFocus = [
   { title: 'Butterfly life cycle poster', outcome: 'Science, sequencing and fine motor', status: 'Ready' },
@@ -19,6 +35,40 @@ const goals = [
 export const PlanningPage = () => {
   const [selectedFocus, setSelectedFocus] = useState<string>(weeklyFocus[0].title);
   const [parentNote, setParentNote] = useState('');
+  const [isLearningPlanDialogVisible, setIsLearningPlanDialogVisible] = useState(false);
+  const [learningPlanDraft, setLearningPlanDraft] = useState<LearningPlanModel>(() => createEmptyLearningPlan());
+  const createLearningPlanMutation = useCreateLearningPlanMutation();
+
+  const handleCreateLearningPlan = () => {
+    createLearningPlanMutation.mutate(
+      {
+        householdId: learningPlanDraft.householdId,
+        childId: learningPlanDraft.childId,
+        startDate: learningPlanDraft.startDate,
+        endDate: learningPlanDraft.endDate,
+        focus: learningPlanDraft.focus
+      },
+      {
+        onSuccess: () => {
+          setLearningPlanDraft(createEmptyLearningPlan());
+          setIsLearningPlanDialogVisible(false);
+        }
+      }
+    );
+  };
+
+  const handleHideLearningPlanDialog = () => {
+    setIsLearningPlanDialogVisible(false);
+  };
+
+  const handleNewLearningPlan = () => {
+    setLearningPlanDraft(createEmptyLearningPlan());
+    setIsLearningPlanDialogVisible(true);
+  };
+
+  const handleSelectFocus = (title: string) => {
+    setSelectedFocus(title);
+  };
 
   return (
     <section aria-labelledby="planning-title" className="space-y-5">
@@ -33,7 +83,7 @@ export const PlanningPage = () => {
                 </h1>
                 <p className="mt-2 max-w-2xl text-brand-muted">Choose a gentle focus, keep goals visible, and turn everyday moments into learning opportunities.</p>
               </div>
-              <AppButton icon={<UilPlus aria-hidden="true" className="h-5 w-5" />} label="New plan" />
+              <AppButton icon={<UilPlus aria-hidden="true" className="h-5 w-5" />} label="New plan" onClick={handleNewLearningPlan} />
             </div>
           </AppCard>
 
@@ -43,21 +93,17 @@ export const PlanningPage = () => {
                 const isSelected = item.title === selectedFocus;
 
                 return (
-                  <button
-                    className={`rounded-md border p-4 text-left transition ${isSelected ? 'border-brand-primary bg-brand-primary-soft' : 'border-brand-border bg-white hover:bg-brand-surface-muted'}`}
+                  <AppCardButton
+                    action={<AppStatusBadge tone={isSelected ? 'warning' : 'neutral'}>{item.status}</AppStatusBadge>}
+                    icon={<UilBookOpen aria-hidden="true" className="h-5 w-5 text-brand-primary" />}
                     key={item.title}
-                    type="button"
+                    selected={isSelected}
+                    supportingText={item.outcome}
+                    title={item.title}
                     onClick={() => {
-                      setSelectedFocus(item.title);
+                      handleSelectFocus(item.title);
                     }}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <UilBookOpen aria-hidden="true" className="h-5 w-5 text-brand-primary" />
-                      <AppStatusBadge tone={isSelected ? 'warning' : 'neutral'}>{item.status}</AppStatusBadge>
-                    </div>
-                    <h2 className="mt-4 font-bold text-brand-heading">{item.title}</h2>
-                    <p className="mt-2 text-sm leading-6 text-brand-muted">{item.outcome}</p>
-                  </button>
+                  />
                 );
               })}
             </div>
@@ -98,6 +144,7 @@ export const PlanningPage = () => {
           </AppCard>
         </aside>
       </div>
+      <LearningPlanDialog learningPlan={learningPlanDraft} saving={createLearningPlanMutation.isPending} visible={isLearningPlanDialogVisible} onChange={setLearningPlanDraft} onHide={handleHideLearningPlanDialog} onSave={handleCreateLearningPlan} />
     </section>
   );
 };
