@@ -26,7 +26,8 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
             .HasForeignKey(child => child.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(child => child.GivenName)
+        builder.Property(child => child.FirstName)
+            .HasColumnName("given_name")
             .HasMaxLength(120)
             .IsRequired();
 
@@ -36,7 +37,8 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
         builder.Property(child => child.IsArchived)
             .IsRequired();
 
-        builder.HasIndex(child => new { child.HouseholdId, child.GivenName });
+        builder.HasIndex(child => new { child.HouseholdId, child.FirstName });
+        builder.Ignore(child => child.LastName);
         builder.Ignore(child => child.DomainEvents);
     }
 }

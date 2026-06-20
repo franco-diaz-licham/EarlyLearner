@@ -46,27 +46,20 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "carers",
+                name: "users",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    household_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
                     first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    role = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_carers", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_carers_households_household_id",
-                        column: x => x.household_id,
-                        principalTable: "households",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("pk_users", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -115,6 +108,34 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         name: "fk_stored_files_households_household_id",
                         column: x => x.household_id,
                         principalTable: "households",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "carers",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    household_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    role = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_carers", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_carers_households_household_id",
+                        column: x => x.household_id,
+                        principalTable: "households",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_carers_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -767,6 +788,11 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_carers_user_id",
+                table: "carers",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_children_household_id_given_name",
                 table: "children",
                 columns: new[] { "household_id", "given_name" });
@@ -960,6 +986,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 name: "ix_suggested_next_steps_readiness_profile_id",
                 table: "suggested_next_steps",
                 column: "readiness_profile_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_users_email",
+                table: "users",
+                column: "email",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -1009,6 +1041,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "suggested_next_steps");
+
+            migrationBuilder.DropTable(
+                name: "users");
 
             migrationBuilder.DropTable(
                 name: "completed_activities");

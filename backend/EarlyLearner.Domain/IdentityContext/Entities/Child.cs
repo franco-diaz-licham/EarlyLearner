@@ -15,7 +15,7 @@ public sealed class Child : Entity<ChildId>
     {
         Id = id;
         HouseholdId = householdId;
-        GivenName = Required(givenName, nameof(givenName));
+        FirstName = Required(givenName, nameof(givenName));
         DateOfBirth = dateOfBirth;
         IsArchived = false;
         SetCreatedOn();
@@ -29,7 +29,12 @@ public sealed class Child : Entity<ChildId>
     /// <summary>
     /// Name used by carers when planning and recording this child's learning.
     /// </summary>
-    public string GivenName { get; private set; } = default!;
+    public string FirstName { get; private set; } = default!;
+
+    /// <summary>
+    /// Family name shown in household and parent-facing screens.
+    /// </summary>
+    public string LastName { get; private set; } = default!;
 
     /// <summary>
     /// Birth date used for age-aware planning, readiness interpretation, and future activity suggestions.
@@ -43,7 +48,7 @@ public sealed class Child : Entity<ChildId>
 
     internal void Rename(string givenName)
     {
-        GivenName = Required(givenName, nameof(givenName));
+        FirstName = Required(givenName, nameof(givenName));
         SetUpdatedOn();
     }
 

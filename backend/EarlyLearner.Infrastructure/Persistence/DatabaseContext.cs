@@ -9,6 +9,7 @@ namespace EarlyLearner.Infrastructure.Persistence;
 
 public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options)
 {
+    public DbSet<User> Users => Set<User>();
     public DbSet<Household> Households => Set<Household>();
     public DbSet<Carer> Carers => Set<Carer>();
     public DbSet<Child> Children => Set<Child>();

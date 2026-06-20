@@ -31,13 +31,10 @@ public sealed class CarerConfig : IEntityTypeConfiguration<Carer>
             .HasConversion(id => id.Value, value => new UserId(value))
             .IsRequired();
 
-        builder.Property(carer => carer.FirstName)
-            .HasMaxLength(100)
-            .IsRequired();
-
-        builder.Property(carer => carer.LastName)
-            .HasMaxLength(100)
-            .IsRequired();
+        builder.HasOne(carer => carer.User)
+            .WithMany()
+            .HasForeignKey(carer => carer.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(carer => carer.Role)
             .HasConversion<string>()
@@ -45,7 +42,6 @@ public sealed class CarerConfig : IEntityTypeConfiguration<Carer>
             .IsRequired();
 
         builder.HasIndex(carer => new { carer.HouseholdId, carer.UserId }).IsUnique();
-        builder.Ignore(carer => carer.DisplayName);
         builder.Ignore(carer => carer.DomainEvents);
     }
 }

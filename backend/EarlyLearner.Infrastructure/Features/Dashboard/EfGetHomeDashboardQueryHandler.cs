@@ -14,10 +14,10 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db) : IGetHom
         var children = await db.Children
             .AsNoTracking()
             .Where(child => child.HouseholdId.Value == query.HouseholdId && !child.IsArchived)
-            .OrderBy(child => child.GivenName)
+            .OrderBy(child => child.FirstName)
             .Select(child => new HomeDashboardChildResponse(
                 ChildId: child.Id.Value,
-                GivenName: child.GivenName,
+                GivenName: child.FirstName,
                 DateOfBirth: child.DateOfBirth))
             .ToListAsync(cancellationToken);
 

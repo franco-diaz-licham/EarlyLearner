@@ -43,7 +43,7 @@ public sealed class Household : Entity<HouseholdId>
     public static Household Create(string name, UserId ownerUserId, string ownerFirstName, string ownerLastName)
     {
         var household = new Household(new HouseholdId(Guid.NewGuid()), name);
-        var owner = new Carer(new CarerId(Guid.NewGuid()), household.Id, ownerUserId, ownerFirstName, ownerLastName, HouseholdRoleEnum.Owner);
+        var owner = new Carer(new CarerId(Guid.NewGuid()), household.Id, ownerUserId, HouseholdRoleEnum.Owner);
         household._carers.Add(owner);
         return household;
     }
@@ -54,11 +54,21 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
-    public void AddCarer(UserId userId, string firstName, string lastName, HouseholdRoleEnum role)
+    public void AddCarer(UserId userId, HouseholdRoleEnum role)
     {
         if (_carers.Any(carer => carer.UserId == userId)) throw new DomainException("Carer already belongs to this household.");
-        var carer = new Carer(new CarerId(Guid.NewGuid()), Id, userId, firstName, lastName, role);
+        var carer = new Carer(new CarerId(Guid.NewGuid()), Id, userId, role);
         _carers.Add(carer);
+        SetUpdatedOn();
+    }
+
+    public void RemoveCarer(CarerId carerId)
+    {
+        var carer = _carers.SingleOrDefault(existingCarer => existingCarer.Id == carerId);
+        if (carer is null) throw new DomainException("Carer does not belong to this household.");
+        if (carer.Role == HouseholdRoleEnum.Owner) throw new DomainException("Household owner cannot be removed.");
+
+        _carers.Remove(carer);
         SetUpdatedOn();
     }
 

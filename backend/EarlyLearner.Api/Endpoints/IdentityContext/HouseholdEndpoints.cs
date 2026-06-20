@@ -1,5 +1,6 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -16,6 +17,10 @@ public static class HouseholdEndpoints
         households.MapGet("/{householdId:guid}", GetHousehold).WithName(nameof(GetHousehold));
         households.MapPost("/", CreateHousehold).WithName(nameof(CreateHousehold));
         households.MapPut("/{householdId:guid}", UpdateHousehold).WithName(nameof(UpdateHousehold));
+        households.MapPost("/{householdId:guid}/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
+        households.MapDelete("/{householdId:guid}/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
+        households.MapPost("/{householdId:guid}/children", AddChild).WithName(nameof(AddChild));
+        households.MapDelete("/{householdId:guid}/children/{childId:guid}", RemoveChild).WithName(nameof(RemoveChild));
         households.MapDelete("/{householdId:guid}", DeleteHousehold).WithName(nameof(DeleteHousehold));
 
         return endpoints;
@@ -42,12 +47,12 @@ public static class HouseholdEndpoints
 
         var command = new CreateHouseholdCommand(
             Name: request.Name,
-            OwnerUserId: request.OwnerUserId,
-            OwnerFirstName: request.OwnerFirstName,
-            OwnerLastName: request.OwnerLastName);
+            OwnerUserId: Guid.NewGuid(),
+            OwnerFirstName: "Household",
+            OwnerLastName: "Owner");
 
         var result = await commandService.CreateAsync(command, cancellationToken);
-        var locationUrl = result.IsSuccess ? $"/households/{result.Value.HouseholdId}" : null;
+        var locationUrl = result.IsSuccess ? $"/households/{result.Value.Id}" : null;
         return result.ToApiResult(locationUrl);
     }
 
@@ -73,18 +78,75 @@ public static class HouseholdEndpoints
         var result = await commandService.DeleteAsync(householdId, cancellationToken);
         return result.ToApiResult();
     }
+
+    public static async Task<IResult> InviteCarer(Guid householdId, InviteHouseholdCarerRequest request, IValidator<InviteHouseholdCarerRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    {
+        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var validation = validator.Validate(request).ToResult();
+        if (!validation.IsSuccess) return validation.ToApiResult();
+
+        var command = new AddHouseholdCarerCommand(
+            HouseholdId: householdId,
+            Email: request.Email,
+            FirstName: request.FirstName,
+            LastName: request.LastName,
+            Role: request.Role);
+
+        var result = await commandService.AddCarerAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
+
+    public static async Task<IResult> RemoveCarer(Guid householdId, Guid carerId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    {
+        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
+        if (carerId == Guid.Empty) return Result<HouseholdResponse>.Fail("Carer id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var command = new RemoveHouseholdCarerCommand(
+            HouseholdId: householdId,
+            CarerId: carerId);
+
+        var result = await commandService.RemoveCarerAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
+
+    public static async Task<IResult> AddChild(Guid householdId, AddHouseholdChildRequest request, IValidator<AddHouseholdChildRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    {
+        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var validation = validator.Validate(request).ToResult();
+        if (!validation.IsSuccess) return validation.ToApiResult();
+
+        var command = new AddHouseholdChildCommand(
+            HouseholdId: householdId,
+            GivenName: request.GivenName,
+            DateOfBirth: request.DateOfBirth);
+
+        var result = await commandService.AddChildAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
+
+    public static async Task<IResult> RemoveChild(Guid householdId, Guid childId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    {
+        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
+        if (childId == Guid.Empty) return Result<HouseholdResponse>.Fail("Child id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var command = new RemoveHouseholdChildCommand(
+            HouseholdId: householdId,
+            ChildId: childId);
+
+        var result = await commandService.RemoveChildAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
 }
 
-public sealed record CreateHouseholdRequest(string Name, Guid OwnerUserId, string OwnerFirstName, string OwnerLastName);
+public sealed record CreateHouseholdRequest(string Name);
 
 public sealed class CreateHouseholdRequestValidator : AbstractValidator<CreateHouseholdRequest>
 {
     public CreateHouseholdRequestValidator()
     {
         RuleFor(request => request.Name).NotEmpty();
-        RuleFor(request => request.OwnerUserId).NotEmpty();
-        RuleFor(request => request.OwnerFirstName).NotEmpty();
-        RuleFor(request => request.OwnerLastName).NotEmpty();
     }
 }
 
@@ -95,5 +157,29 @@ public sealed class UpdateHouseholdRequestValidator : AbstractValidator<UpdateHo
     public UpdateHouseholdRequestValidator()
     {
         RuleFor(request => request.Name).NotEmpty();
+    }
+}
+
+public sealed record InviteHouseholdCarerRequest(string Email, string FirstName, string LastName, HouseholdRoleEnum Role);
+
+public sealed class InviteHouseholdCarerRequestValidator : AbstractValidator<InviteHouseholdCarerRequest>
+{
+    public InviteHouseholdCarerRequestValidator()
+    {
+        RuleFor(request => request.Email).NotEmpty().EmailAddress();
+        RuleFor(request => request.FirstName).NotEmpty();
+        RuleFor(request => request.LastName).NotEmpty();
+        RuleFor(request => request.Role).IsInEnum();
+    }
+}
+
+public sealed record AddHouseholdChildRequest(string GivenName, DateOnly DateOfBirth);
+
+public sealed class AddHouseholdChildRequestValidator : AbstractValidator<AddHouseholdChildRequest>
+{
+    public AddHouseholdChildRequestValidator()
+    {
+        RuleFor(request => request.GivenName).NotEmpty();
+        RuleFor(request => request.DateOfBirth).NotEmpty();
     }
 }
