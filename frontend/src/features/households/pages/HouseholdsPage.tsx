@@ -20,6 +20,8 @@ const createEmptyInvite = (): InviteHouseholdCarerRequest => ({
   role: 2
 });
 
+const emptyHouseholds: HouseholdModel[] = [];
+
 export const HouseholdsPage = () => {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [isDialogVisible, setIsDialogVisible] = useState(false);
@@ -34,7 +36,7 @@ export const HouseholdsPage = () => {
   const inviteHouseholdCarerMutation = useInviteHouseholdCarerMutation();
   const deleteHouseholdMutation = useDeleteHouseholdMutation();
 
-  const households = householdsQuery.data ?? [];
+  const households = householdsQuery.data ?? emptyHouseholds;
   const selectedHousehold = useMemo(() => households.find((household) => household.id === deletePendingId), [deletePendingId, households]);
   const inviteHousehold = useMemo(() => households.find((household) => household.id === inviteHouseholdId) ?? null, [inviteHouseholdId, households]);
   const isSaving = createHouseholdMutation.isPending || updateHouseholdMutation.isPending;

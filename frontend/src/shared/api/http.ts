@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
+import { useAuthStore } from '../../features/auth/stores/auth.store';
 import { appConfig } from '../config/appConfig';
 import type { QueryFilter } from './api.types';
 
@@ -37,6 +38,12 @@ const http: AxiosInstance = axios.create({
   timeout: 30_000,
   headers: { 'Content-Type': 'application/json' },
   paramsSerializer: { serialize: serializeParams }
+});
+
+http.interceptors.request.use(async config => {
+  const token = await useAuthStore.getState().getToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
 });
 
 export default http;
