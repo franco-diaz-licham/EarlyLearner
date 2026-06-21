@@ -1,5 +1,7 @@
 import type { ButtonProps } from 'primereact/button';
 import { Button } from 'primereact/button';
+import { mergeClassNames } from './mergeClassNames';
+
 type ButtonVariant = 'primary' | 'secondary';
 
 interface AppButtonProps extends ButtonProps {
@@ -7,18 +9,19 @@ interface AppButtonProps extends ButtonProps {
 }
 
 export const AppButton = ({ children, className, variant = 'primary', ...buttonProps }: AppButtonProps) => {
-  let buttonClassName =
-    'inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-brand-primary px-4 text-sm font-semibold text-white transition hover:bg-brand-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary';
-
-  if (variant === 'secondary') {
-    buttonClassName =
-      'inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-brand-border bg-brand-surface px-4 text-sm font-semibold text-brand-heading transition hover:bg-brand-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary';
-  }
-
-  if (className) buttonClassName = `${buttonClassName} ${className}`;
-
   return (
-    <Button {...buttonProps} className={buttonClassName} type="button">
+    <Button
+      {...buttonProps}
+      className={mergeClassNames(
+        'inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4',
+        'text-sm font-semibold transition',
+        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary',
+        variant === 'primary' && 'bg-brand-primary text-white hover:bg-brand-primary-hover',
+        variant === 'secondary' && 'border border-brand-border bg-brand-surface text-brand-heading hover:bg-brand-surface-muted',
+        className
+      )}
+      type="button"
+    >
       {children}
     </Button>
   );

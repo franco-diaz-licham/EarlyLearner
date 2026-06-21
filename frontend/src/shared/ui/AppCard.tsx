@@ -1,5 +1,6 @@
 import { Card } from 'primereact/card';
 import type { PropsWithChildren, ReactNode } from 'react';
+import { mergeClassNames } from './mergeClassNames';
 
 interface AppCardProps extends PropsWithChildren {
   action?: ReactNode;
@@ -8,12 +9,8 @@ interface AppCardProps extends PropsWithChildren {
 }
 
 export const AppCard = ({ action, children, className, title }: AppCardProps) => {
-  let cardClassName = 'rounded-md bg-white p-6 shadow-app-card';
-
-  if (className) cardClassName = `${cardClassName} ${className}`;
-
   return (
-    <Card className={cardClassName}>
+    <Card className={mergeClassNames('rounded-md bg-white p-6 shadow-app-card', className)}>
       {(title ?? action) && (
         <div className="mb-5 flex items-center justify-between gap-4">
           {title && <h2 className="text-base font-bold text-brand-heading">{title}</h2>}

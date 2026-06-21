@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { mergeClassNames } from './mergeClassNames';
 
 interface AppCardButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'title'> {
   action?: ReactNode;
@@ -9,14 +10,14 @@ interface AppCardButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 }
 
 export const AppCardButton = ({ action, className, icon, selected = false, supportingText, title, ...buttonProps }: AppCardButtonProps) => {
-  let buttonClassName = `rounded-md border p-4 text-left transition hover:cursor-pointer ${selected ? 'border-brand-primary bg-brand-primary-soft' : 'border-brand-border bg-white hover:bg-brand-surface-muted'}`;
-
-  if (className) buttonClassName = `${buttonClassName} ${className}`;
-
   return (
-    <button {...buttonProps} className={buttonClassName} type="button">
+    <button
+      {...buttonProps}
+      className={mergeClassNames('rounded-md border p-4 text-left transition hover:cursor-pointer', selected ? 'border-brand-primary bg-brand-primary-soft' : 'border-brand-border bg-white hover:bg-brand-surface-muted', className)}
+      type="button"
+    >
       {(icon ?? action) && (
-        <div className="flex items-center justify-between gap-3 ">
+        <div className="flex items-center justify-between gap-3">
           {icon}
           {action}
         </div>
