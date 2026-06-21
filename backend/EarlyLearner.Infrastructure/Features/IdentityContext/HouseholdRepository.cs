@@ -1,5 +1,7 @@
 using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.Entities;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,20 +42,20 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Household?> GetAsync(Guid householdId, CancellationToken cancellationToken)
+    public Task<Household?> GetAsync(HouseholdId householdId, CancellationToken cancellationToken)
     {
         return db.Households
-            .Include(household => household.Carers)
-            .ThenInclude(carer => carer.User)
+            .AsSplitQuery()
+            .Include(household => household.Carers).ThenInclude(carer => carer.User)
             .Include(household => household.Children)
-            .SingleOrDefaultAsync(item => item.Id.Value == householdId, cancellationToken);
+            .SingleOrDefaultAsync(item => item.Id == householdId, cancellationToken);
     }
 
-    public async Task<HouseholdResponse?> GetResponseAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<HouseholdResponse?> GetResponseAsync(HouseholdId id, CancellationToken cancellationToken)
     {
         return await db.Households
             .AsNoTracking()
-            .Where(item => item.Id.Value == householdId)
+            .Where(item => item.Id == id)
             .Select(item => new HouseholdResponse(
                 item.Id.Value,
                 item.Name,

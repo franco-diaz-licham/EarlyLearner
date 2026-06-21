@@ -5,10 +5,22 @@ values
     ('11111111-1111-1111-1111-111111111111', 'Demo Household', now())
 on conflict (id) do nothing;
 
-insert into carers (id, household_id, user_id, first_name, last_name, role, created_on)
+insert into users (id, email, external_object_id, external_tenant_id, first_name, last_name, status, created_on)
 values
-    ('22222222-2222-2222-2222-222222222221', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333331', 'Avery', 'Taylor', 'Owner', now()),
-    ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333332', 'Jordan', 'Taylor', 'Caregiver', now())
+    ('33333333-3333-3333-3333-333333333331', 'avery.taylor@example.local', 'demo-external-object-avery-taylor', 'demo-external-tenant', 'Avery', 'Taylor', 'Active', now()),
+    ('33333333-3333-3333-3333-333333333332', 'jordan.taylor@example.local', 'demo-external-object-jordan-taylor', 'demo-external-tenant', 'Jordan', 'Taylor', 'Active', now())
+on conflict (id) do update set
+    email = excluded.email,
+    external_object_id = excluded.external_object_id,
+    external_tenant_id = excluded.external_tenant_id,
+    first_name = excluded.first_name,
+    last_name = excluded.last_name,
+    status = excluded.status;
+
+insert into carers (id, household_id, user_id, role, created_on)
+values
+    ('22222222-2222-2222-2222-222222222221', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333331', 'Owner', now()),
+    ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333332', 'Caregiver', now())
 on conflict (id) do nothing;
 
 insert into children (id, household_id, given_name, date_of_birth, is_archived, created_on)

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EarlyLearner.Infrastructure.Persistence;
 
-public sealed class EfUnitOfWork(DatabaseContext db) : IUnitOfWork
+public sealed class UnitOfWork(DatabaseContext db) : IUnitOfWork
 {
     private IDbContextTransaction? transaction;
 

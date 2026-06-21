@@ -22,6 +22,12 @@ public sealed class UserConfig : IEntityTypeConfiguration<User>
             .HasMaxLength(320)
             .IsRequired();
 
+        builder.Property(user => user.ExternalObjectId)
+            .IsRequired();
+
+        builder.Property(user => user.ExternalTenantId)
+            .IsRequired();
+
         builder.Property(user => user.FirstName)
             .HasMaxLength(100)
             .IsRequired();

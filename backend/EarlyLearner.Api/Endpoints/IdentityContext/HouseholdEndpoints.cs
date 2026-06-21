@@ -1,6 +1,7 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Domain.IdentityContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -36,7 +37,7 @@ public static class HouseholdEndpoints
     {
         if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await queryService.GetAsync(householdId, cancellationToken);
+        var result = await queryService.GetAsync(new HouseholdId(householdId), cancellationToken);
         return result.ToApiResult();
     }
 

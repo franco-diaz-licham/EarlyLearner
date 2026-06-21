@@ -17,6 +17,16 @@ public sealed class User : Entity<UserId>
         SetCreatedOn();
     }
 
+    /// <summary>
+    /// External identity provider object id. Null while the account is invited but has not completed first sign-in.
+    /// </summary>
+    public string? ExternalObjectId { get; private set; }
+
+    /// <summary>
+    /// Optional external tenant id when the identity provider supplies one.
+    /// </summary>
+    public string? ExternalTenantId { get; private set; }
+
     public string Email { get; private set; } = default!;
     public string FirstName { get; private set; } = default!;
     public string LastName { get; private set; } = default!;

@@ -32,8 +32,8 @@ public interface IHouseholdCommandService
 
 public interface IHouseholdCommandRepository
 {
-    Task<Household?> GetAsync(Guid householdId, CancellationToken cancellationToken);
-    Task<HouseholdResponse?> GetResponseAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Household?> GetAsync(HouseholdId householdId, CancellationToken cancellationToken);
+    Task<HouseholdResponse?> GetResponseAsync(HouseholdId householdId, CancellationToken cancellationToken);
     Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
     void Add(Household household);
@@ -57,28 +57,28 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Household could not be created.", ResultTypeEnum.Invalid);
 
-        var result = await householdRepo.GetResponseAsync(household.Id.Value, cancellationToken);
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after creation.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Created);
     }
 
     public async Task<Result<HouseholdResponse>> UpdateAsync(UpdateHouseholdCommand command, CancellationToken cancellationToken)
     {
-        var household = await householdRepo.GetAsync(command.HouseholdId, cancellationToken);
+        var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         household.Rename(command.Name);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Household could not be updated.", ResultTypeEnum.Invalid);
 
-        var result = await householdRepo.GetResponseAsync(household.Id.Value, cancellationToken);
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after update.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
     public async Task<Result<HouseholdResponse>> AddCarerAsync(AddHouseholdCarerCommand command, CancellationToken cancellationToken)
     {
-        var household = await householdRepo.GetAsync(command.HouseholdId, cancellationToken);
+        var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         var user = await householdRepo.GetUserByEmailAsync(command.Email, cancellationToken);
@@ -91,56 +91,56 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Carer could not be invited.", ResultTypeEnum.Invalid);
 
-        var result = await householdRepo.GetResponseAsync(household.Id.Value, cancellationToken);
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after invite.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
     public async Task<Result<HouseholdResponse>> RemoveCarerAsync(RemoveHouseholdCarerCommand command, CancellationToken cancellationToken)
     {
-        var household = await householdRepo.GetAsync(command.HouseholdId, cancellationToken);
+        var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         household.RemoveCarer(new CarerId(command.CarerId));
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Carer could not be removed.", ResultTypeEnum.Invalid);
 
-        var result = await householdRepo.GetResponseAsync(household.Id.Value, cancellationToken);
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after removing carer.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
     public async Task<Result<HouseholdResponse>> AddChildAsync(AddHouseholdChildCommand command, CancellationToken cancellationToken)
     {
-        var household = await householdRepo.GetAsync(command.HouseholdId, cancellationToken);
+        var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         household.AddChild(command.GivenName, command.DateOfBirth);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Child could not be added.", ResultTypeEnum.Invalid);
 
-        var result = await householdRepo.GetResponseAsync(household.Id.Value, cancellationToken);
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after adding child.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
     public async Task<Result<HouseholdResponse>> RemoveChildAsync(RemoveHouseholdChildCommand command, CancellationToken cancellationToken)
     {
-        var household = await householdRepo.GetAsync(command.HouseholdId, cancellationToken);
+        var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         household.ArchiveChild(new ChildId(command.ChildId));
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Child could not be removed.", ResultTypeEnum.Invalid);
 
-        var result = await householdRepo.GetResponseAsync(household.Id.Value, cancellationToken);
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after removing child.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
     public async Task<Result> DeleteAsync(Guid householdId, CancellationToken cancellationToken)
     {
-        var household = await householdRepo.GetAsync(householdId, cancellationToken);
+        var household = await householdRepo.GetAsync(new HouseholdId(householdId), cancellationToken);
         if (household is null) return Result.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         householdRepo.Remove(household);

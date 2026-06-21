@@ -1,24 +1,26 @@
 using Azure.Storage.Blobs;
 using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Features.CoreContext;
-using EarlyLearner.Application.Features.Dashboard;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Features.LearningContext;
 using EarlyLearner.Application.Features.PlanningContext;
 using EarlyLearner.Application.Features.ReadinessContext;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Configuration.Options;
 using EarlyLearner.Infrastructure.Features.CoreContext;
-using EarlyLearner.Infrastructure.Features.Dashboard;
 using EarlyLearner.Infrastructure.Features.IdentityContext;
 using EarlyLearner.Infrastructure.Features.LearningContext;
 using EarlyLearner.Infrastructure.Features.PlanningContext;
 using EarlyLearner.Infrastructure.Features.ReadinessContext;
 using EarlyLearner.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.Web;
 
 namespace EarlyLearner.Infrastructure.Configuration;
 
@@ -27,11 +29,36 @@ public static class InfraAppServices
     public static void AddAppServices(this IServiceCollection services, IConfiguration config)
     {
         services
+            .AddAzureAdAuthentication(config)
             .AddDbServices(config)
             .AddFileStorageServices(config)
-            .AddApplicationReadServices();
+            .AddRepositoryServices();
     }
 
+    public static IServiceCollection AddAzureAdAuthentication(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<AzureAdOptions>()
+            .Bind(configuration.GetSection(AzureAdOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddMicrosoftIdentityWebApi(
+                jwtOptions => configuration.Bind(AzureAdOptions.SECTION_NAME, jwtOptions),
+                identityOptions => configuration.Bind(AzureAdOptions.SECTION_NAME, identityOptions));
+
+        services.AddAuthorization(options => {
+            var defaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser()
+                .Build();
+
+            options.DefaultPolicy = defaultPolicy;
+            options.FallbackPolicy = defaultPolicy;
+        });
+
+        return services;
+    }
 
     public static IServiceCollection AddDbServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -60,6 +87,29 @@ public static class InfraAppServices
         return services;
     }
 
+    public static IServiceCollection AddRepositoryServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IStoredFileQueryRepository, StoredFileRepository>();
+        services.AddScoped<IStoredFileCommandRepository, StoredFileRepository>();
+        services.AddScoped<IHouseholdQueryRepository, HouseholdRepository>();
+        services.AddScoped<IHouseholdCommandRepository, HouseholdRepository>();
+        services.AddScoped<IUserQueryRepository, UserRepository>();
+        services.AddScoped<IDailyLogQueryRepository, DailyLogRepository>();
+        services.AddScoped<IDailyLogCommandRepository, DailyLogRepository>();
+        services.AddScoped<IGoalQueryRepository, GoalRepository>();
+        services.AddScoped<IGoalCommandRepository, GoalRepository>();
+        services.AddScoped<ILearningPlanQueryRepository, LearningPlanRepository>();
+        services.AddScoped<ILearningPlanCommandRepository, LearningPlanRepository>();
+        services.AddScoped<IReadinessOutcomeQueryRepository, ReadinessOutcomeRepository>();
+        services.AddScoped<IReadinessOutcomeCommandRepository, ReadinessOutcomeRepository>();
+        services.AddScoped<IReadinessProfileQueryRepository, ReadinessProfileRepository>();
+        services.AddScoped<IReadinessProfileCommandRepository, ReadinessProfileRepository>();
+
+        return services;
+    }
+
+
     public static IServiceCollection AddFileStorageServices(this IServiceCollection services, IConfiguration configuration)
     {
         services
@@ -87,46 +137,4 @@ public static class InfraAppServices
         return services;
     }
 
-    public static IServiceCollection AddApplicationReadServices(this IServiceCollection services)
-    {
-        services.AddScoped<IGetHomeDashboardQueryHandler, EfGetHomeDashboardQueryHandler>();
-        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        services.AddScoped<IHouseholdQueryService, HouseholdQueryService>();
-        services.AddScoped<IHouseholdCommandService, HouseholdCommandService>();
-        services.AddScoped<HouseholdRepository>();
-        services.AddScoped<IHouseholdQueryRepository>(sp => sp.GetRequiredService<HouseholdRepository>());
-        services.AddScoped<IHouseholdCommandRepository>(sp => sp.GetRequiredService<HouseholdRepository>());
-        services.AddScoped<IStoredFileQueryService, StoredFileQueryService>();
-        services.AddScoped<IStoredFileCommandService, StoredFileCommandService>();
-        services.AddScoped<StoredFileRepository>();
-        services.AddScoped<IStoredFileQueryRepository>(sp => sp.GetRequiredService<StoredFileRepository>());
-        services.AddScoped<IStoredFileCommandRepository>(sp => sp.GetRequiredService<StoredFileRepository>());
-        services.AddScoped<IReadinessOutcomeQueryService, ReadinessOutcomeQueryService>();
-        services.AddScoped<IReadinessOutcomeCommandService, ReadinessOutcomeCommandService>();
-        services.AddScoped<ReadinessOutcomeRepository>();
-        services.AddScoped<IReadinessOutcomeQueryRepository>(sp => sp.GetRequiredService<ReadinessOutcomeRepository>());
-        services.AddScoped<IReadinessOutcomeCommandRepository>(sp => sp.GetRequiredService<ReadinessOutcomeRepository>());
-        services.AddScoped<IReadinessProfileQueryService, ReadinessProfileQueryService>();
-        services.AddScoped<IReadinessProfileCommandService, ReadinessProfileCommandService>();
-        services.AddScoped<ReadinessProfileRepository>();
-        services.AddScoped<IReadinessProfileQueryRepository>(sp => sp.GetRequiredService<ReadinessProfileRepository>());
-        services.AddScoped<IReadinessProfileCommandRepository>(sp => sp.GetRequiredService<ReadinessProfileRepository>());
-        services.AddScoped<IGoalQueryService, GoalQueryService>();
-        services.AddScoped<IGoalCommandService, GoalCommandService>();
-        services.AddScoped<GoalRepository>();
-        services.AddScoped<IGoalQueryRepository>(sp => sp.GetRequiredService<GoalRepository>());
-        services.AddScoped<IGoalCommandRepository>(sp => sp.GetRequiredService<GoalRepository>());
-        services.AddScoped<ILearningPlanQueryService, LearningPlanQueryService>();
-        services.AddScoped<ILearningPlanCommandService, LearningPlanCommandService>();
-        services.AddScoped<LearningPlanRepository>();
-        services.AddScoped<ILearningPlanQueryRepository>(sp => sp.GetRequiredService<LearningPlanRepository>());
-        services.AddScoped<ILearningPlanCommandRepository>(sp => sp.GetRequiredService<LearningPlanRepository>());
-        services.AddScoped<IDailyLogQueryService, DailyLogQueryService>();
-        services.AddScoped<IDailyLogCommandService, DailyLogCommandService>();
-        services.AddScoped<DailyLogRepository>();
-        services.AddScoped<IDailyLogQueryRepository>(sp => sp.GetRequiredService<DailyLogRepository>());
-        services.AddScoped<IDailyLogCommandRepository>(sp => sp.GetRequiredService<DailyLogRepository>());
-
-        return services;
-    }
 }

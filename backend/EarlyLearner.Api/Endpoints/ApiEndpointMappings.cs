@@ -10,6 +10,7 @@ public static class ApiEndpointMappings
         endpoints.MapGet(pattern: "/health", handler: () => Results.Ok(new ApiResponse(StatusCodes.Status200OK, "Healthy")))
             .WithName(endpointName: "HealthCheck")
             .WithTags(tags: "Health")
+            .AllowAnonymous()
             .Produces<ApiResponse>(StatusCodes.Status200OK);
 
         var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");

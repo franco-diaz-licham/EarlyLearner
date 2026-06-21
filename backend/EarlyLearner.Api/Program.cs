@@ -27,6 +27,9 @@ try {
     app.UseHttpsRedirection();
     app.UseCors(corsOptions.PolicyName);
     app.UseMiddleware<ExceptionMiddleware>();
+    app.UseAuthentication();
+    app.UseMiddleware<UserClaimsMiddleware>();
+    app.UseAuthorization();
     app.MapApiEndpoints();
     await app.Services.ConfigureApp();
     await app.RunAsync();

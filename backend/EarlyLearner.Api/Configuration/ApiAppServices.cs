@@ -1,5 +1,13 @@
 using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Api.Endpoints;
+using EarlyLearner.Application.Features.CoreContext;
+using EarlyLearner.Application.Features.Dashboard;
+using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Application.Features.LearningContext;
+using EarlyLearner.Application.Features.PlanningContext;
+using EarlyLearner.Application.Features.ReadinessContext;
+using EarlyLearner.Application.Ports;
+using EarlyLearner.Infrastructure.Features.Dashboard;
 using EarlyLearner.Infrastructure.Configuration.Options;
 using FluentValidation;
 using Microsoft.OpenApi;
@@ -15,12 +23,10 @@ public static class ApiAppServices
         builder.Services.AddSwaggerServices();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddPermissionAuthorization();
         builder.Services.AddRequestValidators();
 
         builder.Services
             .AddUseCaseServices()
-            .AddRepositoryServices()
             .AddPortServices()
             .AddCorsPolicy(builder.Configuration)
             .AddApiMessagingServices(builder.Configuration);
@@ -54,12 +60,6 @@ public static class ApiAppServices
     }
 
     private static IServiceCollection AddApiMessagingServices(this IServiceCollection services, IConfiguration configuration)
-    {
-
-        return services;
-    }
-
-    public static IServiceCollection AddPermissionAuthorization(this IServiceCollection services)
     {
 
         return services;
@@ -111,19 +111,30 @@ public static class ApiAppServices
 
     public static IServiceCollection AddUseCaseServices(this IServiceCollection services)
     {
-
-
-        return services;
-    }
-
-    public static IServiceCollection AddRepositoryServices(this IServiceCollection services)
-    {
+        services.AddScoped<IGetHomeDashboardQueryHandler, EfGetHomeDashboardQueryHandler>();
+        services.AddScoped<IStoredFileQueryService, StoredFileQueryService>();
+        services.AddScoped<IStoredFileCommandService, StoredFileCommandService>();
+        services.AddScoped<IHouseholdQueryService, HouseholdQueryService>();
+        services.AddScoped<IHouseholdCommandService, HouseholdCommandService>();
+        services.AddScoped<IUserQueryService, UserQueryService>();
+        services.AddScoped<IDailyLogQueryService, DailyLogQueryService>();
+        services.AddScoped<IDailyLogCommandService, DailyLogCommandService>();
+        services.AddScoped<IGoalQueryService, GoalQueryService>();
+        services.AddScoped<IGoalCommandService, GoalCommandService>();
+        services.AddScoped<ILearningPlanQueryService, LearningPlanQueryService>();
+        services.AddScoped<ILearningPlanCommandService, LearningPlanCommandService>();
+        services.AddScoped<IReadinessOutcomeQueryService, ReadinessOutcomeQueryService>();
+        services.AddScoped<IReadinessOutcomeCommandService, ReadinessOutcomeCommandService>();
+        services.AddScoped<IReadinessProfileQueryService, ReadinessProfileQueryService>();
+        services.AddScoped<IReadinessProfileCommandService, ReadinessProfileCommandService>();
 
         return services;
     }
 
     public static IServiceCollection AddPortServices(this IServiceCollection services)
     {
+        services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
+        services.AddScoped<ICachingService, MemoryCachingService>();
 
         return services;
     }
