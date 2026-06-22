@@ -1,64 +1,30 @@
-import { BrowserAuthError, InteractionRequiredAuthError, PublicClientApplication } from '@azure/msal-browser';
-import { msalConfig } from '../config/authConfig';
+import { BrowserAuthError, InteractionRequiredAuthError, PublicClientApplication, type IPublicClientApplication } from '@azure/msal-browser';
 import { appConfig } from '../../../shared/config/appConfig';
 import type { AuthAccount, AuthRedirectResult } from '../types/auth.types';
+import { msalConfig, type AuthConnector, type MsalAuthRequest, type MsalTokenOptions } from '../types/msal.types';
+import { toAuthAccount } from '../mappers/auth.mapper';
 
-interface TokenOptions {
-  allowRedirect: boolean;
-  beforeRedirect: () => void;
-}
-
-interface AuthRequest {
-  scopes: string[];
-  prompt?: string;
-}
-
-const authRequest: AuthRequest = {
+/**
+ * Microsoft request for forcing users to select an account.
+ * This is important since many users have microsoft logins already.
+ */
+const loginRequest: MsalAuthRequest = {
   scopes: [appConfig.entraApiScope].filter(Boolean),
   prompt: 'select_account'
 };
 
-interface MsalAccount {
-  homeAccountId: string;
-  environment: string;
-  tenantId: string;
-  localAccountId: string;
-  name?: string;
-  username: string;
-}
-
-interface MsalAuthResult {
-  accessToken: string;
-  account: MsalAccount;
-}
-
-export interface MsalClient {
-  initialize: () => Promise<void>;
-  handleRedirectPromise: () => Promise<MsalAuthResult | null>;
-  getActiveAccount: () => MsalAccount | null;
-  getAllAccounts: () => MsalAccount[];
-  setActiveAccount: (account: MsalAccount | null) => void;
-  loginRedirect: (request: AuthRequest & { redirectStartPage?: string }) => Promise<void>;
-  logoutRedirect: (request: { account?: MsalAccount }) => Promise<void>;
-  acquireTokenSilent: (request: AuthRequest & { account: MsalAccount }) => Promise<MsalAuthResult>;
-  acquireTokenRedirect: (request: AuthRequest) => Promise<void>;
-}
-
-let msalInstance: MsalClient | null = null;
-
-const getMsalInstance = (): MsalClient => {
-  if (msalInstance === null) throw new Error('Authentication has not been initialised.');
-  return msalInstance;
+/** Allow users to create an new account. */
+const createAccountRequest: MsalAuthRequest = {
+  scopes: [appConfig.entraApiScope].filter(Boolean),
+  prompt: 'create'
 };
 
-const toAuthAccount = (account: MsalAccount | null): AuthAccount | null => {
-  if (!account) return null;
+/** Memoise the configured client at the module level so that the same instance survives the entirity of the app. */
+let msalInstance: IPublicClientApplication | null = null;
 
-  return {
-    id: account.homeAccountId,
-    name: account.name,
-    username: account.username
-  };
+const getMsalInstance = (): IPublicClientApplication => {
+  if (msalInstance === null) throw new Error('Authentication has not been initialised.');
+  return msalInstance;
 };
 
 const getAuthErrorText = (err: unknown): string => {
@@ -69,19 +35,12 @@ const getAuthErrorText = (err: unknown): string => {
   return [payload.name, payload.errorCode, payload.errorMessage, payload.message].filter((value): value is string => typeof value === 'string').join(' ');
 };
 
-const syncFirstAccountAsActive = () => {
-  const instance = getMsalInstance();
-  if (instance.getActiveAccount()) return;
-
-  const accounts = instance.getAllAccounts();
-  if (accounts.length > 0) instance.setActiveAccount(accounts[0]);
-};
-
-export const authConnector = {
+/** MS authentication flow connector. */
+export const authConnector: AuthConnector = {
   async initialize(): Promise<void> {
     msalInstance ??= new PublicClientApplication(msalConfig);
-    await getMsalInstance().initialize();
-    syncFirstAccountAsActive();
+    const instance = getMsalInstance();
+    await instance.initialize();
   },
 
   async handleRedirect(): Promise<AuthRedirectResult | null> {
@@ -94,37 +53,42 @@ export const authConnector = {
   },
 
   getCurrentAccount(): AuthAccount | null {
-    syncFirstAccountAsActive();
-    return toAuthAccount(getMsalInstance().getActiveAccount());
+    const instance = getMsalInstance();
+    return toAuthAccount(instance.getActiveAccount());
   },
 
   login(): Promise<void> {
     const instance = getMsalInstance();
     instance.setActiveAccount(null);
-    return instance.loginRedirect({ ...authRequest, redirectStartPage: '/' });
+    return instance.loginRedirect({ ...loginRequest, redirectStartPage: '/' });
+  },
+
+  createAccount(): Promise<void> {
+    const instance = getMsalInstance();
+    instance.setActiveAccount(null);
+    return instance.loginRedirect({ ...createAccountRequest, redirectStartPage: '/' });
   },
 
   logout(): Promise<void> {
     const instance = getMsalInstance();
-    return instance.logoutRedirect({ account: instance.getActiveAccount() ?? undefined });
+    return instance.logoutRedirect({ account: instance.getActiveAccount() ?? undefined, postLogoutRedirectUri: '/' });
   },
 
-  async getToken({ allowRedirect, beforeRedirect }: TokenOptions): Promise<string | null> {
-    syncFirstAccountAsActive();
+  async getAccessToken({ allowRedirect, beforeRedirect }: MsalTokenOptions): Promise<string | null> {
     const instance = getMsalInstance();
     const account = instance.getActiveAccount();
     if (!account) return null;
 
     try {
       const result = await instance.acquireTokenSilent({
-        ...authRequest,
+        ...loginRequest,
         account
       });
       return result.accessToken;
     } catch (err) {
       if (err instanceof InteractionRequiredAuthError && allowRedirect) {
         beforeRedirect();
-        await instance.acquireTokenRedirect(authRequest);
+        await instance.acquireTokenRedirect(loginRequest);
       }
 
       return null;

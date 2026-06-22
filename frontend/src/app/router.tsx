@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { LoginPage, RequireAuth } from '../features/auth';
 import { AppShell } from '../shared/layout/AppShell';
 import { HomePage } from '../features/home/pages/HomePage';
 import { HouseholdsPage } from '../features/households/pages/HouseholdsPage';
@@ -8,17 +9,23 @@ import { ReadinessPage } from '../features/readiness/pages/ReadinessPage';
 import { NotFoundPage } from '../shared/pages/NotFoundPage';
 
 export const router = createBrowserRouter([
+  { path: '/login', element: <LoginPage /> },
   {
-    path: '/',
-    element: <AppShell />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <Navigate to="/home" replace /> },
-      { path: 'home', element: <HomePage /> },
-      { path: 'households', element: <HouseholdsPage /> },
-      { path: 'planning', element: <PlanningPage /> },
-      { path: 'readiness', element: <ReadinessPage /> },
-      { path: 'learning', element: <LearningPage /> },
-      { path: '*', element: <NotFoundPage /> }
+      {
+        path: '/',
+        element: <AppShell />,
+        children: [
+          { index: true, element: <Navigate to="/home" replace /> },
+          { path: 'home', element: <HomePage /> },
+          { path: 'households', element: <HouseholdsPage /> },
+          { path: 'planning', element: <PlanningPage /> },
+          { path: 'readiness', element: <ReadinessPage /> },
+          { path: 'learning', element: <LearningPage /> },
+          { path: '*', element: <NotFoundPage /> }
+        ]
+      }
     ]
   }
 ]);

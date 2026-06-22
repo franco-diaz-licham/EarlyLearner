@@ -11,7 +11,11 @@ const navigationItems = [
   { label: 'Learning', path: '/learning' }
 ] as const;
 
-export const AppTopBar = () => (
+interface AppTopBarProps {
+  onLogout?: () => void;
+}
+
+export const AppTopBar = ({ onLogout }: AppTopBarProps) => (
   <header className="flex min-h-16 items-center justify-between gap-4 rounded-md border border-brand-border/70 bg-white/90 px-4 shadow-app-card  sm:px-6">
     <div className="flex min-w-0 items-center gap-2">
       <img src={LightLogo} alt="logo" className="layout-topbar-logo-image" width={30} />
@@ -34,7 +38,7 @@ export const AppTopBar = () => (
     <div className="flex items-center gap-3">
       <AppIconButton aria-label="Search" icon={<UilSearch aria-hidden="true" className="h-5 w-5" />} />
       <AppIconButton aria-label="Notifications" icon={<UilBell aria-hidden="true" className="h-6 w-6" />} />
-      <AppAccountMenu />
+      <AppAccountMenu onLogout={onLogout} />
     </div>
   </header>
 );

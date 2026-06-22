@@ -212,6 +212,16 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(320)")
                         .HasColumnName("email");
 
+                    b.Property<string>("ExternalObjectId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("external_object_id");
+
+                    b.Property<string>("ExternalTenantId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("external_tenant_id");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)

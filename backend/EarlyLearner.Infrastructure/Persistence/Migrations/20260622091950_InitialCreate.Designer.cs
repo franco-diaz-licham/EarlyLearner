@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EarlyLearner.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260620112100_InitialCreate")]
+    [Migration("20260622091950_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -214,6 +214,16 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)")
                         .HasColumnName("email");
+
+                    b.Property<string>("ExternalObjectId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("external_object_id");
+
+                    b.Property<string>("ExternalTenantId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("external_tenant_id");
 
                     b.Property<string>("FirstName")
                         .IsRequired()

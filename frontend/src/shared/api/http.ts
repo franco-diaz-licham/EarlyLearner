@@ -40,8 +40,8 @@ const http: AxiosInstance = axios.create({
   paramsSerializer: { serialize: serializeParams }
 });
 
-http.interceptors.request.use(async config => {
-  const token = await useAuthStore.getState().getToken();
+http.interceptors.request.use(async (config) => {
+  const token = await useAuthStore.getState().getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

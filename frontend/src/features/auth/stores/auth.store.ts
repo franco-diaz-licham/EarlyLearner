@@ -16,8 +16,9 @@ interface AuthState {
   initialiseAuth: () => Promise<AuthStartupResult>;
   syncAccount: () => void;
   login: () => Promise<void>;
+  createAccount: () => Promise<void>;
   logout: () => Promise<void>;
-  getToken: () => Promise<string | null>;
+  getAccessToken: () => Promise<string | null>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -70,6 +71,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  createAccount: async () => {
+    if (get().interactionInProgress) return;
+
+    try {
+      set({ interactionInProgress: true });
+      await authConnector.createAccount();
+    } catch (err) {
+      if (!authConnector.isInteractionInProgressError(err)) throw err;
+    } finally {
+      set({ interactionInProgress: false });
+    }
+  },
+
   logout: async () => {
     if (get().interactionInProgress) return;
 
@@ -83,10 +97,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  getToken: async () => {
+  getAccessToken: async () => {
     if (!get().account) return null;
 
-    return authConnector.getToken({
+    return authConnector.getAccessToken({
       allowRedirect: !get().interactionInProgress,
       beforeRedirect: () => {
         set({ interactionInProgress: true });

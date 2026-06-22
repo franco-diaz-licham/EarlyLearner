@@ -8,7 +8,7 @@ const appDialogPt: DialogPassThroughOptions = {
       'flex h-9 w-9 items-center justify-center rounded-2xl',
       'border border-transparent bg-transparent text-brand-muted transition',
       'hover:border-brand-border hover:bg-brand-surface-muted hover:text-brand-heading',
-      'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary'
+      'focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-brand-primary'
     )
   },
   closeButtonIcon: {
