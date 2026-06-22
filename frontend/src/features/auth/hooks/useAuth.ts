@@ -2,7 +2,6 @@ import { useAuthStore } from '../stores/auth.store';
 
 export const useAuth = () => {
   const account = useAuthStore((state) => state.account);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasInitialised = useAuthStore((state) => state.hasInitialised);
   const interactionInProgress = useAuthStore((state) => state.interactionInProgress);
   const routeToAccessNotEnabled = useAuthStore((state) => state.routeToAccessNotEnabled);
@@ -13,7 +12,7 @@ export const useAuth = () => {
 
   return {
     account,
-    isAuthenticated,
+    isAuthenticated: account !== null,
     isAuthReady: hasInitialised && !interactionInProgress,
     interactionInProgress,
     routeToAccessNotEnabled,

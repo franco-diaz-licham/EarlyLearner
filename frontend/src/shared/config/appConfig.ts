@@ -12,5 +12,6 @@ export const appConfig = {
   apiBaseUrl: `${rootUrl}/api/${apiVersion}`,
   appName: readEnvValue('VITE_APP_NAME', 'EarlyLearner'),
   entraClientId: readEnvValue('VITE_ENTRA_CLIENT_ID'),
-  entraApiScope: readEnvValue('VITE_ENTRA_API_SCOPE')
+  entraApiScope: readEnvValue('VITE_ENTRA_API_SCOPE'),
+  entraAuthority: readEnvValue('VITE_ENTRA_AUTHORITY')
 } as const;

@@ -37,6 +37,7 @@ export interface MsalAuthResult {
 export const msalConfig: Configuration = {
   auth: {
     clientId: appConfig.entraClientId,
+    authority: appConfig.entraAuthority,
     redirectUri: window.location.origin,
     postLogoutRedirectUri: window.location.origin
   },
@@ -82,7 +83,7 @@ export interface AuthConnector {
    * Clears the active account first so MSAL prompts the user to choose which
    * account to use instead of silently reusing a previous active account.
    */
-  login: () => Promise<void>;
+  login: (redirectStartPage?: string) => Promise<void>;
 
   /**
    * Starts the Microsoft account creation redirect flow.
@@ -90,7 +91,7 @@ export interface AuthConnector {
    * Uses the Microsoft identity platform `prompt: 'create'` hint. Account creation
    * only works when the configured tenant/application supports self-service sign-up.
    */
-  createAccount: () => Promise<void>;
+  createAccount: (redirectStartPage?: string) => Promise<void>;
 
   /**
    * Starts the Microsoft logout redirect flow for the active account.

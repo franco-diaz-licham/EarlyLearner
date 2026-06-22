@@ -21,14 +21,15 @@ export const LoginPage = () => {
     document.title = 'Sign in | EarlyLearner';
   }, [isAuthenticated]);
 
+  // On successful redirect from MS, we will navigate the user from where they came from.
   if (isAuthenticated) return <Navigate to={returnTo} replace />;
 
   const handleLogin = () => {
-    void login();
+    void login(returnTo);
   };
 
   const handleCreateAccount = () => {
-    void createAccount();
+    void createAccount(returnTo);
   };
 
   return (

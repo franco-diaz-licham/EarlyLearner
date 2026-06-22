@@ -57,16 +57,16 @@ export const authConnector: AuthConnector = {
     return toAuthAccount(instance.getActiveAccount());
   },
 
-  login(): Promise<void> {
+  login(redirectStartPage = window.location.href): Promise<void> {
     const instance = getMsalInstance();
     instance.setActiveAccount(null);
-    return instance.loginRedirect({ ...loginRequest, redirectStartPage: '/' });
+    return instance.loginRedirect({ ...loginRequest, redirectStartPage });
   },
 
-  createAccount(): Promise<void> {
+  createAccount(redirectStartPage = window.location.href): Promise<void> {
     const instance = getMsalInstance();
     instance.setActiveAccount(null);
-    return instance.loginRedirect({ ...createAccountRequest, redirectStartPage: '/' });
+    return instance.loginRedirect({ ...createAccountRequest, redirectStartPage });
   },
 
   logout(): Promise<void> {

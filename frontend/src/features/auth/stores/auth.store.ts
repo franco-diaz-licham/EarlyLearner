@@ -1,22 +1,16 @@
 import { create } from 'zustand';
 import { authConnector } from '../services/authConnector';
-import type { AuthAccount, AuthRedirectResult } from '../types/auth.types';
-
-interface AuthStartupResult {
-  redirectResult: AuthRedirectResult | null;
-  routeToAccessNotEnabled: boolean;
-}
+import type { AuthAccount } from '../types/auth.types';
 
 interface AuthState {
   account: AuthAccount | null;
   hasInitialised: boolean;
   interactionInProgress: boolean;
   routeToAccessNotEnabled: boolean;
-  isAuthenticated: boolean;
-  initialiseAuth: () => Promise<AuthStartupResult>;
+  initialiseAuth: () => Promise<void>;
   syncAccount: () => void;
-  login: () => Promise<void>;
-  createAccount: () => Promise<void>;
+  login: (redirectStartPage?: string) => Promise<void>;
+  createAccount: (redirectStartPage?: string) => Promise<void>;
   logout: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
 }
@@ -26,9 +20,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   hasInitialised: false,
   interactionInProgress: false,
   routeToAccessNotEnabled: false,
-  get isAuthenticated() {
-    return get().account !== null;
-  },
 
   syncAccount: () => {
     set({ account: authConnector.getCurrentAccount() });
@@ -37,12 +28,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialiseAuth: async () => {
     set({ interactionInProgress: true });
 
-    let redirectResult: AuthRedirectResult | null = null;
     let routeToAccessNotEnabled = false;
 
     try {
       await authConnector.initialize();
-      redirectResult = await authConnector.handleRedirect();
+      await authConnector.handleRedirect();
     } catch (err) {
       if (!authConnector.isUnsupportedTenantAccessError(err)) throw err;
       routeToAccessNotEnabled = true;
@@ -54,16 +44,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         routeToAccessNotEnabled
       });
     }
-
-    return { redirectResult, routeToAccessNotEnabled };
   },
 
-  login: async () => {
+  login: async (redirectStartPage) => {
     if (get().interactionInProgress) return;
 
     try {
       set({ interactionInProgress: true });
-      await authConnector.login();
+      await authConnector.login(redirectStartPage);
     } catch (err) {
       if (!authConnector.isInteractionInProgressError(err)) throw err;
     } finally {
@@ -71,12 +59,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  createAccount: async () => {
+  createAccount: async (redirectStartPage) => {
     if (get().interactionInProgress) return;
 
     try {
       set({ interactionInProgress: true });
-      await authConnector.createAccount();
+      await authConnector.createAccount(redirectStartPage);
     } catch (err) {
       if (!authConnector.isInteractionInProgressError(err)) throw err;
     } finally {
