@@ -3,4 +3,5 @@
   <Project Path="EarlyLearner.Application/EarlyLearner.Application.csproj" Id="b6ea0fe3-e5d7-4268-9561-e61bca006b62" />
   <Project Path="EarlyLearner.Domain/EarlyLearner.Domain.csproj" Id="27959372-e602-4781-b65e-96623167b4d6" />
   <Project Path="EarlyLearner.Infrastructure/EarlyLearner.Infrastructure.csproj" Id="cef60898-d162-4816-a581-ff014ffdd563" />
+  <Project Path="EarlyLearner.Worker/EarlyLearner.Worker.csproj" Id="6ad6b412-d8c5-4d13-b80c-d1fe6b11e508" />
 </Solution>

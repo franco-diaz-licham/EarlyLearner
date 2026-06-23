@@ -11,6 +11,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Household> Households => Set<Household>();
+    public DbSet<HouseholdInvitation> HouseholdInvitations => Set<HouseholdInvitation>();
     public DbSet<Carer> Carers => Set<Carer>();
     public DbSet<Child> Children => Set<Child>();
     public DbSet<StoredFile> StoredFiles => Set<StoredFile>();

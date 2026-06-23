@@ -12,7 +12,9 @@ using EarlyLearner.Infrastructure.Features.IdentityContext;
 using EarlyLearner.Infrastructure.Features.LearningContext;
 using EarlyLearner.Infrastructure.Features.PlanningContext;
 using EarlyLearner.Infrastructure.Features.ReadinessContext;
+using EarlyLearner.Infrastructure.Messaging;
 using EarlyLearner.Infrastructure.Persistence;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -138,4 +140,46 @@ public static class InfraAppServices
         return services;
     }
 
+    private static IServiceCollection AddApiMessagingServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<BusObserver>();
+        services
+            .AddOptions<RabbitMqOptions>()
+            .Bind(configuration.GetSection(RabbitMqOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+
+        services.AddMassTransit(configurator => {
+            configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(MessagingConstants.EndpointPrefix, includeNamespace: false));
+            configurator.AddEntityFrameworkOutbox<DatabaseContext>(outboxConfigurator => {
+                outboxConfigurator.UsePostgres();
+                outboxConfigurator.UseBusOutbox();
+            });
+            configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor));
+            configurator.AddConfigureEndpointsCallback((context, _, endpointConfigurator) => {
+                endpointConfigurator.UseEntityFrameworkOutbox<DatabaseContext>(context);
+            });
+
+            configurator.UsingRabbitMq((context, busFactoryConfigurator) => {
+                var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+                busFactoryConfigurator.Host(new Uri(options.HostUri), hostConfigurator => {
+                    hostConfigurator.Username(options.Username);
+                    hostConfigurator.Password(options.Password);
+                });
+                busFactoryConfigurator.PrefetchCount = options.PrefetchCount ?? 1;
+                busFactoryConfigurator.ConcurrentMessageLimit = options.ConcurrentMessageLimit ?? 1;
+                busFactoryConfigurator.UseMessageRetry(retryConfigurator => retryConfigurator.None());
+                busFactoryConfigurator.UseTimeout(timeoutConfigurator => {
+                    timeoutConfigurator.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds ?? 60);
+                });
+                busFactoryConfigurator.ConnectBusObserver(context.GetRequiredService<BusObserver>());
+                busFactoryConfigurator.ConfigureEndpoints(context);
+            });
+        });
+
+        return services;
+    }
 }
