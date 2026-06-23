@@ -38,6 +38,19 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         child.FirstName,
                         string.Empty,
                         child.DateOfBirth))
+                    .ToList(),
+                household.Invitations
+                    .OrderByDescending(invitation => invitation.InvitedAt)
+                    .Select(invitation => new HouseholdInvitationResponse(
+                        invitation.Id.Value,
+                        invitation.Email,
+                        invitation.FirstName,
+                        invitation.LastName,
+                        (int)invitation.Role,
+                        invitation.Role.ToString(),
+                        invitation.Status.ToString(),
+                        invitation.InvitedAt,
+                        invitation.ExpiresAt))
                     .ToList()))
             .ToListAsync(cancellationToken);
     }
@@ -48,6 +61,7 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
             .AsSplitQuery()
             .Include(household => household.Carers).ThenInclude(carer => carer.User)
             .Include(household => household.Children)
+            .Include(household => household.Invitations)
             .SingleOrDefaultAsync(item => item.Id == householdId, cancellationToken);
     }
 
@@ -80,6 +94,19 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         child.FirstName,
                         string.Empty,
                         child.DateOfBirth))
+                    .ToList(),
+                item.Invitations
+                    .OrderByDescending(invitation => invitation.InvitedAt)
+                    .Select(invitation => new HouseholdInvitationResponse(
+                        invitation.Id.Value,
+                        invitation.Email,
+                        invitation.FirstName,
+                        invitation.LastName,
+                        (int)invitation.Role,
+                        invitation.Role.ToString(),
+                        invitation.Status.ToString(),
+                        invitation.InvitedAt,
+                        invitation.ExpiresAt))
                     .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
     }

@@ -28,13 +28,13 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         if (string.IsNullOrWhiteSpace(identity.Email)) return Result<UserModel>.Fail("Email is required.", ResultTypeEnum.Unauthorized);
 
         var user = await userRepo.GetByExternalIdentityAsync(identity.ExternalObjectId, identity.ExternalTenantId, cancellationToken);
-        await UpsertUser(user, identity, cancellationToken);
-        if (user!.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
+        user = await UpsertUser(user, identity, cancellationToken);
+        if (user.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
 
         var membership = await userRepo.GetMembershipAsync(user.Id, cancellationToken);
         if (membership is null) {
             var householdName = $"{identity.FirstName}'s household";
-            var household = Household.Create(householdName, user.Id, identity.FirstName, identity.LastName);
+            var household = Household.Create(householdName, user.Id);
             userRepo.AddHousehold(household);
             membership = (household.Id, null);
         }
@@ -43,7 +43,7 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         return Result<UserModel>.Success(Map(user, membership.Value.HouseholdId, membership.Value.CarerId), ResultTypeEnum.Success);
     }
 
-    private async Task UpsertUser(User? user, ExternalUserIdentity identity, CancellationToken cancellationToken)
+    private async Task<User> UpsertUser(User? user, ExternalUserIdentity identity, CancellationToken cancellationToken)
     {
         if (user is null) {
             user = await userRepo.GetByEmailAsync(identity.Email, cancellationToken);
@@ -57,6 +57,8 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         } else {
             user.UpdateProfile(identity.Email, identity.FirstName, identity.LastName);
         }
+
+        return user;
     }
 
     private static UserModel Map(User user, HouseholdId householdId, CarerId? carerId)

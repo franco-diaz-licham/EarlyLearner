@@ -32,8 +32,14 @@ public sealed class HouseholdConfig : IEntityTypeConfiguration<Household>
             .HasForeignKey(child => child.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(household => household.Invitations)
+            .WithOne(invitation => invitation.Household)
+            .HasForeignKey(invitation => invitation.HouseholdId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Navigation(household => household.Carers).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(household => household.Children).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(household => household.Invitations).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Ignore(household => household.DomainEvents);
     }

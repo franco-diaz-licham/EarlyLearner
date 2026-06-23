@@ -11,6 +11,7 @@ public sealed class Household : Entity<HouseholdId>
 {
     private readonly List<Carer> _carers = [];
     private readonly List<Child> _children = [];
+    private readonly List<HouseholdInvitation> _invitations = [];
 
     private Household() { }
 
@@ -38,9 +39,14 @@ public sealed class Household : Entity<HouseholdId>
     /// </summary>
     public IReadOnlyCollection<Child> Children => _children.AsReadOnly();
 
+    /// <summary>
+    /// Invitations for people who have been asked to join the household.
+    /// </summary>
+    public IReadOnlyCollection<HouseholdInvitation> Invitations => _invitations.AsReadOnly();
+
     #endregion
 
-    public static Household Create(string name, UserId ownerUserId, string ownerFirstName, string ownerLastName)
+    public static Household Create(string name, UserId ownerUserId)
     {
         var household = new Household(new HouseholdId(Guid.NewGuid()), name);
         var owner = new Carer(new CarerId(Guid.NewGuid()), household.Id, ownerUserId, HouseholdRoleEnum.Owner);
@@ -60,6 +66,50 @@ public sealed class Household : Entity<HouseholdId>
         var carer = new Carer(new CarerId(Guid.NewGuid()), Id, userId, role);
         _carers.Add(carer);
         SetUpdatedOn();
+    }
+
+    public HouseholdInvitation InviteCarer(string email, string firstName, string lastName, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
+    {
+        var normalizedEmail = Required(email, nameof(email)).ToLowerInvariant();
+        var existingInvitation = _invitations
+            .Where(invitation => invitation.Email == normalizedEmail)
+            .OrderByDescending(invitation => invitation.InvitedAt)
+            .FirstOrDefault();
+
+        if (existingInvitation is not null && existingInvitation.Status == HouseholdInvitationStatusEnum.Pending) {
+            existingInvitation.Resend(expiresAt);
+            RaiseInvitationEvent(existingInvitation);
+            SetUpdatedOn();
+            return existingInvitation;
+        }
+
+        var invitation = new HouseholdInvitation(
+            new HouseholdInvitationId(Guid.NewGuid()),
+            Id,
+            normalizedEmail,
+            firstName,
+            lastName,
+            role,
+            invitedByUserId,
+            expiresAt);
+
+        _invitations.Add(invitation);
+        RaiseInvitationEvent(invitation);
+        SetUpdatedOn();
+        return invitation;
+    }
+
+    private void RaiseInvitationEvent(HouseholdInvitation invitation)
+    {
+        RaiseDomainEvent(new HouseholdCarerInvited(
+            Id,
+            invitation.Id,
+            Name,
+            invitation.Email,
+            invitation.FirstName,
+            invitation.LastName,
+            invitation.ExpiresAt,
+            DateTimeOffset.UtcNow));
     }
 
     public void RemoveCarer(CarerId carerId)

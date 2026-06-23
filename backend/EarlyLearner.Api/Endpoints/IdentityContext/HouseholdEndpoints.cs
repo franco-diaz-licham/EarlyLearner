@@ -46,13 +46,7 @@ public static class HouseholdEndpoints
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new CreateHouseholdCommand(
-            Name: request.Name,
-            OwnerUserId: Guid.NewGuid(),
-            OwnerFirstName: "Household",
-            OwnerLastName: "Owner");
-
-        var result = await commandService.CreateAsync(command, cancellationToken);
+        var result = await commandService.CreateAsync(request.Name, cancellationToken);
         var locationUrl = result.IsSuccess ? $"/households/{result.Value.Id}" : null;
         return result.ToApiResult(locationUrl);
     }
