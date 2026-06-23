@@ -117,6 +117,7 @@ public static class ApiAppServices
         services.AddScoped<IHouseholdQueryService, HouseholdQueryService>();
         services.AddScoped<IHouseholdCommandService, HouseholdCommandService>();
         services.AddScoped<IUserQueryService, UserQueryService>();
+        services.AddScoped<ICurrentUserProvisioningService, CurrentUserProvisioningService>();
         services.AddScoped<IDailyLogQueryService, DailyLogQueryService>();
         services.AddScoped<IDailyLogCommandService, DailyLogCommandService>();
         services.AddScoped<IGoalQueryService, GoalQueryService>();

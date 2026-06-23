@@ -43,6 +43,28 @@ public sealed class User : Entity<UserId>
         return new User(id, email, firstName, lastName, UserAccountStatusEnum.Active);
     }
 
+    public static User CreateActiveParent(string email, string firstName, string lastName, string externalObjectId, string? externalTenantId)
+    {
+        var user = new User(new UserId(Guid.NewGuid()), email, firstName, lastName, UserAccountStatusEnum.Active);
+        user.LinkExternalIdentity(externalObjectId, externalTenantId);
+        return user;
+    }
+
+    public void LinkExternalIdentity(string externalObjectId, string? externalTenantId)
+    {
+        ExternalObjectId = Required(externalObjectId, nameof(externalObjectId));
+        ExternalTenantId = string.IsNullOrWhiteSpace(externalTenantId) ? null : externalTenantId.Trim();
+        MarkActive();
+    }
+
+    public void UpdateProfile(string email, string firstName, string lastName)
+    {
+        Email = Required(email, nameof(email)).ToLowerInvariant();
+        FirstName = Required(firstName, nameof(firstName));
+        LastName = Required(lastName, nameof(lastName));
+        SetUpdatedOn();
+    }
+
     public void MarkActive()
     {
         Status = UserAccountStatusEnum.Active;

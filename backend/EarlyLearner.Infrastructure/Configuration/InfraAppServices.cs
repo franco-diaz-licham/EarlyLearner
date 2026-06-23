@@ -95,6 +95,7 @@ public static class InfraAppServices
         services.AddScoped<IHouseholdQueryRepository, HouseholdRepository>();
         services.AddScoped<IHouseholdCommandRepository, HouseholdRepository>();
         services.AddScoped<IUserQueryRepository, UserRepository>();
+        services.AddScoped<IUserProvisioningRepository, UserRepository>();
         services.AddScoped<IDailyLogQueryRepository, DailyLogRepository>();
         services.AddScoped<IDailyLogCommandRepository, DailyLogRepository>();
         services.AddScoped<IGoalQueryRepository, GoalRepository>();

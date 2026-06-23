@@ -23,10 +23,10 @@ public sealed class UserConfig : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(user => user.ExternalObjectId)
-            .IsRequired();
+            .HasMaxLength(100);
 
         builder.Property(user => user.ExternalTenantId)
-            .IsRequired();
+            .HasMaxLength(100);
 
         builder.Property(user => user.FirstName)
             .HasMaxLength(100)
@@ -42,6 +42,7 @@ public sealed class UserConfig : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.HasIndex(user => user.Email).IsUnique();
+        builder.HasIndex(user => new { user.ExternalObjectId, user.ExternalTenantId }).IsUnique();
         builder.Ignore(user => user.DisplayName);
         builder.Ignore(user => user.DomainEvents);
     }

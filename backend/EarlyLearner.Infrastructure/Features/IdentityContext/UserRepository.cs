@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.IdentityContext;
 
-public class UserRepository(DatabaseContext db) : IUserQueryRepository
+public class UserRepository(DatabaseContext db) : IUserQueryRepository, IUserProvisioningRepository
 {
     public async Task<User?> GetAsync(UserId userId, CancellationToken cancellationToken)
     {
@@ -21,12 +21,31 @@ public class UserRepository(DatabaseContext db) : IUserQueryRepository
             .SingleOrDefaultAsync(user => user.ExternalObjectId == normalizedObjectId, cancellationToken);
     }
 
+    public Task<User?> GetByExternalIdentityAsync(string externalObjectId, string? externalTenantId, CancellationToken cancellationToken)
+    {
+        var normalizedObjectId = externalObjectId.Trim();
+        var normalizedTenantId = string.IsNullOrWhiteSpace(externalTenantId) ? null : externalTenantId.Trim();
+
+        return db.Users
+            .SingleOrDefaultAsync(user => user.ExternalObjectId == normalizedObjectId && user.ExternalTenantId == normalizedTenantId, cancellationToken);
+    }
+
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
         return db.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(user => user.Email == normalizedEmail, cancellationToken);
+    }
+
+    public void AddUser(User user)
+    {
+        db.Users.Add(user);
+    }
+
+    public void AddHousehold(Household household)
+    {
+        db.Households.Add(household);
     }
 
     public async Task<(HouseholdId HouseholdId, CarerId? CarerId)?> GetMembershipAsync(UserId userId, CancellationToken cancellationToken)
