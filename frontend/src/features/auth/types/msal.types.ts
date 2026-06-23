@@ -5,7 +5,7 @@ import type { AuthAccount } from './auth.types';
 /** Allows us to define a redirect so that we can bring the user back from where they logged in from */
 export interface MsalTokenOptions {
   allowRedirect: boolean;
-  beforeRedirect: () => void;
+  beforeRedirect?: () => void;
 }
 
 /** Allows to determine the type of flow we want the user to udnergo. */
@@ -114,6 +114,15 @@ export interface AuthConnector {
    * @returns The access token when one is available; otherwise `null`.
    */
   getAccessToken: (options: MsalTokenOptions) => Promise<string | null>;
+
+  /**
+   * Ensures the authenticated Microsoft account has a local application session.
+   *
+   * This is called once during app auth initialisation after MSAL has restored or
+   * completed login. The backend may create/update the local user and default
+   * household here.
+   */
+  ensureSession: () => Promise<void>;
 
   /**
    * Checks whether an auth error indicates another MSAL interaction is already running.

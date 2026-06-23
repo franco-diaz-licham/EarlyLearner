@@ -3,6 +3,7 @@ import { appConfig } from '../../../shared/config/appConfig';
 import type { AuthAccount } from '../types/auth.types';
 import { msalConfig, type AuthConnector, type MsalAuthRequest, type MsalTokenOptions } from '../types/msal.types';
 import { toAuthAccount } from '../mappers/auth.mapper';
+import { authService } from './auth.services';
 
 /**
  * Microsoft request for forcing users to select an account.
@@ -84,12 +85,21 @@ export const authConnector: AuthConnector = {
       return result.accessToken;
     } catch (err) {
       if (err instanceof InteractionRequiredAuthError && allowRedirect) {
-        beforeRedirect();
+        beforeRedirect?.();
         await instance.acquireTokenRedirect(loginRequest);
       }
 
       return null;
     }
+  },
+
+  async ensureSession(): Promise<void> {
+    const token = await authConnector.getAccessToken({
+      allowRedirect: false
+    });
+
+    if (!token) return;
+    await authService.ensureSession(token);
   },
 
   isInteractionInProgressError(err: unknown): boolean {

@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authConnector.initialize();
       await authConnector.handleRedirect();
+      if (authConnector.getCurrentAccount()) await authConnector.ensureSession();
     } catch (err) {
       if (!authConnector.isUnsupportedTenantAccessError(err)) throw err;
       routeToAccessNotEnabled = true;

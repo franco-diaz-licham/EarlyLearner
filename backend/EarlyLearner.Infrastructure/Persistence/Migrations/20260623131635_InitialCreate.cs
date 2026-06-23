@@ -50,8 +50,8 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    external_object_id = table.Column<string>(type: "text", nullable: false),
-                    external_tenant_id = table.Column<string>(type: "text", nullable: false),
+                    external_object_id = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    external_tenant_id = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
                     first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
@@ -137,6 +137,42 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_carers_users_user_id",
                         column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "household_invitations",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    household_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
+                    first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    role = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    invited_by_user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    invited_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    expires_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    accepted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    accepted_by_user_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_household_invitations", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_household_invitations_households_household_id",
+                        column: x => x.household_id,
+                        principalTable: "households",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_household_invitations_users_invited_by_user_id",
+                        column: x => x.invited_by_user_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -856,6 +892,16 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 columns: new[] { "household_id", "child_id", "status" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_household_invitations_household_id_email_status",
+                table: "household_invitations",
+                columns: new[] { "household_id", "email", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_household_invitations_invited_by_user_id",
+                table: "household_invitations",
+                column: "invited_by_user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_learning_plans_child_id",
                 table: "learning_plans",
                 column: "child_id");
@@ -994,6 +1040,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 table: "users",
                 column: "email",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_users_external_object_id_external_tenant_id",
+                table: "users",
+                columns: new[] { "external_object_id", "external_tenant_id" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -1016,6 +1068,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "goal_readiness_outcomes");
+
+            migrationBuilder.DropTable(
+                name: "household_invitations");
 
             migrationBuilder.DropTable(
                 name: "observation_readiness_outcomes");
@@ -1045,13 +1100,13 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 name: "suggested_next_steps");
 
             migrationBuilder.DropTable(
-                name: "users");
-
-            migrationBuilder.DropTable(
                 name: "completed_activities");
 
             migrationBuilder.DropTable(
                 name: "readiness_outcome_progresses");
+
+            migrationBuilder.DropTable(
+                name: "users");
 
             migrationBuilder.DropTable(
                 name: "observations");

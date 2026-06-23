@@ -11,10 +11,16 @@ namespace EarlyLearner.Api.Configuration;
 public sealed class UserClaimsMiddleware(RequestDelegate next)
 {
     private static readonly TimeSpan ClaimsCacheTtl = TimeSpan.FromMinutes(5);
+    private const string IdentitySessionPath = "/api/v1/identity/session";
 
     public async Task Invoke(HttpContext context, ICurrentUserProvisioningService userProvisioningService, ICachingService cache, ILogger<UserClaimsMiddleware> logger)
     {
         if (context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null) {
+            await next(context);
+            return;
+        }
+
+        if (IsIdentitySessionEndpoint(context)) {
             await next(context);
             return;
         }
@@ -24,7 +30,7 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
             return;
         }
 
-        var identity = ExtractIdentity(context.User);
+        var identity = ExternalUserIdentityReader.Read(context.User);
         if (identity is null) {
             logger.LogWarning("Authenticated request is missing an external object id claim.");
             await RejectAsync(context, StatusCodes.Status401Unauthorized, "Invalid user.");
@@ -61,60 +67,6 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
         context.User.AddIdentity(new ClaimsIdentity(claims));
     }
 
-    private static string? ExtractObjectId(ClaimsPrincipal principal)
-    {
-        return principal.FindFirstValue("oid")
-            ?? principal.FindFirstValue("http://schemas.microsoft.com/identity/claims/objectidentifier")
-            ?? principal.FindFirstValue(ClaimTypes.NameIdentifier);
-    }
-
-    private static string? ExtractTenantId(ClaimsPrincipal principal)
-    {
-        return principal.FindFirstValue("tid")
-            ?? principal.FindFirstValue("http://schemas.microsoft.com/identity/claims/tenantid");
-    }
-
-    private static ExternalUserIdentity? ExtractIdentity(ClaimsPrincipal principal)
-    {
-        var objectId = ExtractObjectId(principal);
-        var email = ExtractEmail(principal);
-        if (string.IsNullOrWhiteSpace(objectId) || string.IsNullOrWhiteSpace(email)) return null;
-
-        var givenName = principal.FindFirstValue(ClaimTypes.GivenName) ?? principal.FindFirstValue("given_name");
-        var surname = principal.FindFirstValue(ClaimTypes.Surname) ?? principal.FindFirstValue("family_name");
-        var displayName = principal.FindFirstValue("name") ?? principal.Identity?.Name ?? email;
-        var (firstName, lastName) = ResolveName(givenName, surname, displayName, email);
-
-        return new ExternalUserIdentity(objectId, ExtractTenantId(principal), email, firstName, lastName);
-    }
-
-    private static string? ExtractEmail(ClaimsPrincipal principal)
-    {
-        var candidates = new[] {
-            principal.FindFirstValue("preferred_username"),
-            principal.FindFirstValue("upn"),
-            principal.FindFirstValue("email"),
-            principal.FindFirstValue(ClaimTypes.Email),
-            principal.Identity?.Name
-        };
-
-        return candidates.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value) && value.Contains('@'));
-    }
-
-    private static (string FirstName, string LastName) ResolveName(string? givenName, string? surname, string displayName, string email)
-    {
-        if (!string.IsNullOrWhiteSpace(givenName) && !string.IsNullOrWhiteSpace(surname)) return (givenName.Trim(), surname.Trim());
-        if (!string.IsNullOrWhiteSpace(givenName)) return (givenName.Trim(), "User");
-
-        var fallbackName = displayName.Contains('@') ? email.Split('@')[0] : displayName;
-        var parts = fallbackName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return parts.Length switch {
-            0 => ("EarlyLearner", "User"),
-            1 => (parts[0], "User"),
-            _ => (parts[0], string.Join(' ', parts.Skip(1)))
-        };
-    }
-
     private static int GetStatusCode(ResultTypeEnum resultType)
     {
         return resultType switch {
@@ -128,5 +80,11 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
     {
         context.Response.StatusCode = statusCode;
         return context.Response.WriteAsync(message);
+    }
+
+    private static bool IsIdentitySessionEndpoint(HttpContext context)
+    {
+        return context.Request.Method == HttpMethods.Post
+            && context.Request.Path.Equals(IdentitySessionPath, StringComparison.OrdinalIgnoreCase);
     }
 }

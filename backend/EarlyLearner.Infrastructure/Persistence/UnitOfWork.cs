@@ -1,15 +1,35 @@
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Ports;
+using EarlyLearner.Domain.CoreContext;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EarlyLearner.Infrastructure.Persistence;
 
-public sealed class UnitOfWork(DatabaseContext db) : IUnitOfWork
+public sealed class UnitOfWork(DatabaseContext db, IDomainEventDispatcher domainEventDispatcher) : IUnitOfWork
 {
     private IDbContextTransaction? transaction;
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return db.SaveChangesAsync(cancellationToken);
+        var entitiesWithEvents = db.ChangeTracker
+            .Entries<Entity>()
+            .Where(entry => entry.Entity.DomainEvents.Count > 0)
+            .Select(entry => entry.Entity)
+            .ToList();
+
+        var domainEvents = entitiesWithEvents
+            .SelectMany(entity => entity.DomainEvents)
+            .ToList();
+
+        await domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+        var result = await db.SaveChangesAsync(cancellationToken);
+
+        foreach (var entity in entitiesWithEvents) {
+            entity.ClearDomainEvents();
+        }
+
+        return result;
     }
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)

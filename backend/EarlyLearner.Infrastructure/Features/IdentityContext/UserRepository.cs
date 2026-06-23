@@ -33,9 +33,7 @@ public class UserRepository(DatabaseContext db) : IUserQueryRepository, IUserPro
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
-        return db.Users
-            .AsNoTracking()
-            .SingleOrDefaultAsync(user => user.Email == normalizedEmail, cancellationToken);
+        return db.Users.SingleOrDefaultAsync(user => user.Email == normalizedEmail, cancellationToken);
     }
 
     public void AddUser(User user)

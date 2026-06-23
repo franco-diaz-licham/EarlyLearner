@@ -17,12 +17,13 @@ public sealed record ExternalUserIdentity(
 
 public interface ICurrentUserProvisioningService
 {
+    Task<Result<UserModel>> EnsureCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken);
     Task<Result<UserModel>> ResolveCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken);
 }
 
 public sealed class CurrentUserProvisioningService(IUserProvisioningRepository userRepo, IUnitOfWork uow) : ICurrentUserProvisioningService
 {
-    public async Task<Result<UserModel>> ResolveCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken)
+    public async Task<Result<UserModel>> EnsureCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(identity.ExternalObjectId)) return Result<UserModel>.Fail("External object id is required.", ResultTypeEnum.Unauthorized);
         if (string.IsNullOrWhiteSpace(identity.Email)) return Result<UserModel>.Fail("Email is required.", ResultTypeEnum.Unauthorized);
@@ -31,34 +32,55 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         user = await UpsertUser(user, identity, cancellationToken);
         if (user.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
 
-        var membership = await userRepo.GetMembershipAsync(user.Id, cancellationToken);
-        if (membership is null) {
-            var householdName = $"{identity.FirstName}'s household";
-            var household = Household.Create(householdName, user.Id);
-            userRepo.AddHousehold(household);
-            membership = (household.Id, null);
-        }
-
+        var membership = await CreateHousehold(user, identity, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
+        return Result<UserModel>.Success(Map(user, membership.HouseholdId, membership.CarerId), ResultTypeEnum.Success);
+    }
+
+    public async Task<Result<UserModel>> ResolveCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(identity.ExternalObjectId)) return Result<UserModel>.Fail("External object id is required.", ResultTypeEnum.Unauthorized);
+
+        var user = await userRepo.GetByExternalIdentityAsync(identity.ExternalObjectId, identity.ExternalTenantId, cancellationToken);
+        if (user is null) return Result<UserModel>.Fail("User was not found.", ResultTypeEnum.Unauthorized);
+        if (user.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
+
+        var membership = await userRepo.GetMembershipAsync(user.Id, cancellationToken);
+        if (membership is null) return Result<UserModel>.Fail("User household membership was not found.", ResultTypeEnum.Unauthorized);
+
         return Result<UserModel>.Success(Map(user, membership.Value.HouseholdId, membership.Value.CarerId), ResultTypeEnum.Success);
     }
 
     private async Task<User> UpsertUser(User? user, ExternalUserIdentity identity, CancellationToken cancellationToken)
     {
+        if (user is not null) {
+            user.UpdateProfile(identity.Email, identity.FirstName, identity.LastName);
+            return user;
+        }
+
+        user = await userRepo.GetByEmailAsync(identity.Email, cancellationToken);
         if (user is null) {
-            user = await userRepo.GetByEmailAsync(identity.Email, cancellationToken);
-            if (user is null) {
-                user = User.CreateActiveParent(identity.Email, identity.FirstName, identity.LastName, identity.ExternalObjectId, identity.ExternalTenantId);
-                userRepo.AddUser(user);
-            } else {
-                user.LinkExternalIdentity(identity.ExternalObjectId, identity.ExternalTenantId);
-                user.UpdateProfile(identity.Email, identity.FirstName, identity.LastName);
-            }
+            user = User.CreateActiveParent(identity.Email, identity.FirstName, identity.LastName, identity.ExternalObjectId, identity.ExternalTenantId);
+            userRepo.AddUser(user);
         } else {
+            user.LinkExternalIdentity(identity.ExternalObjectId, identity.ExternalTenantId);
             user.UpdateProfile(identity.Email, identity.FirstName, identity.LastName);
         }
 
         return user;
+    }
+
+    private async Task<(HouseholdId HouseholdId, CarerId? CarerId)> CreateHousehold(User user, ExternalUserIdentity identity, CancellationToken cancellationToken)
+    {
+        var membership = await userRepo.GetMembershipAsync(user.Id, cancellationToken);
+        if (membership is null) {
+            var householdName = $"{identity.FirstName}'s household";
+            var household = Household.Create(householdName, user.Id);
+            userRepo.AddHousehold(household);
+            membership = (household.Id, household.Carers.First().Id);
+        }
+
+        return membership.Value;
     }
 
     private static UserModel Map(User user, HouseholdId householdId, CarerId? carerId)

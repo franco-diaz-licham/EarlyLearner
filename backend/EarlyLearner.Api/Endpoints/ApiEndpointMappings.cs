@@ -15,6 +15,7 @@ public static class ApiEndpointMappings
 
         var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");
 
+        api.MapIdentityEndpoints();
         api.MapStoredFileEndpoints();
         api.MapDashboardEndpoints();
         api.MapHouseholdEndpoints();

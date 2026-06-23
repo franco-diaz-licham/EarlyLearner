@@ -3,6 +3,7 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Persistence;
@@ -33,6 +34,9 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DatabaseContext).Assembly);
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
         base.OnModelCreating(modelBuilder);
     }
 }

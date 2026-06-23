@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EarlyLearner.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260622091950_InitialCreate")]
+    [Migration("20260623131635_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -199,6 +199,86 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.ToTable("households", (string)null);
                 });
 
+            modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.HouseholdInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("accepted_at");
+
+                    b.Property<Guid?>("AcceptedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("accepted_by_user_id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("email");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("household_id");
+
+                    b.Property<DateTimeOffset>("InvitedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("invited_at");
+
+                    b.Property<Guid>("InvitedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_by_user_id");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("role");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_household_invitations");
+
+                    b.HasIndex("InvitedByUserId")
+                        .HasDatabaseName("ix_household_invitations_invited_by_user_id");
+
+                    b.HasIndex("HouseholdId", "Email", "Status")
+                        .HasDatabaseName("ix_household_invitations_household_id_email_status");
+
+                    b.ToTable("household_invitations", (string)null);
+                });
+
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -216,13 +296,13 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasColumnName("email");
 
                     b.Property<string>("ExternalObjectId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("external_object_id");
 
                     b.Property<string>("ExternalTenantId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("external_tenant_id");
 
                     b.Property<string>("FirstName")
@@ -253,6 +333,10 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ix_users_email");
+
+                    b.HasIndex("ExternalObjectId", "ExternalTenantId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_external_object_id_external_tenant_id");
 
                     b.ToTable("users", (string)null);
                 });
@@ -1135,6 +1219,27 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.Navigation("Household");
                 });
 
+            modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.HouseholdInvitation", b =>
+                {
+                    b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
+                        .WithMany("Invitations")
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_household_invitations_households_household_id");
+
+                    b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.User", "InvitedByUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_household_invitations_users_invited_by_user_id");
+
+                    b.Navigation("Household");
+
+                    b.Navigation("InvitedByUser");
+                });
+
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.CompletedActivity", b =>
                 {
                     b.HasOne("EarlyLearner.Domain.LearningContext.Entities.DailyLog", "DailyLog")
@@ -1712,6 +1817,8 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.Navigation("Carers");
 
                     b.Navigation("Children");
+
+                    b.Navigation("Invitations");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.DailyLog", b =>

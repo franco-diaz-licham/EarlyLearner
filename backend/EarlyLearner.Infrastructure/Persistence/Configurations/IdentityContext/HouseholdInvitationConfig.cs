@@ -49,6 +49,12 @@ public sealed class HouseholdInvitationConfig : IEntityTypeConfiguration<Househo
             .HasConversion(id => id.Value, value => new UserId(value))
             .IsRequired();
 
+        builder.Property(invitation => invitation.InvitedAt)
+            .IsRequired();
+
+        builder.Property(invitation => invitation.ExpiresAt)
+            .IsRequired();
+
         builder.HasOne(invitation => invitation.InvitedByUser)
             .WithMany()
             .HasForeignKey(invitation => invitation.InvitedByUserId)
@@ -58,6 +64,13 @@ public sealed class HouseholdInvitationConfig : IEntityTypeConfiguration<Househo
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired();
+
+        builder.Property(invitation => invitation.AcceptedByUserId)
+            .HasConversion(id => id.HasValue ? id.Value.Value : (Guid?)null, value => value.HasValue ? new UserId(value.Value) : null)
+            .IsRequired(false);
+
+        builder.Property(invitation => invitation.AcceptedAt)
+            .IsRequired(false);
 
         builder.HasIndex(invitation => new { invitation.HouseholdId, invitation.Email, invitation.Status });
         builder.Ignore(invitation => invitation.DomainEvents);
