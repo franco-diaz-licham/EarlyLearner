@@ -10,4 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EarlyLearner.Shared\EarlyLearner.Shared.csproj" />
+  </ItemGroup>
 </Project>

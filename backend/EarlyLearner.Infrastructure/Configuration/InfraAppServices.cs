@@ -34,6 +34,7 @@ public static class InfraAppServices
             .AddAzureAdAuthentication(config)
             .AddDbServices(config)
             .AddFileStorageServices(config)
+            .AddApiMessagingServices(config)
             .AddRepositoryServices();
     }
 
@@ -157,7 +158,7 @@ public static class InfraAppServices
                 outboxConfigurator.UsePostgres();
                 outboxConfigurator.UseBusOutbox();
             });
-            configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor));
+
             configurator.AddConfigureEndpointsCallback((context, _, endpointConfigurator) => {
                 endpointConfigurator.UseEntityFrameworkOutbox<DatabaseContext>(context);
             });
