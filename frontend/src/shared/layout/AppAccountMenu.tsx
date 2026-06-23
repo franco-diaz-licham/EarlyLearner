@@ -32,7 +32,7 @@ export const AppAccountMenu = ({ onLogout }: AppAccountMenuProps) => {
 
   return (
     <>
-      <Button aria-haspopup="dialog" className="flex items-center gap-3 rounded-full px-1 py-1 hover:bg-brand-surface-muted" type="button" onClick={handleToggle}>
+      <Button aria-haspopup="dialog" className="app-account-menu-button flex items-center gap-3 rounded-3xl px-1 py-1 hover:bg-brand-surface-muted" type="button" onClick={handleToggle}>
         <span className="h-10 w-10 rounded-full bg-[linear-gradient(135deg,#f7c7b6,#f6e4a7_45%,#b9d7c5)]" />
         <span className="hidden text-left sm:block">
           <span className="block text-sm font-bold leading-4 text-brand-heading">{currentUser.displayName}</span>

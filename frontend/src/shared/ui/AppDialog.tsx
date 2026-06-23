@@ -24,10 +24,7 @@ const appDialogPt: DialogPassThroughOptions = {
     className: mergeClassNames('text-lg font-bold text-brand-heading')
   },
   mask: {
-    className: mergeClassNames('bg-brand-heading/45 p-4 backdrop-blur-sm')
-  },
-  root: {
-    className: mergeClassNames('max-h-[calc(100vh-2rem)]')
+    className: mergeClassNames('bg-brand-heading/45! p-4 backdrop-blur-sm')
   }
 };
 
