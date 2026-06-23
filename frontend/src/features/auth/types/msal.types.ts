@@ -1,6 +1,6 @@
 import type { Configuration } from '@azure/msal-browser';
 import { appConfig } from '../../../shared/config/appConfig';
-import type { AuthAccount, AuthRedirectResult } from './auth.types';
+import type { AuthAccount } from './auth.types';
 
 /** Allows us to define a redirect so that we can bring the user back from where they logged in from */
 export interface MsalTokenOptions {
@@ -65,7 +65,7 @@ export interface AuthConnector {
    *
    * @returns The authenticated account from the redirect response, or `null` when there is no redirect response to process.
    */
-  handleRedirect: () => Promise<AuthRedirectResult | null>;
+  handleRedirect: () => Promise<void>;
 
   /**
    * Returns the currently active Microsoft account.

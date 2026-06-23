@@ -4,7 +4,3 @@ export interface AuthAccount {
   name?: string;
   username: string;
 }
-
-export interface AuthRedirectResult {
-  account: AuthAccount | null;
-}

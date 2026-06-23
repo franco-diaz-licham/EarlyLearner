@@ -1,6 +1,6 @@
 import { BrowserAuthError, InteractionRequiredAuthError, PublicClientApplication, type IPublicClientApplication } from '@azure/msal-browser';
 import { appConfig } from '../../../shared/config/appConfig';
-import type { AuthAccount, AuthRedirectResult } from '../types/auth.types';
+import type { AuthAccount } from '../types/auth.types';
 import { msalConfig, type AuthConnector, type MsalAuthRequest, type MsalTokenOptions } from '../types/msal.types';
 import { toAuthAccount } from '../mappers/auth.mapper';
 
@@ -35,7 +35,6 @@ const getAuthErrorText = (err: unknown): string => {
   return [payload.name, payload.errorCode, payload.errorMessage, payload.message].filter((value): value is string => typeof value === 'string').join(' ');
 };
 
-/** MS authentication flow connector. */
 export const authConnector: AuthConnector = {
   async initialize(): Promise<void> {
     msalInstance ??= new PublicClientApplication(msalConfig);
@@ -43,13 +42,11 @@ export const authConnector: AuthConnector = {
     await instance.initialize();
   },
 
-  async handleRedirect(): Promise<AuthRedirectResult | null> {
+  async handleRedirect(): Promise<void> {
     const instance = getMsalInstance();
     const result = await instance.handleRedirectPromise();
-    if (result === null) return null;
-
+    if (result === null) return;
     instance.setActiveAccount(result.account);
-    return { account: toAuthAccount(result.account) };
   },
 
   getCurrentAccount(): AuthAccount | null {
@@ -57,21 +54,21 @@ export const authConnector: AuthConnector = {
     return toAuthAccount(instance.getActiveAccount());
   },
 
-  login(redirectStartPage = window.location.href): Promise<void> {
+  async login(redirectUri): Promise<void> {
     const instance = getMsalInstance();
     instance.setActiveAccount(null);
-    return instance.loginRedirect({ ...loginRequest, redirectStartPage });
+    await instance.loginRedirect({ ...loginRequest, redirectStartPage: redirectUri ?? '/' });
   },
 
-  createAccount(redirectStartPage = window.location.href): Promise<void> {
+  async createAccount(redirectUri): Promise<void> {
     const instance = getMsalInstance();
     instance.setActiveAccount(null);
-    return instance.loginRedirect({ ...createAccountRequest, redirectStartPage });
+    await instance.loginRedirect({ ...createAccountRequest, redirectStartPage: redirectUri ?? '/' });
   },
 
-  logout(): Promise<void> {
+  async logout(): Promise<void> {
     const instance = getMsalInstance();
-    return instance.logoutRedirect({ account: instance.getActiveAccount() ?? undefined, postLogoutRedirectUri: '/' });
+    await instance.logoutRedirect({ account: instance.getActiveAccount() ?? undefined, postLogoutRedirectUri: '/' });
   },
 
   async getAccessToken({ allowRedirect, beforeRedirect }: MsalTokenOptions): Promise<string | null> {

@@ -46,12 +46,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async (redirectStartPage) => {
+  login: async (redirectUri) => {
     if (get().interactionInProgress) return;
 
     try {
       set({ interactionInProgress: true });
-      await authConnector.login(redirectStartPage);
+      await authConnector.login(redirectUri);
     } catch (err) {
       if (!authConnector.isInteractionInProgressError(err)) throw err;
     } finally {
@@ -59,12 +59,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  createAccount: async (redirectStartPage) => {
+  createAccount: async (redirectUri) => {
     if (get().interactionInProgress) return;
 
     try {
       set({ interactionInProgress: true });
-      await authConnector.createAccount(redirectStartPage);
+      await authConnector.createAccount(redirectUri);
     } catch (err) {
       if (!authConnector.isInteractionInProgressError(err)) throw err;
     } finally {
