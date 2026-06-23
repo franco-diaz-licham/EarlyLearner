@@ -1,4 +1,4 @@
-import { AppError } from '../stores/app.store';
+import { getErrorStatusCode } from './apiError';
 
 const RETRYABLE_HTTP_STATUSES = new Set([408, 429, 502, 503, 504]);
 const MAX_QUERY_RETRIES = 1;
@@ -10,8 +10,5 @@ export const isRetryableHttpStatus = (status?: number): boolean => {
 
 export const shouldRetryQuery = (failureCount: number, error: unknown): boolean => {
   if (failureCount >= MAX_QUERY_RETRIES) return false;
-  if (error instanceof AppError) return isRetryableHttpStatus(error.status);
-
-  const status = typeof error === 'object' && error !== null && 'response' in error ? (error as { response?: { status?: number } }).response?.status : undefined;
-  return isRetryableHttpStatus(status);
+  return isRetryableHttpStatus(getErrorStatusCode(error));
 };
