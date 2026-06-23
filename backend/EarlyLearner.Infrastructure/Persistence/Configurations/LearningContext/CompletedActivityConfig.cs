@@ -81,6 +81,8 @@ public sealed class CompletedActivityConfig : IEntityTypeConfiguration<Completed
 
         builder.Navigation(activity => activity.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(activity => activity.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Property(activity => activity.CreatedOn).IsRequired();
+        builder.Property(activity => activity.UpdatedOn).IsRequired(false);
         builder.Ignore(activity => activity.DomainEvents);
     }
 

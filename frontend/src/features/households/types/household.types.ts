@@ -38,7 +38,6 @@ export interface CarerResponse {
   email: string;
   firstName: string;
   lastName: string;
-  roleId: number;
   role: string;
   accountStatus: string;
 }

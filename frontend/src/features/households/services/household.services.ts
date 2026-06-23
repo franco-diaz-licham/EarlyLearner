@@ -1,19 +1,12 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import { mapHouseholdResponseToModel, mapHouseholdResponsesToModels } from '../mappers/household.mapper';
-import type {
-  AddHouseholdChildRequest,
-  CreateHouseholdRequest,
-  HouseholdModel,
-  HouseholdResponse,
-  InviteHouseholdCarerRequest,
-  UpdateHouseholdRequest
-} from '../types/household.types';
+import type { AddHouseholdChildRequest, CreateHouseholdRequest, HouseholdModel, HouseholdResponse, InviteHouseholdCarerRequest, UpdateHouseholdRequest } from '../types/household.types';
 
 const HOUSEHOLDS_URL = '/households';
 
 export const householdService = {
   async list(): Promise<HouseholdModel[]> {
-    const households = await apiClient.getList<HouseholdResponse>(`${HOUSEHOLDS_URL}/`);
+    const households = await apiClient.getList<HouseholdResponse>(HOUSEHOLDS_URL);
     return mapHouseholdResponsesToModels(households);
   },
 

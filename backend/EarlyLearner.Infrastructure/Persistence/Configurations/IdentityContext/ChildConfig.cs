@@ -27,7 +27,6 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(child => child.FirstName)
-            .HasColumnName("given_name")
             .HasMaxLength(120)
             .IsRequired();
 
@@ -39,6 +38,8 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
 
         builder.HasIndex(child => new { child.HouseholdId, child.FirstName });
         builder.Ignore(child => child.LastName);
+        builder.Property(child => child.CreatedOn).IsRequired();
+        builder.Property(child => child.UpdatedOn).IsRequired(false);
         builder.Ignore(child => child.DomainEvents);
     }
 }

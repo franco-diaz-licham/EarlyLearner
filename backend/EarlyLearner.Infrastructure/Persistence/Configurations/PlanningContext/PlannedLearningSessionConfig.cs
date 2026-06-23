@@ -90,6 +90,8 @@ public sealed class PlannedLearningSessionConfig : IEntityTypeConfiguration<Plan
         builder.Navigation(session => session.Goals).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(session => session.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(session => new { session.LearningPlanId, session.PlannedDate });
+        builder.Property(session => session.CreatedOn).IsRequired();
+        builder.Property(session => session.UpdatedOn).IsRequired(false);
         builder.Ignore(session => session.DomainEvents);
     }
 

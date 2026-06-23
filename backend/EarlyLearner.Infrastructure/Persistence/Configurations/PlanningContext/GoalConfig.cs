@@ -86,6 +86,8 @@ public sealed class GoalConfig : IEntityTypeConfiguration<Goal>
 
         builder.Navigation(goal => goal.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(goal => new { goal.HouseholdId, goal.ChildId, goal.Status });
+        builder.Property(goal => goal.CreatedOn).IsRequired();
+        builder.Property(goal => goal.UpdatedOn).IsRequired(false);
         builder.Ignore(goal => goal.DomainEvents);
     }
 

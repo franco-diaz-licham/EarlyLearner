@@ -44,6 +44,8 @@ public sealed class UserConfig : IEntityTypeConfiguration<User>
         builder.HasIndex(user => user.Email).IsUnique();
         builder.HasIndex(user => new { user.ExternalObjectId, user.ExternalTenantId }).IsUnique();
         builder.Ignore(user => user.DisplayName);
+        builder.Property(user => user.CreatedOn).IsRequired();
+        builder.Property(user => user.UpdatedOn).IsRequired(false);
         builder.Ignore(user => user.DomainEvents);
     }
 }

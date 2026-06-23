@@ -51,6 +51,8 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
         builder.Navigation(profile => profile.OutcomeProgress).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(profile => profile.SuggestedNextSteps).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(profile => new { profile.HouseholdId, profile.ChildId }).IsUnique();
+        builder.Property(profile => profile.CreatedOn).IsRequired();
+        builder.Property(profile => profile.UpdatedOn).IsRequired(false);
         builder.Ignore(profile => profile.DomainEvents);
     }
 }

@@ -73,6 +73,8 @@ public sealed class HouseholdInvitationConfig : IEntityTypeConfiguration<Househo
             .IsRequired(false);
 
         builder.HasIndex(invitation => new { invitation.HouseholdId, invitation.Email, invitation.Status });
+        builder.Property(invitation => invitation.CreatedOn).IsRequired();
+        builder.Property(invitation => invitation.UpdatedOn).IsRequired(false);
         builder.Ignore(invitation => invitation.DomainEvents);
     }
 }

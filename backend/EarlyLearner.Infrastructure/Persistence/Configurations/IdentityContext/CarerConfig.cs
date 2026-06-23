@@ -42,6 +42,8 @@ public sealed class CarerConfig : IEntityTypeConfiguration<Carer>
             .IsRequired();
 
         builder.HasIndex(carer => new { carer.HouseholdId, carer.UserId }).IsUnique();
+        builder.Property(carer => carer.CreatedOn).IsRequired();
+        builder.Property(carer => carer.UpdatedOn).IsRequired(false);
         builder.Ignore(carer => carer.DomainEvents);
     }
 }

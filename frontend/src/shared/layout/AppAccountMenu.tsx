@@ -42,7 +42,7 @@ export const AppAccountMenu = ({ onLogout }: AppAccountMenuProps) => {
       </Button>
 
       <OverlayPanel ref={overlayPanelRef} className="rounded-md! border! border-brand-border! bg-white shadow-app-card!" dismissable>
-        <div className="w-64 p-2">
+        <div className="w-64 p-2 flex flex-col gap-2">
           <div className="border-b border-brand-border px-2 pb-4">
             <p className="text-sm font-bold text-brand-heading">{currentUser.displayName}</p>
             <p className="mt-1 text-xs font-semibold text-brand-muted">{currentUser.roleLabel}</p>

@@ -56,6 +56,8 @@ public sealed class LearningPlanConfig : IEntityTypeConfiguration<LearningPlan>
 
         builder.Navigation(plan => plan.Sessions).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(plan => new { plan.HouseholdId, plan.ChildId });
+        builder.Property(plan => plan.CreatedOn).IsRequired();
+        builder.Property(plan => plan.UpdatedOn).IsRequired(false);
         builder.Ignore(plan => plan.DomainEvents);
     }
 }

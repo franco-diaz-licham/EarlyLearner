@@ -84,6 +84,8 @@ public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
         builder.Navigation(log => log.RoutineEntries).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(log => log.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(log => new { log.HouseholdId, log.ChildId, log.LogDate }).IsUnique();
+        builder.Property(log => log.CreatedOn).IsRequired();
+        builder.Property(log => log.UpdatedOn).IsRequired(false);
         builder.Ignore(log => log.DomainEvents);
     }
 

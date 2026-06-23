@@ -31,6 +31,8 @@ public sealed class ReadinessOutcomeConfig : IEntityTypeConfiguration<ReadinessO
 
         builder.HasIndex(outcome => outcome.Code).IsUnique();
         builder.HasIndex(outcome => new { outcome.Category, outcome.SortOrder });
+        builder.Property(outcome => outcome.CreatedOn).IsRequired();
+        builder.Property(outcome => outcome.UpdatedOn).IsRequired(false);
         builder.Ignore(outcome => outcome.DomainEvents);
     }
 }

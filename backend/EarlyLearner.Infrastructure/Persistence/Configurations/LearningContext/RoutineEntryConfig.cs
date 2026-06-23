@@ -56,6 +56,8 @@ public sealed class RoutineEntryConfig : IEntityTypeConfiguration<RoutineEntry>
                 });
 
         builder.Navigation(entry => entry.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Property(entry => entry.CreatedOn).IsRequired();
+        builder.Property(entry => entry.UpdatedOn).IsRequired(false);
         builder.Ignore(entry => entry.DomainEvents);
     }
 

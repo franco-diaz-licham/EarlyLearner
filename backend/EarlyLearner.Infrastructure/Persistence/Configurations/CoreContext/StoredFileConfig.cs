@@ -45,6 +45,8 @@ public sealed class StoredFileConfig : IEntityTypeConfiguration<StoredFile>
 
         builder.Property(file => file.UploadedAt).IsRequired();
         builder.HasIndex(file => new { file.HouseholdId, file.StorageKey }).IsUnique();
+        builder.Property(file => file.CreatedOn).IsRequired();
+        builder.Property(file => file.UpdatedOn).IsRequired(false);
         builder.Ignore(file => file.DomainEvents);
     }
 }

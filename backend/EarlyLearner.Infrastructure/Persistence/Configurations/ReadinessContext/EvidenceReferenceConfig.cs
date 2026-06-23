@@ -45,6 +45,8 @@ public sealed class EvidenceReferenceConfig : IEntityTypeConfiguration<EvidenceR
         builder.Property(evidence => evidence.EvidenceRecordId).IsRequired();
         builder.Property(evidence => evidence.ObservedOn).IsRequired();
         builder.Property(evidence => evidence.Summary).HasMaxLength(800).IsRequired();
+        builder.Property(evidence => evidence.CreatedOn).IsRequired();
+        builder.Property(evidence => evidence.UpdatedOn).IsRequired(false);
         builder.Ignore(evidence => evidence.DomainEvents);
     }
 }

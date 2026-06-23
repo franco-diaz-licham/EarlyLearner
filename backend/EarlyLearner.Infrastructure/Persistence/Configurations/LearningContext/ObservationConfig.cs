@@ -93,6 +93,8 @@ public sealed class ObservationConfig : IEntityTypeConfiguration<Observation>
         builder.Navigation(observation => observation.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(observation => observation.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(observation => new { observation.HouseholdId, observation.ChildId, observation.ObservedOn });
+        builder.Property(observation => observation.CreatedOn).IsRequired();
+        builder.Property(observation => observation.UpdatedOn).IsRequired(false);
         builder.Ignore(observation => observation.DomainEvents);
     }
 

@@ -41,6 +41,8 @@ public sealed class HouseholdConfig : IEntityTypeConfiguration<Household>
         builder.Navigation(household => household.Children).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(household => household.Invitations).UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.Property(household => household.CreatedOn).IsRequired();
+        builder.Property(household => household.UpdatedOn).IsRequired(false);
         builder.Ignore(household => household.DomainEvents);
     }
 }

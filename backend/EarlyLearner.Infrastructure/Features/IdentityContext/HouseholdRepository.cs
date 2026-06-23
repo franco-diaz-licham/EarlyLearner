@@ -26,7 +26,6 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         carer.User.Email,
                         carer.User.FirstName,
                         carer.User.LastName,
-                        (int)carer.Role,
                         carer.Role.ToString(),
                         carer.User.Status.ToString()))
                     .ToList(),
@@ -46,7 +45,6 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         invitation.Email,
                         invitation.FirstName,
                         invitation.LastName,
-                        (int)invitation.Role,
                         invitation.Role.ToString(),
                         invitation.Status.ToString(),
                         invitation.InvitedAt,
@@ -82,7 +80,6 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         carer.User.Email,
                         carer.User.FirstName,
                         carer.User.LastName,
-                        (int)carer.Role,
                         carer.Role.ToString(),
                         carer.User.Status.ToString()))
                     .ToList(),
@@ -102,7 +99,6 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         invitation.Email,
                         invitation.FirstName,
                         invitation.LastName,
-                        (int)invitation.Role,
                         invitation.Role.ToString(),
                         invitation.Status.ToString(),
                         invitation.InvitedAt,

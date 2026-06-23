@@ -103,6 +103,8 @@ public sealed class PortfolioItemConfig : IEntityTypeConfiguration<PortfolioItem
         builder.Navigation(item => item.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(item => item.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(item => new { item.HouseholdId, item.ChildId, item.CapturedOn });
+        builder.Property(item => item.CreatedOn).IsRequired();
+        builder.Property(item => item.UpdatedOn).IsRequired(false);
         builder.Ignore(item => item.DomainEvents);
     }
 

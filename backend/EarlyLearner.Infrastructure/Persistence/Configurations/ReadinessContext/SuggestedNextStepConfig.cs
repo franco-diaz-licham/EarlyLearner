@@ -41,6 +41,8 @@ public sealed class SuggestedNextStepConfig : IEntityTypeConfiguration<Suggested
             .HasMaxLength(800)
             .IsRequired();
 
+        builder.Property(step => step.CreatedOn).IsRequired();
+        builder.Property(step => step.UpdatedOn).IsRequired(false);
         builder.Ignore(step => step.DomainEvents);
     }
 }
