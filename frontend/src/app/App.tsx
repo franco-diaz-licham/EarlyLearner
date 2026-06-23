@@ -1,9 +1,22 @@
 import { RouterProvider } from 'react-router-dom';
-import { AppProviders } from './providers/AppProviders';
 import { router } from './router';
+import { PrimeReactProvider } from 'primereact/api';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { AuthBootstrap } from '../features/auth';
+import { ConfirmProvider } from '../shared/confirm/ConfirmProvider';
+import { AppErrorToast } from '../shared/feedback/AppErrorToast';
+import { primeReactConfig } from '../shared/config/primeReactConfig';
+import { queryClient } from '../shared/api/queryClient';
 
 export const App = () => (
-  <AppProviders>
-    <RouterProvider router={router} />
-  </AppProviders>
+  <PrimeReactProvider value={primeReactConfig}>
+    <QueryClientProvider client={queryClient}>
+      <AuthBootstrap>
+        <ConfirmProvider>
+          <RouterProvider router={router} />
+        </ConfirmProvider>
+        <AppErrorToast />
+      </AuthBootstrap>
+    </QueryClientProvider>
+  </PrimeReactProvider>
 );
