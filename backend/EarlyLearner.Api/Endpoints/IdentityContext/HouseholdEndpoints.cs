@@ -20,6 +20,7 @@ public static class HouseholdEndpoints
         households.MapPost("/{householdId:guid}/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
         households.MapDelete("/{householdId:guid}/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
         households.MapPost("/{householdId:guid}/children", AddChild).WithName(nameof(AddChild));
+        households.MapPut("/{householdId:guid}/children/{childId:guid}", UpdateChild).WithName(nameof(UpdateChild));
         households.MapDelete("/{householdId:guid}/children/{childId:guid}", RemoveChild).WithName(nameof(RemoveChild));
 
         return endpoints;
@@ -99,6 +100,25 @@ public static class HouseholdEndpoints
         var result = await commandService.RemoveChildAsync(command, cancellationToken);
         return result.ToApiResult();
     }
+
+    public static async Task<IResult> UpdateChild(Guid householdId, Guid childId, UpdateHouseholdChildRequest request, IValidator<UpdateHouseholdChildRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    {
+        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
+        if (childId == Guid.Empty) return Result<HouseholdResponse>.Fail("Child id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var validation = validator.Validate(request).ToResult();
+        if (!validation.IsSuccess) return validation.ToApiResult();
+
+        var command = new UpdateHouseholdChildCommand(
+            HouseholdId: householdId,
+            ChildId: childId,
+            FirstName: request.FirstName,
+            LastName: request.LastName,
+            DateOfBirth: request.DateOfBirth);
+
+        var result = await commandService.UpdateChildAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
 }
 
 public sealed record UpdateHouseholdRequest(string Name);
@@ -127,9 +147,21 @@ public sealed class InviteHouseholdCarerRequestValidator : AbstractValidator<Inv
 
 public sealed record AddHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth);
 
+public sealed record UpdateHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth);
+
 public sealed class AddHouseholdChildRequestValidator : AbstractValidator<AddHouseholdChildRequest>
 {
     public AddHouseholdChildRequestValidator()
+    {
+        RuleFor(request => request.FirstName).NotEmpty();
+        RuleFor(request => request.LastName).NotEmpty();
+        RuleFor(request => request.DateOfBirth).NotEmpty();
+    }
+}
+
+public sealed class UpdateHouseholdChildRequestValidator : AbstractValidator<UpdateHouseholdChildRequest>
+{
+    public UpdateHouseholdChildRequestValidator()
     {
         RuleFor(request => request.FirstName).NotEmpty();
         RuleFor(request => request.LastName).NotEmpty();

@@ -137,6 +137,15 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
+    public void UpdateChild(ChildId childId, string firstName, string lastName, DateOnly dateOfBirth)
+    {
+        var child = _children.SingleOrDefault(existingChild => existingChild.Id == childId);
+        if (child is null) throw new DomainException("Child does not belong to this household.");
+
+        child.UpdateDetails(firstName, lastName, dateOfBirth);
+        SetUpdatedOn();
+    }
+
     private static string Required(string value, string name)
     {
         if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} is required.");

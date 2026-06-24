@@ -153,6 +153,7 @@ public static class ApiAppServices
         services.AddScoped<IValidator<UpdateHouseholdRequest>, UpdateHouseholdRequestValidator>();
         services.AddScoped<IValidator<InviteHouseholdCarerRequest>, InviteHouseholdCarerRequestValidator>();
         services.AddScoped<IValidator<AddHouseholdChildRequest>, AddHouseholdChildRequestValidator>();
+        services.AddScoped<IValidator<UpdateHouseholdChildRequest>, UpdateHouseholdChildRequestValidator>();
         services.AddScoped<IValidator<CreateDailyLogRequest>, CreateDailyLogRequestValidator>();
         services.AddScoped<IValidator<CreateGoalRequest>, CreateGoalRequestValidator>();
         services.AddScoped<IValidator<UpdateGoalRequest>, UpdateGoalRequestValidator>();

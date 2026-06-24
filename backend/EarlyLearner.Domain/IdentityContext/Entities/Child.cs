@@ -40,7 +40,7 @@ public sealed class Child : Entity<ChildId>
     /// <summary>
     /// Birth date used for age-aware planning, readiness interpretation, and future activity suggestions.
     /// </summary>
-    public DateOnly DateOfBirth { get; }
+    public DateOnly DateOfBirth { get; private set; }
 
     /// <summary>
     /// Indicates the child profile is no longer actively managed while preserving historical records.
@@ -51,6 +51,14 @@ public sealed class Child : Entity<ChildId>
     {
         FirstName = Required(firstName, nameof(firstName));
         LastName = Required(lastName, nameof(lastName));
+        SetUpdatedOn();
+    }
+
+    internal void UpdateDetails(string firstName, string lastName, DateOnly dateOfBirth)
+    {
+        FirstName = Required(firstName, nameof(firstName));
+        LastName = Required(lastName, nameof(lastName));
+        DateOfBirth = dateOfBirth;
         SetUpdatedOn();
     }
 
