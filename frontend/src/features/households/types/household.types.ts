@@ -10,10 +10,6 @@ export interface HouseholdModel {
   name: string;
 }
 
-export interface CreateHouseholdRequest {
-  name: string;
-}
-
 export interface UpdateHouseholdRequest {
   name: string;
 }

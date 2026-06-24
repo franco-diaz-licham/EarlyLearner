@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { householdService } from '../services/household.services';
 import type {
   AddHouseholdChildRequest,
-  CreateHouseholdRequest,
   InviteHouseholdCarerRequest,
   UpdateHouseholdRequest
 } from '../types/household.types';
@@ -27,17 +26,6 @@ export const useHouseholdQuery = (householdId: string) =>
     queryFn: () => householdService.get(householdId),
     enabled: Boolean(householdId)
   });
-
-export const useCreateHouseholdMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (request: CreateHouseholdRequest) => householdService.create(request),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-    }
-  });
-};
 
 export const useUpdateHouseholdMutation = () => {
   const queryClient = useQueryClient();

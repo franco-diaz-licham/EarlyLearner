@@ -1,17 +1,13 @@
 import { useMemo, useState } from 'react';
-import { UilEditAlt, UilEstate, UilPlus, UilTrashAlt, UilUserPlus, UilUsersAlt } from '@iconscout/react-unicons';
+import { UilEditAlt, UilEstate, UilTrashAlt, UilUserPlus, UilUsersAlt } from '@iconscout/react-unicons';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppCard } from '../../../shared/ui/AppCard';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 import { HouseholdDialog } from '../components/HouseholdDialog';
 import { InviteCarerDialog } from '../components/InviteCarerDialog';
-import { useCreateHouseholdMutation, useDeleteHouseholdMutation, useHouseholdsQuery, useInviteHouseholdCarerMutation, useUpdateHouseholdMutation } from '../queries/household.queries';
-import type { CreateHouseholdRequest, HouseholdModel, InviteHouseholdCarerRequest } from '../types/household.types';
-
-const createEmptyHousehold = (): CreateHouseholdRequest => ({
-  name: ''
-});
+import { useDeleteHouseholdMutation, useHouseholdsQuery, useInviteHouseholdCarerMutation, useUpdateHouseholdMutation } from '../queries/household.queries';
+import type { HouseholdModel, InviteHouseholdCarerRequest } from '../types/household.types';
 
 const createEmptyInvite = (): InviteHouseholdCarerRequest => ({
   email: '',
@@ -23,15 +19,13 @@ const createEmptyInvite = (): InviteHouseholdCarerRequest => ({
 const emptyHouseholds: HouseholdModel[] = [];
 
 export const HouseholdsPage = () => {
-  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const [householdDraft, setHousehold] = useState<CreateHouseholdRequest | HouseholdModel>(() => createEmptyHousehold());
+  const [householdDraft, setHousehold] = useState<HouseholdModel | null>(null);
   const [inviteDraft, setInviteDraft] = useState<InviteHouseholdCarerRequest>(() => createEmptyInvite());
   const [inviteHouseholdId, setInviteHouseholdId] = useState<string | null>(null);
   const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
 
   const householdsQuery = useHouseholdsQuery();
-  const createHouseholdMutation = useCreateHouseholdMutation();
   const updateHouseholdMutation = useUpdateHouseholdMutation();
   const inviteHouseholdCarerMutation = useInviteHouseholdCarerMutation();
   const deleteHouseholdMutation = useDeleteHouseholdMutation();
@@ -39,16 +33,9 @@ export const HouseholdsPage = () => {
   const households = householdsQuery.data ?? emptyHouseholds;
   const selectedHousehold = useMemo(() => households.find((household) => household.id === deletePendingId), [deletePendingId, households]);
   const inviteHousehold = useMemo(() => households.find((household) => household.id === inviteHouseholdId) ?? null, [inviteHouseholdId, households]);
-  const isSaving = createHouseholdMutation.isPending || updateHouseholdMutation.isPending;
-
-  const handleNewHousehold = () => {
-    setDialogMode('create');
-    setHousehold(createEmptyHousehold());
-    setIsDialogVisible(true);
-  };
+  const isSaving = updateHouseholdMutation.isPending;
 
   const handleEditHousehold = (household: HouseholdModel) => {
-    setDialogMode('edit');
     setHousehold(household);
     setIsDialogVisible(true);
   };
@@ -59,26 +46,16 @@ export const HouseholdsPage = () => {
   };
 
   const handleSaveHousehold = () => {
-    if (dialogMode === 'create') {
-      createHouseholdMutation.mutate(householdDraft, {
+    if (!householdDraft) return;
+
+    updateHouseholdMutation.mutate(
+      { householdId: householdDraft.id, request: { name: householdDraft.name } },
+      {
         onSuccess: () => {
-          setHousehold(createEmptyHousehold());
           setIsDialogVisible(false);
         }
-      });
-      return;
-    }
-
-    if ('id' in householdDraft) {
-      updateHouseholdMutation.mutate(
-        { householdId: householdDraft.id, request: { name: householdDraft.name } },
-        {
-          onSuccess: () => {
-            setIsDialogVisible(false);
-          }
-        }
-      );
-    }
+      }
+    );
   };
 
   const handleDeleteHousehold = (householdId: string) => {
@@ -112,9 +89,8 @@ export const HouseholdsPage = () => {
             <h1 id="households-title" className="mt-1 text-3xl font-bold text-brand-heading">
               Manage households
             </h1>
-            <p className="mt-2 max-w-2xl text-brand-muted">Create family spaces, keep ownership clear, and choose the household that anchors planning, learning and readiness records.</p>
+            <p className="mt-2 max-w-2xl text-brand-muted">Keep ownership clear, manage carers, and choose the household that anchors planning, learning and readiness records.</p>
           </div>
-          <AppButton icon={<UilPlus aria-hidden="true" className="h-5 w-5" />} label="New household" onClick={handleNewHousehold} />
         </div>
       </AppCard>
 
@@ -128,8 +104,7 @@ export const HouseholdsPage = () => {
                 <UilEstate aria-hidden="true" className="h-6 w-6" />
               </div>
               <h2 className="mt-4 text-lg font-bold text-brand-heading">No households yet</h2>
-              <p className="mt-2 text-sm leading-6 text-brand-muted">Add the first household to unlock planning and learning records.</p>
-              <AppButton className="mt-4" label="Create household" onClick={handleNewHousehold} />
+              <p className="mt-2 text-sm leading-6 text-brand-muted">Finish signup to create your household and unlock planning and learning records.</p>
             </div>
           ) : null}
           <div className="grid gap-3">
@@ -210,12 +185,11 @@ export const HouseholdsPage = () => {
       </div>
 
       <HouseholdDialog
-        mode={dialogMode}
-        name={householdDraft.name}
+        name={householdDraft?.name ?? ''}
         saving={isSaving}
         visible={isDialogVisible}
         onChange={(name) => {
-          setHousehold((current) => ({ ...current, name }));
+          setHousehold((current) => (current ? { ...current, name } : current));
         }}
         onHide={() => {
           setIsDialogVisible(false);

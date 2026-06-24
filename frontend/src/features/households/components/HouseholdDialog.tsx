@@ -3,7 +3,6 @@ import { AppDialog } from '../../../shared/ui/AppDialog';
 import { AppInputText } from '../../../shared/ui/AppInputText';
 
 interface HouseholdDialogProps {
-  mode: 'create' | 'edit';
   saving: boolean;
   visible: boolean;
   name: string;
@@ -12,9 +11,9 @@ interface HouseholdDialogProps {
   onSave: () => void;
 }
 
-export const HouseholdDialog = ({ name, mode, saving, visible, onChange, onHide, onSave }: HouseholdDialogProps) => {
+export const HouseholdDialog = ({ name, saving, visible, onChange, onHide, onSave }: HouseholdDialogProps) => {
   return (
-    <AppDialog header={mode === 'create' ? 'New household' : 'Rename household'} visible={visible} onHide={onHide}>
+    <AppDialog header="Rename household" visible={visible} onHide={onHide}>
       <div className="space-y-4 pt-4">
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-brand-heading">Household name</span>
