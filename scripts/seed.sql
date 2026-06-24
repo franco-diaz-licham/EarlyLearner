@@ -23,10 +23,10 @@ values
     ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333333332', 'Caregiver', now())
 on conflict (id) do nothing;
 
-insert into children (id, household_id, given_name, date_of_birth, is_archived, created_on)
+insert into children (id, household_id, first_name, last_name, date_of_birth, is_archived, created_on)
 values
-    ('44444444-4444-4444-4444-444444444441', '11111111-1111-1111-1111-111111111111', 'Mia', '2021-03-14', false, now()),
-    ('44444444-4444-4444-4444-444444444442', '11111111-1111-1111-1111-111111111111', 'Noah', '2022-08-02', false, now())
+    ('44444444-4444-4444-4444-444444444441', '11111111-1111-1111-1111-111111111111', 'Mia', 'Taylor', '2021-03-14', false, now()),
+    ('44444444-4444-4444-4444-444444444442', '11111111-1111-1111-1111-111111111111', 'Noah', 'Taylor', '2022-08-02', false, now())
 on conflict (id) do nothing;
 
 insert into readiness_outcomes (id, code, name, description, category, sort_order, status, created_on)
