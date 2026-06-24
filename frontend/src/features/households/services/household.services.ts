@@ -38,9 +38,5 @@ export const householdService = {
   async removeChild(householdId: string, childId: string): Promise<HouseholdModel> {
     const household = await apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children/${childId}`);
     return mapHouseholdResponseToModel(household);
-  },
-
-  delete(householdId: string): Promise<void> {
-    return apiClient.delete(`${HOUSEHOLDS_URL}/${householdId}`);
   }
 };

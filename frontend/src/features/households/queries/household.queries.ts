@@ -86,15 +86,3 @@ export const useRemoveHouseholdChildMutation = () => {
     }
   });
 };
-
-export const useDeleteHouseholdMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (householdId: string) => householdService.delete(householdId),
-    onSuccess: (_data, householdId) => {
-      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.removeQueries({ queryKey: householdKeys.detail(householdId) });
-    }
-  });
-};

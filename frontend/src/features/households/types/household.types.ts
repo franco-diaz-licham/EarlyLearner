@@ -3,11 +3,15 @@ export interface HouseholdResponse {
   name: string;
   carers: CarerResponse[];
   children: ChildResponse[];
+  invitations: HouseholdInvitationResponse[];
 }
 
 export interface HouseholdModel {
   id: string;
   name: string;
+  carers: CarerResponse[];
+  children: ChildResponse[];
+  invitations: HouseholdInvitationResponse[];
 }
 
 export interface UpdateHouseholdRequest {
@@ -18,13 +22,12 @@ export type HouseholdRole = 2 | 3;
 
 export interface InviteHouseholdCarerRequest {
   email: string;
-  firstName: string;
-  lastName: string;
   role: HouseholdRole;
 }
 
 export interface AddHouseholdChildRequest {
-  givenName: string;
+  firstName: string;
+  lastName: string;
   dateOfBirth: string;
 }
 
@@ -43,4 +46,15 @@ export interface ChildResponse {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+}
+
+export interface HouseholdInvitationResponse {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
+  status: string;
+  invitedAt: string;
+  expiresAt: string;
 }

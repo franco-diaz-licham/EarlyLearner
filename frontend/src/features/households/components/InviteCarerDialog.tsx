@@ -19,7 +19,7 @@ const roleOptions: { label: string; value: HouseholdRole }[] = [
 ];
 
 export const InviteCarerDialog = ({ draft, household, saving, visible, onChange, onHide, onSave }: InviteCarerDialogProps) => {
-  const canSave = Boolean(household && draft.email.trim() && draft.firstName.trim() && draft.lastName.trim() && draft.role);
+  const canSave = Boolean(household && draft.email.trim() && draft.role);
 
   const updateField = (field: keyof InviteHouseholdCarerRequest, value: string | HouseholdRole) => {
     onChange({ ...draft, [field]: value });
@@ -39,29 +39,6 @@ export const InviteCarerDialog = ({ draft, household, saving, visible, onChange,
             }}
           />
         </label>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-brand-heading">First name</span>
-            <AppInputText
-              placeholder="Jamie"
-              value={draft.firstName}
-              onChange={(event) => {
-                updateField('firstName', event.target.value);
-              }}
-            />
-          </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-brand-heading">Last name</span>
-            <AppInputText
-              placeholder="Rivera"
-              value={draft.lastName}
-              onChange={(event) => {
-                updateField('lastName', event.target.value);
-              }}
-            />
-          </label>
-        </div>
 
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-brand-heading">Role</span>
