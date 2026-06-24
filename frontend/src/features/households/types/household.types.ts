@@ -38,11 +38,9 @@ export interface RenameHouseholdForm {
   name: string;
 }
 
-export type InviteCarerRole = 'caregiver' | 'viewer';
-
 export interface InviteCarerForm {
   email: string;
-  role: InviteCarerRole;
+  role: HouseholdRole;
 }
 
 export interface AddChildForm {
@@ -50,3 +48,5 @@ export interface AddChildForm {
   lastName: string;
   dateOfBirth: string;
 }
+
+export type HouseholdRole = 'caregiver' | 'viewer';

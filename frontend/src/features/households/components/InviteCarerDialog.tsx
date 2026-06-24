@@ -1,28 +1,37 @@
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppDialog } from '../../../shared/ui/AppDialog';
 import { AppInputText } from '../../../shared/ui/AppInputText';
-import type { HouseholdModel, HouseholdRole, InviteHouseholdCarerRequest } from '../types/household.types';
+import { AppSelect } from '../../../shared/ui/AppSelect';
+import { useInviteCarerForm } from '../hooks/useInviteCarerForm';
+import type { HouseholdModel, HouseholdRole, InviteCarerForm } from '../types/household.types';
 
 interface InviteCarerDialogProps {
-  draft: InviteHouseholdCarerRequest;
   household: HouseholdModel | null;
   saving: boolean;
   visible: boolean;
-  onChange: (draft: InviteHouseholdCarerRequest) => void;
   onHide: () => void;
-  onSave: () => void;
+  onSave: (form: InviteCarerForm) => void;
 }
 
 const roleOptions: { label: string; value: HouseholdRole }[] = [
-  { label: 'Caregiver', value: 2 },
-  { label: 'Viewer', value: 3 }
+  { label: 'Caregiver', value: 'caregiver' },
+  { label: 'Viewer', value: 'viewer' }
 ];
 
-export const InviteCarerDialog = ({ draft, household, saving, visible, onChange, onHide, onSave }: InviteCarerDialogProps) => {
-  const canSave = Boolean(household && draft.email.trim() && draft.role);
+export const InviteCarerDialog = ({ household, saving, visible, onHide, onSave }: InviteCarerDialogProps) => {
+  const form = useInviteCarerForm();
+  const { draft, errors } = form;
+  const hasErrors = Object.keys(errors).length > 0;
 
-  const updateField = (field: keyof InviteHouseholdCarerRequest, value: string | HouseholdRole) => {
-    onChange({ ...draft, [field]: value });
+  const handleSave = () => {
+    const validForm = form.getValidForm();
+    if (!validForm) return;
+    onSave(validForm);
+  };
+
+  const handleCancel = () => {
+    form.reset();
+    onHide();
   };
 
   return (
@@ -35,31 +44,27 @@ export const InviteCarerDialog = ({ draft, household, saving, visible, onChange,
             placeholder="parent@example.com"
             value={draft.email}
             onChange={(event) => {
-              updateField('email', event.target.value);
+              form.updateField('email', event.target.value);
             }}
           />
+          {errors.email ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.email}</span> : null}
         </label>
 
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-brand-heading">Role</span>
-          <select
-            className="min-h-10 w-full rounded-md border border-brand-border bg-white px-4 py-2 text-brand-text transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          <AppSelect
+            options={roleOptions}
             value={draft.role}
-            onChange={(event) => {
-              updateField('role', Number(event.target.value) as HouseholdRole);
+            onChange={(value) => {
+              form.updateField('role', value);
             }}
-          >
-            {roleOptions.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
+          />
+          {errors.role ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.role}</span> : null}
         </label>
 
         <div className="flex justify-end gap-3 pt-2">
-          <AppButton label="Cancel" variant="secondary" onClick={onHide} />
-          <AppButton disabled={!canSave || saving} label={saving ? 'Inviting...' : 'Invite'} onClick={onSave} />
+          <AppButton label="Cancel" variant="secondary" onClick={handleCancel} />
+          <AppButton disabled={!household || saving || (!form.isValid && hasErrors)} label={saving ? 'Inviting...' : 'Invite'} onClick={handleSave} />
         </div>
       </div>
     </AppDialog>

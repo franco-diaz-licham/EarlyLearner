@@ -1,3 +1,5 @@
+import type { HouseholdRole } from './household.types';
+
 export interface HouseholdResponse {
   id: string;
   name: string;
@@ -10,14 +12,18 @@ export interface UpdateHouseholdRequest {
   name: string;
 }
 
-export type HouseholdRoleRequest = 'caregiver' | 'viewer';
-
 export interface InviteHouseholdCarerRequest {
   email: string;
-  role: HouseholdRoleRequest;
+  role: HouseholdRole;
 }
 
 export interface AddHouseholdChildRequest {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+}
+
+export interface UpdateHouseholdChildRequest {
   firstName: string;
   lastName: string;
   dateOfBirth: string;

@@ -1,4 +1,5 @@
-import type { SelectHTMLAttributes } from 'react';
+import { Dropdown } from 'primereact/dropdown';
+import type { DropdownProps } from 'primereact/dropdown';
 import { mergeClassNames } from './mergeClassNames';
 
 export interface AppSelectOption<TValue extends string = string> {
@@ -6,25 +7,24 @@ export interface AppSelectOption<TValue extends string = string> {
   value: TValue;
 }
 
-interface AppSelectProps<TValue extends string = string> extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+interface AppSelectProps<TValue extends string = string> extends Omit<DropdownProps, 'onChange' | 'optionLabel' | 'optionValue' | 'options' | 'value'> {
   options: AppSelectOption<TValue>[];
+  value: TValue;
   onChange: (value: TValue) => void;
 }
 
-export const AppSelect = <TValue extends string = string>({ className, options, onChange, ...selectProps }: AppSelectProps<TValue>) => {
+export const AppSelect = <TValue extends string = string>({ className, options, value, onChange, ...selectProps }: AppSelectProps<TValue>) => {
   return (
-    <select
+    <Dropdown
       {...selectProps}
-      className={mergeClassNames('min-h-10 w-full rounded-md border border-brand-border bg-white px-4 py-2 text-brand-text transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20', className)}
+      className={mergeClassNames('min-h-10 w-full border-brand-border text-brand-text', className)}
+      optionLabel="label"
+      optionValue="value"
+      options={options}
+      value={value}
       onChange={(event) => {
-        onChange(event.target.value as TValue);
+        onChange(event.value as TValue);
       }}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    />
   );
 };

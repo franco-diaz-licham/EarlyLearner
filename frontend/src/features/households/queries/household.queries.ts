@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { mapAddChildFormToRequest, mapHouseholdResponseToModel, mapHouseholdResponsesToModels, mapInviteCarerFormToRequest, mapRenameHouseholdFormToRequest } from '../mappers/household.mapper';
+import { mapAddChildFormToRequest, mapHouseholdResponseToModel, mapHouseholdResponsesToModels, mapInviteCarerFormToRequest, mapRenameHouseholdFormToRequest, mapUpdateChildFormToRequest } from '../mappers/household.mapper';
 import { householdService } from '../services/household.services';
 import type { AddChildForm, InviteCarerForm, RenameHouseholdForm } from '../types/household.types';
 
@@ -96,6 +96,21 @@ export const useRemoveHouseholdChildMutation = () => {
   return useMutation({
     mutationFn: async ({ householdId, childId }: { householdId: string; childId: string }) => {
       const household = await householdService.removeChild(householdId, childId);
+      return mapHouseholdResponseToModel(household);
+    },
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
+    }
+  });
+};
+
+export const useUpdateHouseholdChildMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ householdId, childId, form }: { householdId: string; childId: string; form: AddChildForm }) => {
+      const household = await householdService.updateChild(householdId, childId, mapUpdateChildFormToRequest(form));
       return mapHouseholdResponseToModel(household);
     },
     onSuccess: (household) => {

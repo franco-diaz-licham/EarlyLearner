@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { UilEditAlt, UilEstate, UilPlus, UilUserPlus } from '@iconscout/react-unicons';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppCard } from '../../../shared/ui/AppCard';
@@ -12,15 +13,32 @@ interface HouseholdHeaderProps {
   isError: boolean;
   isSavingName: boolean;
   nameDraft: string;
-  onAddChild: (household: HouseholdModel) => void;
+  onAddChild: () => void;
   onCancelRename: () => void;
-  onInviteCarer: (household: HouseholdModel) => void;
+  onInviteCarer: () => void;
   onNameDraftChange: (name: string) => void;
-  onSaveRename: () => void;
+  onSaveRename: () => Promise<void>;
   onStartRename: (household: HouseholdModel) => void;
 }
 
 export const HouseholdHeader = ({ household, isEditingName, isLoading, isError, isSavingName, nameDraft, onAddChild, onCancelRename, onInviteCarer, onNameDraftChange, onSaveRename, onStartRename }: HouseholdHeaderProps) => {
+  const handleNameInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      void onSaveRename();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onCancelRename();
+    }
+  };
+
+  const handleSaveClick = () => {
+    void onSaveRename();
+  };
+
   return (
     <AppCard>
       {isLoading ? <p className="text-sm text-brand-muted">Loading household...</p> : null}
@@ -48,12 +66,9 @@ export const HouseholdHeader = ({ household, isEditingName, isLoading, isError, 
                   onChange={(event) => {
                     onNameDraftChange(event.target.value);
                   }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') onSaveRename();
-                    if (event.key === 'Escape') onCancelRename();
-                  }}
+                  onKeyDown={handleNameInputKeyDown}
                 />
-                <AppButton disabled={isSavingName} label={isSavingName ? 'Saving...' : 'Save'} onClick={onSaveRename} />
+                <AppButton disabled={isSavingName} label={isSavingName ? 'Saving...' : 'Save'} onClick={handleSaveClick} />
                 <AppButton label="Cancel" variant="secondary" onClick={onCancelRename} />
               </div>
             ) : (
@@ -73,21 +88,8 @@ export const HouseholdHeader = ({ household, isEditingName, isLoading, isError, 
             <p className="mt-2 max-w-2xl text-brand-muted">Manage the people who can access this household and keep their responsibilities clear.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <AppButton
-              icon={<UilPlus aria-hidden="true" className="h-5 w-5" />}
-              label="Add child"
-              onClick={() => {
-                onAddChild(household);
-              }}
-            />
-            <AppButton
-              icon={<UilUserPlus aria-hidden="true" className="h-5 w-5" />}
-              label="Invite carer"
-              variant="secondary"
-              onClick={() => {
-                onInviteCarer(household);
-              }}
-            />
+            <AppButton icon={<UilPlus aria-hidden="true" className="h-5 w-5" />} label="Add child" onClick={onAddChild} />
+            <AppButton icon={<UilUserPlus aria-hidden="true" className="h-5 w-5" />} label="Invite carer" variant="secondary" onClick={onInviteCarer} />
           </div>
         </div>
       ) : null}

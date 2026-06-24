@@ -1,21 +1,19 @@
 import { useState } from 'react';
-import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 import { AddChildDialog } from '../components/AddChildDialog';
 import { HouseholdHeader } from '../components/HouseholdHeader';
 import { HouseholdMembers } from '../components/HouseholdMembers';
 import { HouseholdSummaryCard } from '../components/HouseholdSummaryCard';
 import { InviteCarerDialog } from '../components/InviteCarerDialog';
-import { useAddChildForm } from '../hooks/useAddChildForm';
-import { useInviteCarerForm } from '../hooks/useInviteCarerForm';
-import { useAddHouseholdChildMutation, useHouseholdsQuery, useInviteHouseholdCarerMutation, useRemoveHouseholdCarerMutation, useUpdateHouseholdMutation } from '../queries/household.queries';
-import type { HouseholdModel } from '../types/household.types';
-
-const formatDate = (value: string): string =>
-  new Intl.DateTimeFormat('en-AU', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  }).format(new Date(value));
+import {
+  useAddHouseholdChildMutation,
+  useHouseholdsQuery,
+  useInviteHouseholdCarerMutation,
+  useRemoveHouseholdCarerMutation,
+  useRemoveHouseholdChildMutation,
+  useUpdateHouseholdChildMutation,
+  useUpdateHouseholdMutation
+} from '../queries/household.queries';
+import type { AddChildForm, ChildModel, HouseholdModel, InviteCarerForm } from '../types/household.types';
 
 const getStatusTone = (status: string): 'success' | 'warning' | 'neutral' => {
   const normalizedStatus = status.toLowerCase();
@@ -25,23 +23,21 @@ const getStatusTone = (status: string): 'success' | 'warning' | 'neutral' => {
 };
 
 export const HouseholdsPage = () => {
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [nameDraft, setNameDraft] = useState('');
-  const [inviteHouseholdId, setInviteHouseholdId] = useState<string | null>(null);
-  const [childHouseholdId, setChildHouseholdId] = useState<string | null>(null);
-
-  const inviteCarerForm = useInviteCarerForm();
-  const addChildForm = useAddChildForm();
-
   const householdsQuery = useHouseholdsQuery();
   const updateHouseholdMutation = useUpdateHouseholdMutation();
   const inviteHouseholdCarerMutation = useInviteHouseholdCarerMutation();
   const removeHouseholdCarerMutation = useRemoveHouseholdCarerMutation();
   const addHouseholdChildMutation = useAddHouseholdChildMutation();
+  const updateHouseholdChildMutation = useUpdateHouseholdChildMutation();
+  const removeHouseholdChildMutation = useRemoveHouseholdChildMutation();
 
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [inviteCarer, setIniviteCarer] = useState<boolean>(false);
+  const [addChild, setAddChild] = useState<boolean>(false);
+  const [editChild, setEditChild] = useState<boolean>(false);
+  const [editingChild, setEditingChild] = useState<ChildModel | null>(null);
   const household = householdsQuery.data?.[0] ?? null;
-  const inviteHousehold = inviteHouseholdId && household?.id === inviteHouseholdId ? household : null;
-  const childHousehold = childHouseholdId && household?.id === childHouseholdId ? household : null;
 
   const startRename = (currentHousehold: HouseholdModel) => {
     setNameDraft(currentHousehold.name);
@@ -53,7 +49,7 @@ export const HouseholdsPage = () => {
     setIsEditingName(false);
   };
 
-  const saveRename = () => {
+  const saveRename = async () => {
     if (!household) return;
 
     const name = nameDraft.trim();
@@ -61,64 +57,61 @@ export const HouseholdsPage = () => {
       cancelRename();
       return;
     }
-
-    updateHouseholdMutation.mutate(
-      { householdId: household.id, form: { name } },
-      {
-        onSuccess: () => {
-          cancelRename();
-        }
-      }
-    );
+    await updateHouseholdMutation.mutateAsync({ householdId: household.id, form: { name } });
+    cancelRename();
   };
 
-  const handleInviteCarer = (currentHousehold: HouseholdModel) => {
-    setInviteHouseholdId(currentHousehold.id);
-    inviteCarerForm.reset();
+  const handleInviteCarer = () => {
+    setIniviteCarer(true);
   };
 
-  const handleSaveInvite = () => {
-    if (!inviteHouseholdId) return;
-
-    const form = inviteCarerForm.getValidForm();
-    if (!form) return;
-
-    inviteHouseholdCarerMutation.mutate(
-      { householdId: inviteHouseholdId, form },
-      {
-        onSuccess: () => {
-          inviteCarerForm.reset();
-          setInviteHouseholdId(null);
-        }
-      }
-    );
+  const handleSaveInvite = async (form: InviteCarerForm) => {
+    if (!inviteCarer || !household) return;
+    await inviteHouseholdCarerMutation.mutateAsync({ householdId: household.id, form });
+    setIniviteCarer(false);
   };
 
-  const handleAddChild = (currentHousehold: HouseholdModel) => {
-    setChildHouseholdId(currentHousehold.id);
-    addChildForm.reset();
+  const handleAddChild = () => {
+    setEditChild(false);
+    setEditingChild(null);
+    setAddChild(true);
   };
 
-  const handleSaveChild = () => {
-    if (!childHouseholdId) return;
-
-    const form = addChildForm.getValidForm();
-    if (!form) return;
-
-    addHouseholdChildMutation.mutate(
-      { householdId: childHouseholdId, form },
-      {
-        onSuccess: () => {
-          addChildForm.reset();
-          setChildHouseholdId(null);
-        }
-      }
-    );
-  };
-
-  const removeCarer = (carerId: string) => {
+  const handleSaveChild = async (form: AddChildForm) => {
     if (!household) return;
-    removeHouseholdCarerMutation.mutate({ householdId: household.id, carerId });
+
+    if (editChild && editingChild) {
+      await updateHouseholdChildMutation.mutateAsync({ householdId: household.id, childId: editingChild.id, form });
+      setEditChild(false);
+      setEditingChild(null);
+      return;
+    }
+
+    if (!addChild) return;
+    await addHouseholdChildMutation.mutateAsync({ householdId: household.id, form });
+    setAddChild(false);
+  };
+
+  const handleEditChild = (child: ChildModel) => {
+    setAddChild(false);
+    setEditingChild(child);
+    setEditChild(true);
+  };
+
+  const handleCloseChildDialog = () => {
+    setAddChild(false);
+    setEditChild(false);
+    setEditingChild(null);
+  };
+
+  const removeChild = async (childId: string) => {
+    if (!household) return;
+    await removeHouseholdChildMutation.mutateAsync({ householdId: household.id, childId });
+  };
+
+  const removeCarer = async (carerId: string) => {
+    if (!household) return;
+    await removeHouseholdCarerMutation.mutateAsync({ householdId: household.id, carerId });
   };
 
   return (
@@ -140,42 +133,21 @@ export const HouseholdsPage = () => {
 
       {household ? (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <HouseholdMembers carers={household.carers} getStatusTone={getStatusTone} isRemoving={removeHouseholdCarerMutation.isPending} onRemove={removeCarer} />
+          <HouseholdMembers
+            household={household}
+            getStatusTone={getStatusTone}
+            isRemovingCarer={removeHouseholdCarerMutation.isPending}
+            isRemovingChild={removeHouseholdChildMutation.isPending}
+            onEditChild={handleEditChild}
+            onRemoveCarer={(carerId) => {
+              void removeCarer(carerId);
+            }}
+            onRemoveChild={(childId) => {
+              void removeChild(childId);
+            }}
+          />
 
           <aside className="space-y-5">
-            <HouseholdSummaryCard isEmpty={household.children.length === 0} emptyMessage="No child profiles have been added yet." title="Children">
-              <div className="space-y-3">
-                {household.children.map((child) => (
-                  <div className="rounded-md border border-brand-border p-4" key={child.id}>
-                    <h2 className="font-bold text-brand-heading">
-                      {child.firstName} {child.lastName}
-                    </h2>
-                    <p className="mt-1 text-sm text-brand-muted">Born {formatDate(child.dateOfBirth)}</p>
-                  </div>
-                ))}
-              </div>
-            </HouseholdSummaryCard>
-
-            <HouseholdSummaryCard isEmpty={household.invitations.length === 0} emptyMessage="No carer invitations have been sent." title="Invitations">
-              <div className="space-y-3">
-                {household.invitations.map((invitation) => (
-                  <div className="rounded-md border border-brand-border p-4" key={invitation.id}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h2 className="font-bold text-brand-heading">{invitation.firstName || invitation.lastName ? `${invitation.firstName} ${invitation.lastName}`.trim() : invitation.email}</h2>
-                        {invitation.firstName || invitation.lastName ? <p className="mt-1 break-all text-sm text-brand-muted">{invitation.email}</p> : null}
-                      </div>
-                      <AppStatusBadge tone={getStatusTone(invitation.status)}>{invitation.status}</AppStatusBadge>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <AppStatusBadge>{invitation.role}</AppStatusBadge>
-                      <span className="text-xs font-semibold text-brand-muted">Expires {formatDate(invitation.expiresAt)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </HouseholdSummaryCard>
-
             <HouseholdSummaryCard title="Household Summary">
               <p className="text-sm text-brand-muted">Members</p>
               <p className="mt-2 text-4xl font-bold text-brand-heading">{household.carers.length}</p>
@@ -188,32 +160,26 @@ export const HouseholdsPage = () => {
       ) : null}
 
       <InviteCarerDialog
-        canSave={inviteCarerForm.isValid}
-        draft={inviteCarerForm.draft}
-        errors={inviteCarerForm.errors}
-        household={inviteHousehold}
+        household={household}
         saving={inviteHouseholdCarerMutation.isPending}
-        visible={Boolean(inviteHouseholdId)}
-        onChange={inviteCarerForm.setDraft}
+        visible={inviteCarer}
         onHide={() => {
-          inviteCarerForm.reset();
-          setInviteHouseholdId(null);
+          setIniviteCarer(false);
         }}
-        onSave={handleSaveInvite}
+        onSave={(form) => {
+          void handleSaveInvite(form);
+        }}
       />
       <AddChildDialog
-        canSave={addChildForm.isValid}
-        draft={addChildForm.draft}
-        errors={addChildForm.errors}
-        household={childHousehold}
-        saving={addHouseholdChildMutation.isPending}
-        visible={Boolean(childHouseholdId)}
-        onChange={addChildForm.setDraft}
-        onHide={() => {
-          addChildForm.reset();
-          setChildHouseholdId(null);
+        key={editChild && editingChild ? editingChild.id : addChild ? 'add-child-open' : 'add-child-closed'}
+        child={editChild ? editingChild : null}
+        household={household}
+        saving={addHouseholdChildMutation.isPending || updateHouseholdChildMutation.isPending}
+        visible={addChild || editChild}
+        onHide={handleCloseChildDialog}
+        onSave={(form) => {
+          void handleSaveChild(form);
         }}
-        onSave={handleSaveChild}
       />
     </section>
   );
