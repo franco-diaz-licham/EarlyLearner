@@ -1,42 +1,34 @@
 import { apiClient } from '../../../shared/api/apiClient';
-import { mapHouseholdResponseToModel, mapHouseholdResponsesToModels } from '../mappers/household.mapper';
-import type { AddHouseholdChildRequest, HouseholdModel, HouseholdResponse, InviteHouseholdCarerRequest, UpdateHouseholdRequest } from '../types/household.types';
+import type { AddHouseholdChildRequest, HouseholdResponse, InviteHouseholdCarerRequest, UpdateHouseholdRequest } from '../types/household.api.types';
 
 const HOUSEHOLDS_URL = '/households';
 
 export const householdService = {
-  async list(): Promise<HouseholdModel[]> {
-    const households = await apiClient.getList<HouseholdResponse>(HOUSEHOLDS_URL);
-    return mapHouseholdResponsesToModels(households);
+  async list(): Promise<HouseholdResponse[]> {
+    return apiClient.getList<HouseholdResponse>(HOUSEHOLDS_URL);
   },
 
-  async get(householdId: string): Promise<HouseholdModel> {
-    const household = await apiClient.getSingle<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}`);
-    return mapHouseholdResponseToModel(household);
+  async get(householdId: string): Promise<HouseholdResponse> {
+    return apiClient.getSingle<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}`);
   },
 
-  async update(householdId: string, request: UpdateHouseholdRequest): Promise<HouseholdModel> {
-    const household = await apiClient.put<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}`, request);
-    return mapHouseholdResponseToModel(household);
+  async update(householdId: string, request: UpdateHouseholdRequest): Promise<HouseholdResponse> {
+    return apiClient.put<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}`, request);
   },
 
-  async inviteCarer(householdId: string, request: InviteHouseholdCarerRequest): Promise<HouseholdModel> {
-    const household = await apiClient.post<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/carer-invitations`, request);
-    return mapHouseholdResponseToModel(household);
+  async inviteCarer(householdId: string, request: InviteHouseholdCarerRequest): Promise<HouseholdResponse> {
+    return apiClient.post<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/carer-invitations`, request);
   },
 
-  async removeCarer(householdId: string, carerId: string): Promise<HouseholdModel> {
-    const household = await apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/carers/${carerId}`);
-    return mapHouseholdResponseToModel(household);
+  async removeCarer(householdId: string, carerId: string): Promise<HouseholdResponse> {
+    return apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/carers/${carerId}`);
   },
 
-  async addChild(householdId: string, request: AddHouseholdChildRequest): Promise<HouseholdModel> {
-    const household = await apiClient.post<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children`, request);
-    return mapHouseholdResponseToModel(household);
+  async addChild(householdId: string, request: AddHouseholdChildRequest): Promise<HouseholdResponse> {
+    return apiClient.post<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children`, request);
   },
 
-  async removeChild(householdId: string, childId: string): Promise<HouseholdModel> {
-    const household = await apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children/${childId}`);
-    return mapHouseholdResponseToModel(household);
+  async removeChild(householdId: string, childId: string): Promise<HouseholdResponse> {
+    return apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children/${childId}`);
   }
 };

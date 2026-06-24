@@ -1,10 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { mapAddChildFormToRequest, mapHouseholdResponseToModel, mapHouseholdResponsesToModels, mapInviteCarerFormToRequest, mapRenameHouseholdFormToRequest } from '../mappers/household.mapper';
 import { householdService } from '../services/household.services';
-import type {
-  AddHouseholdChildRequest,
-  InviteHouseholdCarerRequest,
-  UpdateHouseholdRequest
-} from '../types/household.types';
+import type { AddChildForm, InviteCarerForm, RenameHouseholdForm } from '../types/household.types';
 
 export const householdKeys = {
   all: ['households'] as const,
@@ -17,13 +14,19 @@ export const householdKeys = {
 export const useHouseholdsQuery = () =>
   useQuery({
     queryKey: householdKeys.list(),
-    queryFn: () => householdService.list()
+    queryFn: async () => {
+      const households = await householdService.list();
+      return mapHouseholdResponsesToModels(households);
+    }
   });
 
 export const useHouseholdQuery = (householdId: string) =>
   useQuery({
     queryKey: householdKeys.detail(householdId),
-    queryFn: () => householdService.get(householdId),
+    queryFn: async () => {
+      const household = await householdService.get(householdId);
+      return mapHouseholdResponseToModel(household);
+    },
     enabled: Boolean(householdId)
   });
 
@@ -31,7 +34,10 @@ export const useUpdateHouseholdMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ householdId, request }: { householdId: string; request: UpdateHouseholdRequest }) => householdService.update(householdId, request),
+    mutationFn: async ({ householdId, form }: { householdId: string; form: RenameHouseholdForm }) => {
+      const household = await householdService.update(householdId, mapRenameHouseholdFormToRequest(form));
+      return mapHouseholdResponseToModel(household);
+    },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
       queryClient.setQueryData(householdKeys.detail(household.id), household);
@@ -43,7 +49,10 @@ export const useInviteHouseholdCarerMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ householdId, request }: { householdId: string; request: InviteHouseholdCarerRequest }) => householdService.inviteCarer(householdId, request),
+    mutationFn: async ({ householdId, form }: { householdId: string; form: InviteCarerForm }) => {
+      const household = await householdService.inviteCarer(householdId, mapInviteCarerFormToRequest(form));
+      return mapHouseholdResponseToModel(household);
+    },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
       queryClient.setQueryData(householdKeys.detail(household.id), household);
@@ -55,7 +64,10 @@ export const useRemoveHouseholdCarerMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ householdId, carerId }: { householdId: string; carerId: string }) => householdService.removeCarer(householdId, carerId),
+    mutationFn: async ({ householdId, carerId }: { householdId: string; carerId: string }) => {
+      const household = await householdService.removeCarer(householdId, carerId);
+      return mapHouseholdResponseToModel(household);
+    },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
       queryClient.setQueryData(householdKeys.detail(household.id), household);
@@ -67,7 +79,10 @@ export const useAddHouseholdChildMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ householdId, request }: { householdId: string; request: AddHouseholdChildRequest }) => householdService.addChild(householdId, request),
+    mutationFn: async ({ householdId, form }: { householdId: string; form: AddChildForm }) => {
+      const household = await householdService.addChild(householdId, mapAddChildFormToRequest(form));
+      return mapHouseholdResponseToModel(household);
+    },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
       queryClient.setQueryData(householdKeys.detail(household.id), household);
@@ -79,7 +94,10 @@ export const useRemoveHouseholdChildMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ householdId, childId }: { householdId: string; childId: string }) => householdService.removeChild(householdId, childId),
+    mutationFn: async ({ householdId, childId }: { householdId: string; childId: string }) => {
+      const household = await householdService.removeChild(householdId, childId);
+      return mapHouseholdResponseToModel(household);
+    },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
       queryClient.setQueryData(householdKeys.detail(household.id), household);

@@ -1,37 +1,12 @@
-export interface HouseholdResponse {
-  id: string;
-  name: string;
-  carers: CarerResponse[];
-  children: ChildResponse[];
-  invitations: HouseholdInvitationResponse[];
-}
-
 export interface HouseholdModel {
   id: string;
   name: string;
-  carers: CarerResponse[];
-  children: ChildResponse[];
-  invitations: HouseholdInvitationResponse[];
+  carers: CarerModel[];
+  children: ChildModel[];
+  invitations: HouseholdInvitationModel[];
 }
 
-export interface UpdateHouseholdRequest {
-  name: string;
-}
-
-export type HouseholdRole = 2 | 3;
-
-export interface InviteHouseholdCarerRequest {
-  email: string;
-  role: HouseholdRole;
-}
-
-export interface AddHouseholdChildRequest {
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-}
-
-export interface CarerResponse {
+export interface CarerModel {
   id: string;
   userId: string;
   email: string;
@@ -41,14 +16,14 @@ export interface CarerResponse {
   accountStatus: string;
 }
 
-export interface ChildResponse {
+export interface ChildModel {
   id: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
 }
 
-export interface HouseholdInvitationResponse {
+export interface HouseholdInvitationModel {
   id: string;
   email: string;
   firstName: string | null;
@@ -57,4 +32,21 @@ export interface HouseholdInvitationResponse {
   status: string;
   invitedAt: string;
   expiresAt: string;
+}
+
+export interface RenameHouseholdForm {
+  name: string;
+}
+
+export type InviteCarerRole = 'caregiver' | 'viewer';
+
+export interface InviteCarerForm {
+  email: string;
+  role: InviteCarerRole;
+}
+
+export interface AddChildForm {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
 }
