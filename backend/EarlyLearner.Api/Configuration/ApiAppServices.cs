@@ -13,6 +13,8 @@ using FluentValidation;
 using Microsoft.OpenApi;
 using Serilog;
 using Serilog.Events;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EarlyLearner.Api.Configuration;
 
@@ -22,6 +24,9 @@ public static class ApiAppServices
     {
         builder.Services.AddSwaggerServices();
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.ConfigureHttpJsonOptions(options => {
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+        });
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddRequestValidators();
 
@@ -105,6 +110,7 @@ public static class ApiAppServices
     {
         services.AddSwaggerGen(options => {
             options.SwaggerDoc(name: "v1", info: new OpenApiInfo { Title = "EarlyLearner API v1" });
+            options.SchemaFilter<EnumSchemaFilter>();
         });
         return services;
     }

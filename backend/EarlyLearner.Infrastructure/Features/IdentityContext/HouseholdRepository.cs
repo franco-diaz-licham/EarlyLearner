@@ -11,11 +11,13 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
 {
     public async Task<List<HouseholdResponse>> ListAsync(IReadOnlyCollection<HouseholdId> householdIds, CancellationToken cancellationToken)
     {
-        var ids = householdIds.Select(id => id.Value).ToArray();
+        if (householdIds.Count == 0) return [];
+
+        var ids = householdIds.Distinct().ToArray();
 
         return await db.Households
             .AsNoTracking()
-            .Where(household => ids.Contains(household.Id.Value))
+            .Where(household => ids.Contains(household.Id))
             .OrderBy(household => household.Name)
             .Select(household => new HouseholdResponse(
                 household.Id.Value,
@@ -126,8 +128,4 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
         db.Users.Add(user);
     }
 
-    public void Remove(Household household)
-    {
-        db.Households.Remove(household);
-    }
 }

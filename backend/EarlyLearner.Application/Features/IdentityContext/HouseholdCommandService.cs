@@ -25,7 +25,6 @@ public interface IHouseholdCommandService
     Task<Result<HouseholdResponse>> RemoveCarerAsync(RemoveHouseholdCarerCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> AddChildAsync(AddHouseholdChildCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> RemoveChildAsync(RemoveHouseholdChildCommand command, CancellationToken cancellationToken);
-    Task<Result> DeleteAsync(Guid householdId, CancellationToken cancellationToken);
 }
 
 public interface IHouseholdCommandRepository
@@ -35,7 +34,6 @@ public interface IHouseholdCommandRepository
     Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
     void AddUser(User user);
-    void Remove(Household household);
 }
 
 public sealed class HouseholdCommandService(IHouseholdCommandRepository householdRepo, IUnitOfWork uow, ICurrentUser user) : IHouseholdCommandService
@@ -127,18 +125,6 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after removing child.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
-    }
-
-    public async Task<Result> DeleteAsync(Guid householdId, CancellationToken cancellationToken)
-    {
-        if (!CanAccess(householdId)) return Result.Fail("Household access denied.", ResultTypeEnum.Forbidden);
-
-        var household = await householdRepo.GetAsync(new HouseholdId(householdId), cancellationToken);
-        if (household is null) return Result.Fail("Household was not found.", ResultTypeEnum.NotFound);
-
-        householdRepo.Remove(household);
-        var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
-        return saved ? Result.Success(ResultTypeEnum.Success) : Result.Fail("Household could not be deleted.", ResultTypeEnum.Invalid);
     }
 
     private bool CanAccess(Guid householdId)
