@@ -16,7 +16,6 @@ public static class HouseholdEndpoints
 
         households.MapGet("/", ListHouseholds).WithName(nameof(ListHouseholds));
         households.MapGet("/{householdId:guid}", GetHousehold).WithName(nameof(GetHousehold));
-        households.MapPost("/", CreateHousehold).WithName(nameof(CreateHousehold));
         households.MapPut("/{householdId:guid}", UpdateHousehold).WithName(nameof(UpdateHousehold));
         households.MapPost("/{householdId:guid}/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
         households.MapDelete("/{householdId:guid}/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
@@ -39,16 +38,6 @@ public static class HouseholdEndpoints
 
         var result = await queryService.GetAsync(new HouseholdId(householdId), cancellationToken);
         return result.ToApiResult();
-    }
-
-    public static async Task<IResult> CreateHousehold(CreateHouseholdRequest request, IValidator<CreateHouseholdRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
-    {
-        var validation = validator.Validate(request).ToResult();
-        if (!validation.IsSuccess) return validation.ToApiResult();
-
-        var result = await commandService.CreateAsync(request.Name, cancellationToken);
-        var locationUrl = result.IsSuccess ? $"/households/{result.Value.Id}" : null;
-        return result.ToApiResult(locationUrl);
     }
 
     public static async Task<IResult> UpdateHousehold(Guid householdId, UpdateHouseholdRequest request, IValidator<UpdateHouseholdRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
@@ -132,16 +121,6 @@ public static class HouseholdEndpoints
 
         var result = await commandService.RemoveChildAsync(command, cancellationToken);
         return result.ToApiResult();
-    }
-}
-
-public sealed record CreateHouseholdRequest(string Name);
-
-public sealed class CreateHouseholdRequestValidator : AbstractValidator<CreateHouseholdRequest>
-{
-    public CreateHouseholdRequestValidator()
-    {
-        RuleFor(request => request.Name).NotEmpty();
     }
 }
 

@@ -144,7 +144,6 @@ public static class ApiAppServices
     {
         services.AddScoped<IValidator<CreateStoredFileRequest>, CreateStoredFileRequestValidator>();
         services.AddScoped<IValidator<UpdateStoredFileStatusRequest>, UpdateStoredFileStatusRequestValidator>();
-        services.AddScoped<IValidator<CreateHouseholdRequest>, CreateHouseholdRequestValidator>();
         services.AddScoped<IValidator<UpdateHouseholdRequest>, UpdateHouseholdRequestValidator>();
         services.AddScoped<IValidator<InviteHouseholdCarerRequest>, InviteHouseholdCarerRequestValidator>();
         services.AddScoped<IValidator<AddHouseholdChildRequest>, AddHouseholdChildRequestValidator>();

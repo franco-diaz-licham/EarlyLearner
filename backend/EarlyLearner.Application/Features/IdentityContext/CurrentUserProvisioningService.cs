@@ -17,7 +17,20 @@ public sealed record ExternalUserIdentity(
 
 public interface ICurrentUserProvisioningService
 {
+    /// <summary>
+    /// Creates or updates the application user for the authenticated external identity and ensures the user has a household membership.
+    /// </summary>
+    /// <param name="identity">The verified identity claims from the external identity provider.</param>
+    /// <param name="cancellationToken">Cancels the provisioning operation.</param>
+    /// <returns>The current application user model when provisioning succeeds.</returns>
     Task<Result<UserModel>> EnsureCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Resolves an existing application user for the authenticated external identity without creating or updating records.
+    /// </summary>
+    /// <param name="identity">The verified identity claims from the external identity provider.</param>
+    /// <param name="cancellationToken">Cancels the lookup operation.</param>
+    /// <returns>The current application user model when the user and membership already exist.</returns>
     Task<Result<UserModel>> ResolveCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken);
 }
 
@@ -32,7 +45,7 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         user = await UpsertUser(user, identity, cancellationToken);
         if (user.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
 
-        var membership = await CreateHousehold(user, identity, cancellationToken);
+        var membership = await EnsureHouseholdMembership(user, identity, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
         return Result<UserModel>.Success(Map(user, membership.HouseholdId, membership.CarerId), ResultTypeEnum.Success);
     }
@@ -70,7 +83,7 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         return user;
     }
 
-    private async Task<(HouseholdId HouseholdId, CarerId? CarerId)> CreateHousehold(User user, ExternalUserIdentity identity, CancellationToken cancellationToken)
+    private async Task<(HouseholdId HouseholdId, CarerId? CarerId)> EnsureHouseholdMembership(User user, ExternalUserIdentity identity, CancellationToken cancellationToken)
     {
         var membership = await userRepo.GetMembershipAsync(user.Id, cancellationToken);
         if (membership is null) {

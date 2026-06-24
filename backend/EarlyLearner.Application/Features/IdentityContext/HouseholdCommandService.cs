@@ -20,7 +20,6 @@ public sealed record RemoveHouseholdChildCommand(Guid HouseholdId, Guid ChildId)
 
 public interface IHouseholdCommandService
 {
-    Task<Result<HouseholdResponse>> CreateAsync(string name, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> UpdateAsync(UpdateHouseholdCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> AddCarerAsync(AddHouseholdCarerCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> RemoveCarerAsync(RemoveHouseholdCarerCommand command, CancellationToken cancellationToken);
@@ -35,7 +34,6 @@ public interface IHouseholdCommandRepository
     Task<HouseholdResponse?> GetResponseAsync(HouseholdId householdId, CancellationToken cancellationToken);
     Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
-    void Add(Household household);
     void AddUser(User user);
     void Remove(Household household);
 }
@@ -43,19 +41,6 @@ public interface IHouseholdCommandRepository
 public sealed class HouseholdCommandService(IHouseholdCommandRepository householdRepo, IUnitOfWork uow, ICurrentUser user) : IHouseholdCommandService
 {
     private static readonly TimeSpan InvitationLifetime = TimeSpan.FromDays(1);
-
-    public async Task<Result<HouseholdResponse>> CreateAsync(string name, CancellationToken cancellationToken)
-    {
-        var household = Household.Create(name, user.UserId);
-        householdRepo.Add(household);
-
-        var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
-        if (!saved) return Result<HouseholdResponse>.Fail("Household could not be created.", ResultTypeEnum.Invalid);
-
-        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
-        if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after creation.", ResultTypeEnum.Invalid);
-        return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Created);
-    }
 
     public async Task<Result<HouseholdResponse>> UpdateAsync(UpdateHouseholdCommand command, CancellationToken cancellationToken)
     {
@@ -80,8 +65,7 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         if (invitedUser is null) {
             var expiresAt = DateTimeOffset.UtcNow.Add(InvitationLifetime);
             household.InviteCarer(command.Email, command.FirstName, command.LastName, command.Role, user.UserId, expiresAt);
-        }
-        else {
+        } else {
             household.AddCarer(invitedUser.Id, command.Role);
         }
 

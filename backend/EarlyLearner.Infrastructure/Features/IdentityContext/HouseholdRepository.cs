@@ -118,11 +118,6 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
         return db.Users.SingleOrDefaultAsync(user => user.Email == normalizedEmail, cancellationToken);
     }
 
-    public void Add(Household household)
-    {
-        db.Households.Add(household);
-    }
-
     public void AddUser(User user)
     {
         db.Users.Add(user);
