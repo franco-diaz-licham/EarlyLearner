@@ -57,4 +57,18 @@ public class UserRepository(DatabaseContext db) : IUserQueryRepository, IUserPro
 
         return membership is null ? null : (membership.HouseholdId, membership.CarerId);
     }
+
+    public async Task<List<(HouseholdId HouseholdId, CarerId? CarerId)>> GetMembershipsAsync(UserId userId, CancellationToken cancellationToken)
+    {
+        var memberships = await db.Carers
+            .AsNoTracking()
+            .Where(carer => carer.UserId == userId)
+            .OrderBy(carer => carer.CreatedOn)
+            .Select(carer => new { carer.HouseholdId, carer.Id })
+            .ToListAsync(cancellationToken);
+
+        return memberships
+            .Select(membership => (membership.HouseholdId, CarerId: (CarerId?)membership.Id))
+            .ToList();
+    }
 }

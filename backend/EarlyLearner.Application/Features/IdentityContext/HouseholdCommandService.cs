@@ -10,11 +10,11 @@ namespace EarlyLearner.Application.Features.IdentityContext;
 
 public sealed record UpdateHouseholdCommand(Guid HouseholdId, string Name);
 
-public sealed record AddHouseholdCarerCommand(Guid HouseholdId, string Email, string FirstName, string LastName, HouseholdRoleEnum Role);
+public sealed record AddHouseholdCarerCommand(Guid HouseholdId, string Email, HouseholdRoleEnum Role);
 
 public sealed record RemoveHouseholdCarerCommand(Guid HouseholdId, Guid CarerId);
 
-public sealed record AddHouseholdChildCommand(Guid HouseholdId, string GivenName, DateOnly DateOfBirth);
+public sealed record AddHouseholdChildCommand(Guid HouseholdId, string FirstName, string LastName, DateOnly DateOfBirth);
 
 public sealed record RemoveHouseholdChildCommand(Guid HouseholdId, Guid ChildId);
 
@@ -44,6 +44,8 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
     public async Task<Result<HouseholdResponse>> UpdateAsync(UpdateHouseholdCommand command, CancellationToken cancellationToken)
     {
+        if (!CanAccess(command.HouseholdId)) return Result<HouseholdResponse>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
+
         var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
@@ -58,13 +60,15 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
     public async Task<Result<HouseholdResponse>> AddCarerAsync(AddHouseholdCarerCommand command, CancellationToken cancellationToken)
     {
+        if (!CanAccess(command.HouseholdId)) return Result<HouseholdResponse>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
+
         var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         var invitedUser = await householdRepo.GetUserByEmailAsync(command.Email, cancellationToken);
         if (invitedUser is null) {
             var expiresAt = DateTimeOffset.UtcNow.Add(InvitationLifetime);
-            household.InviteCarer(command.Email, command.FirstName, command.LastName, command.Role, user.UserId, expiresAt);
+            household.InviteCarer(command.Email, command.Role, user.UserId, expiresAt);
         } else {
             household.AddCarer(invitedUser.Id, command.Role);
         }
@@ -79,6 +83,8 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
     public async Task<Result<HouseholdResponse>> RemoveCarerAsync(RemoveHouseholdCarerCommand command, CancellationToken cancellationToken)
     {
+        if (!CanAccess(command.HouseholdId)) return Result<HouseholdResponse>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
+
         var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
@@ -93,10 +99,12 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
     public async Task<Result<HouseholdResponse>> AddChildAsync(AddHouseholdChildCommand command, CancellationToken cancellationToken)
     {
+        if (!CanAccess(command.HouseholdId)) return Result<HouseholdResponse>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
+
         var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
-        household.AddChild(command.GivenName, command.DateOfBirth);
+        household.AddChild(command.FirstName, command.LastName, command.DateOfBirth);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Child could not be added.", ResultTypeEnum.Invalid);
 
@@ -107,6 +115,8 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
     public async Task<Result<HouseholdResponse>> RemoveChildAsync(RemoveHouseholdChildCommand command, CancellationToken cancellationToken)
     {
+        if (!CanAccess(command.HouseholdId)) return Result<HouseholdResponse>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
+
         var household = await householdRepo.GetAsync(new HouseholdId(command.HouseholdId), cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
@@ -121,11 +131,18 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
     public async Task<Result> DeleteAsync(Guid householdId, CancellationToken cancellationToken)
     {
+        if (!CanAccess(householdId)) return Result.Fail("Household access denied.", ResultTypeEnum.Forbidden);
+
         var household = await householdRepo.GetAsync(new HouseholdId(householdId), cancellationToken);
         if (household is null) return Result.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         householdRepo.Remove(household);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         return saved ? Result.Success(ResultTypeEnum.Success) : Result.Fail("Household could not be deleted.", ResultTypeEnum.Invalid);
+    }
+
+    private bool CanAccess(Guid householdId)
+    {
+        return householdId != Guid.Empty && user.CanAccess(new HouseholdId(householdId));
     }
 }

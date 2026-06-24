@@ -68,7 +68,7 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
-    public HouseholdInvitation InviteCarer(string email, string firstName, string lastName, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
+    public HouseholdInvitation InviteCarer(string email, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
     {
         var normalizedEmail = Required(email, nameof(email)).ToLowerInvariant();
         var existingInvitation = _invitations
@@ -83,12 +83,9 @@ public sealed class Household : Entity<HouseholdId>
             return existingInvitation;
         }
 
-        var invitation = new HouseholdInvitation(
-            new HouseholdInvitationId(Guid.NewGuid()),
+        var invitation = HouseholdInvitation.CreatePending(
             Id,
             normalizedEmail,
-            firstName,
-            lastName,
             role,
             invitedByUserId,
             expiresAt);
@@ -122,9 +119,9 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
-    public Child AddChild(string givenName, DateOnly dateOfBirth)
+    public Child AddChild(string firstName, string lastName, DateOnly dateOfBirth)
     {
-        var child = new Child(new ChildId(Guid.NewGuid()), Id, givenName, dateOfBirth);
+        var child = new Child(new ChildId(Guid.NewGuid()), Id, firstName, lastName, dateOfBirth);
         _children.Add(child);
         RaiseDomainEvent(new ChildCreated(Id, child.Id, DateTimeOffset.UtcNow));
         SetUpdatedOn();

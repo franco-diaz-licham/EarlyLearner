@@ -34,11 +34,11 @@ public sealed class HouseholdInvitationConfig : IEntityTypeConfiguration<Househo
 
         builder.Property(invitation => invitation.FirstName)
             .HasMaxLength(100)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(invitation => invitation.LastName)
             .HasMaxLength(100)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(invitation => invitation.Role)
             .HasConversion<string>()

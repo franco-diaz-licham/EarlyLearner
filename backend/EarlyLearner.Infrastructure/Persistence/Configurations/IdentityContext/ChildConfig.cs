@@ -30,6 +30,10 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
             .HasMaxLength(120)
             .IsRequired();
 
+        builder.Property(child => child.LastName)
+            .HasMaxLength(120)
+            .IsRequired();
+
         builder.Property(child => child.DateOfBirth)
             .IsRequired();
 
@@ -37,7 +41,6 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
             .IsRequired();
 
         builder.HasIndex(child => new { child.HouseholdId, child.FirstName });
-        builder.Ignore(child => child.LastName);
         builder.Property(child => child.CreatedOn).IsRequired();
         builder.Property(child => child.UpdatedOn).IsRequired(false);
         builder.Ignore(child => child.DomainEvents);

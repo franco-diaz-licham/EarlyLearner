@@ -73,8 +73,6 @@ public static class HouseholdEndpoints
         var command = new AddHouseholdCarerCommand(
             HouseholdId: householdId,
             Email: request.Email,
-            FirstName: request.FirstName,
-            LastName: request.LastName,
             Role: request.Role);
 
         var result = await commandService.AddCarerAsync(command, cancellationToken);
@@ -103,7 +101,8 @@ public static class HouseholdEndpoints
 
         var command = new AddHouseholdChildCommand(
             HouseholdId: householdId,
-            GivenName: request.GivenName,
+            FirstName: request.FirstName,
+            LastName: request.LastName,
             DateOfBirth: request.DateOfBirth);
 
         var result = await commandService.AddChildAsync(command, cancellationToken);
@@ -134,26 +133,25 @@ public sealed class UpdateHouseholdRequestValidator : AbstractValidator<UpdateHo
     }
 }
 
-public sealed record InviteHouseholdCarerRequest(string Email, string FirstName, string LastName, HouseholdRoleEnum Role);
+public sealed record InviteHouseholdCarerRequest(string Email, HouseholdRoleEnum Role);
 
 public sealed class InviteHouseholdCarerRequestValidator : AbstractValidator<InviteHouseholdCarerRequest>
 {
     public InviteHouseholdCarerRequestValidator()
     {
         RuleFor(request => request.Email).NotEmpty().EmailAddress();
-        RuleFor(request => request.FirstName).NotEmpty();
-        RuleFor(request => request.LastName).NotEmpty();
         RuleFor(request => request.Role).IsInEnum();
     }
 }
 
-public sealed record AddHouseholdChildRequest(string GivenName, DateOnly DateOfBirth);
+public sealed record AddHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth);
 
 public sealed class AddHouseholdChildRequestValidator : AbstractValidator<AddHouseholdChildRequest>
 {
     public AddHouseholdChildRequestValidator()
     {
-        RuleFor(request => request.GivenName).NotEmpty();
+        RuleFor(request => request.FirstName).NotEmpty();
+        RuleFor(request => request.LastName).NotEmpty();
         RuleFor(request => request.DateOfBirth).NotEmpty();
     }
 }

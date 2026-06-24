@@ -11,11 +11,12 @@ public sealed class Child : Entity<ChildId>
 {
     private Child() { }
 
-    internal Child(ChildId id, HouseholdId householdId, string givenName, DateOnly dateOfBirth)
+    internal Child(ChildId id, HouseholdId householdId, string firstName, string lastName, DateOnly dateOfBirth)
     {
         Id = id;
         HouseholdId = householdId;
-        FirstName = Required(givenName, nameof(givenName));
+        FirstName = Required(firstName, nameof(firstName));
+        LastName = Required(lastName, nameof(lastName));
         DateOfBirth = dateOfBirth;
         IsArchived = false;
         SetCreatedOn();
@@ -46,9 +47,10 @@ public sealed class Child : Entity<ChildId>
     /// </summary>
     public bool IsArchived { get; private set; }
 
-    internal void Rename(string givenName)
+    internal void Rename(string firstName, string lastName)
     {
-        FirstName = Required(givenName, nameof(givenName));
+        FirstName = Required(firstName, nameof(firstName));
+        LastName = Required(lastName, nameof(lastName));
         SetUpdatedOn();
     }
 

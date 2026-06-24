@@ -14,9 +14,14 @@ public interface ICurrentUser
     UserId UserId { get; }
 
     /// <summary>
-    /// School for the active actor context.
+    /// Household for the active actor context.
     /// </summary>
     HouseholdId HouseholdId { get; }
+
+    /// <summary>
+    /// Households the resolved actor can access in the current session.
+    /// </summary>
+    IReadOnlyCollection<HouseholdId> AccessibleHouseholdIds { get; }
 
     /// <summary>
     /// Carer profile represented by the active actor context, or <c>null</c> if not in carer context.
@@ -37,4 +42,9 @@ public interface ICurrentUser
     /// Returns all values for an arbitrary claim type.
     /// </summary>
     IReadOnlyList<string> GetClaims(string type);
+
+    /// <summary>
+    /// Returns whether the current actor can access the supplied household.
+    /// </summary>
+    bool CanAccess(HouseholdId householdId);
 }

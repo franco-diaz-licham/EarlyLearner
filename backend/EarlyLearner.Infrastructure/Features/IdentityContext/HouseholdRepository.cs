@@ -9,10 +9,13 @@ namespace EarlyLearner.Infrastructure.Features.IdentityContext;
 
 public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRepository, IHouseholdCommandRepository
 {
-    public async Task<List<HouseholdResponse>> ListAsync(CancellationToken cancellationToken)
+    public async Task<List<HouseholdResponse>> ListAsync(IReadOnlyCollection<HouseholdId> householdIds, CancellationToken cancellationToken)
     {
+        var ids = householdIds.Select(id => id.Value).ToArray();
+
         return await db.Households
             .AsNoTracking()
+            .Where(household => ids.Contains(household.Id.Value))
             .OrderBy(household => household.Name)
             .Select(household => new HouseholdResponse(
                 household.Id.Value,
@@ -35,7 +38,7 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                     .Select(child => new ChildResponse(
                         child.Id.Value,
                         child.FirstName,
-                        string.Empty,
+                        child.LastName,
                         child.DateOfBirth))
                     .ToList(),
                 household.Invitations
@@ -89,7 +92,7 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                     .Select(child => new ChildResponse(
                         child.Id.Value,
                         child.FirstName,
-                        string.Empty,
+                        child.LastName,
                         child.DateOfBirth))
                     .ToList(),
                 item.Invitations

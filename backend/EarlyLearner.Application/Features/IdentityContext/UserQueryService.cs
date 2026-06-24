@@ -23,7 +23,7 @@ public sealed class UserQueryService(IUserQueryRepository userQueryRepo, ICurren
         var user = await userQueryRepo.GetAsync(id, cancellationToken);
         return user is null
             ? Result<UserModel>.Fail("User was not found.", ResultTypeEnum.NotFound)
-            : Result<UserModel>.Success(Map(user, currentUser.HouseholdId, currentUser.CarerId), ResultTypeEnum.Success);
+            : Result<UserModel>.Success(Map(user, currentUser.HouseholdId, currentUser.AccessibleHouseholdIds, currentUser.CarerId), ResultTypeEnum.Success);
     }
 
 
@@ -47,14 +47,16 @@ public sealed class UserQueryService(IUserQueryRepository userQueryRepo, ICurren
     {
         if (user is null) return Result<UserModel>.Fail("User was not found.", ResultTypeEnum.NotFound);
 
-        var membership = await userQueryRepo.GetMembershipAsync(user.Id, cancellationToken);
-        if (membership is null) return Result<UserModel>.Fail("User does not belong to a household.", ResultTypeEnum.NotFound);
+        var memberships = await userQueryRepo.GetMembershipsAsync(user.Id, cancellationToken);
+        if (memberships.Count == 0) return Result<UserModel>.Fail("User does not belong to a household.", ResultTypeEnum.NotFound);
 
-        return Result<UserModel>.Success(Map(user, membership.Value.HouseholdId, membership.Value.CarerId), ResultTypeEnum.Success);
+        var activeMembership = memberships.First();
+        var accessibleHouseholdIds = memberships.Select(membership => membership.HouseholdId).Distinct().ToArray();
+        return Result<UserModel>.Success(Map(user, activeMembership.HouseholdId, accessibleHouseholdIds, activeMembership.CarerId), ResultTypeEnum.Success);
     }
 
-    private static UserModel Map(User user, HouseholdId householdId, CarerId? carerId)
+    private static UserModel Map(User user, HouseholdId householdId, IReadOnlyCollection<HouseholdId> accessibleHouseholdIds, CarerId? carerId)
     {
-        return new UserModel(user.DisplayName, user.Id, householdId, false, user.Status, carerId);
+        return new UserModel(user.DisplayName, user.Id, householdId, accessibleHouseholdIds, user.Status, carerId);
     }
 }

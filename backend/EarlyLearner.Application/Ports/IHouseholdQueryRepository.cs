@@ -5,6 +5,6 @@ namespace EarlyLearner.Application.Ports;
 
 public interface IHouseholdQueryRepository
 {
-    Task<List<HouseholdResponse>> ListAsync(CancellationToken cancellationToken);
+    Task<List<HouseholdResponse>> ListAsync(IReadOnlyCollection<HouseholdId> householdIds, CancellationToken cancellationToken);
     Task<HouseholdResponse?> GetResponseAsync(HouseholdId id, CancellationToken cancellationToken);
 }

@@ -59,10 +59,10 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
         var claims = new List<Claim>
         {
             new(nameof(UserId), userModel.UserId.Value.ToString()),
-            new(nameof(HouseholdId), userModel.HouseholdId.Value.ToString()),
             new(nameof(UserAccountStatusEnum), userModel.Status.ToString())
         };
 
+        claims.AddRange(userModel.AccessibleHouseholdIds.Select(householdId => new Claim(nameof(HouseholdId), householdId.Value.ToString())));
         if (userModel.CarerId is not null) claims.Add(new Claim(nameof(CarerId), userModel.CarerId.Value.Value.ToString()));
         context.User.AddIdentity(new ClaimsIdentity(claims));
     }

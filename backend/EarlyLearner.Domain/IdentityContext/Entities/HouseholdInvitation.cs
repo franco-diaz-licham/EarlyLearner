@@ -7,12 +7,12 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
 {
     private HouseholdInvitation() { }
 
-    internal HouseholdInvitation(
+    private HouseholdInvitation(
         HouseholdInvitationId id,
         HouseholdId householdId,
         string email,
-        string firstName,
-        string lastName,
+        string? firstName,
+        string? lastName,
         HouseholdRoleEnum role,
         UserId invitedByUserId,
         DateTimeOffset expiresAt)
@@ -20,8 +20,8 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
         Id = id;
         HouseholdId = householdId;
         Email = Required(email, nameof(email)).ToLowerInvariant();
-        FirstName = Required(firstName, nameof(firstName));
-        LastName = Required(lastName, nameof(lastName));
+        FirstName = Optional(firstName);
+        LastName = Optional(lastName);
         Role = role;
         InvitedByUserId = invitedByUserId;
         InvitedAt = DateTimeOffset.UtcNow;
@@ -30,11 +30,29 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
         SetCreatedOn();
     }
 
+    internal static HouseholdInvitation CreatePending(
+        HouseholdId householdId,
+        string email,
+        HouseholdRoleEnum role,
+        UserId invitedByUserId,
+        DateTimeOffset expiresAt)
+    {
+        return new HouseholdInvitation(
+            new HouseholdInvitationId(Guid.NewGuid()),
+            householdId,
+            email,
+            firstName: null,
+            lastName: null,
+            role,
+            invitedByUserId,
+            expiresAt);
+    }
+
     public HouseholdId HouseholdId { get; private set; }
     public Household Household { get; private set; } = null!;
     public string Email { get; private set; } = default!;
-    public string FirstName { get; private set; } = default!;
-    public string LastName { get; private set; } = default!;
+    public string? FirstName { get; private set; }
+    public string? LastName { get; private set; }
     public HouseholdRoleEnum Role { get; private set; }
     public UserId InvitedByUserId { get; private set; }
     public User InvitedByUser { get; private set; } = null!;
@@ -78,5 +96,10 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
     {
         if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} is required.");
         return value.Trim();
+    }
+
+    private static string? Optional(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }

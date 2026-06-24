@@ -7,7 +7,7 @@ public sealed record UserModel(
     string FullName,
     UserId UserId,
     HouseholdId HouseholdId,
-    bool IsSuperAdmin,
+    IReadOnlyCollection<HouseholdId> AccessibleHouseholdIds,
     UserAccountStatusEnum Status,
     CarerId? CarerId = null);
 
@@ -15,6 +15,6 @@ public sealed record UserResponse(
     string FullName,
     UserId UserId,
     HouseholdId HouseholdId,
-    bool IsSuperAdmin,
+    IReadOnlyCollection<HouseholdId> AccessibleHouseholdIds,
     UserAccountStatusEnum Status,
     CarerId? CarerId = null);

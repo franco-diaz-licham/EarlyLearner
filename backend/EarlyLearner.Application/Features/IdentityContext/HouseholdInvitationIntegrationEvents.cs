@@ -8,8 +8,8 @@ public sealed record HouseholdInvitationEmailRequested(
     Guid InvitationId,
     string HouseholdName,
     string Email,
-    string FirstName,
-    string LastName,
+    string? FirstName,
+    string? LastName,
     DateTimeOffset ExpiresAt,
     DateTimeOffset OccurredAt) : IIntegrationEvent;
 

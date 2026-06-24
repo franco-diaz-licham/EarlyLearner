@@ -10,7 +10,7 @@ public sealed record HouseholdCarerInvited(
     HouseholdInvitationId InvitationId,
     string HouseholdName,
     string Email,
-    string FirstName,
-    string LastName,
+    string? FirstName,
+    string? LastName,
     DateTimeOffset ExpiresAt,
     DateTimeOffset OccurredAt) : IDomainEvent;

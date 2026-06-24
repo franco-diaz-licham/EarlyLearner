@@ -45,9 +45,13 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         user = await UpsertUser(user, identity, cancellationToken);
         if (user.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
 
-        var membership = await EnsureHouseholdMembership(user, identity, cancellationToken);
+        await EnsureHouseholdMembership(user, identity, cancellationToken);
         await uow.SaveChangesAsync(cancellationToken);
-        return Result<UserModel>.Success(Map(user, membership.HouseholdId, membership.CarerId), ResultTypeEnum.Success);
+
+        var memberships = await userRepo.GetMembershipsAsync(user.Id, cancellationToken);
+        if (memberships.Count == 0) return Result<UserModel>.Fail("User household membership was not found.", ResultTypeEnum.Unauthorized);
+
+        return Result<UserModel>.Success(Map(user, memberships), ResultTypeEnum.Success);
     }
 
     public async Task<Result<UserModel>> ResolveCurrentUserAsync(ExternalUserIdentity identity, CancellationToken cancellationToken)
@@ -58,10 +62,10 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         if (user is null) return Result<UserModel>.Fail("User was not found.", ResultTypeEnum.Unauthorized);
         if (user.Status == UserAccountStatusEnum.Disabled) return Result<UserModel>.Fail("User account is disabled.", ResultTypeEnum.Forbidden);
 
-        var membership = await userRepo.GetMembershipAsync(user.Id, cancellationToken);
-        if (membership is null) return Result<UserModel>.Fail("User household membership was not found.", ResultTypeEnum.Unauthorized);
+        var memberships = await userRepo.GetMembershipsAsync(user.Id, cancellationToken);
+        if (memberships.Count == 0) return Result<UserModel>.Fail("User household membership was not found.", ResultTypeEnum.Unauthorized);
 
-        return Result<UserModel>.Success(Map(user, membership.Value.HouseholdId, membership.Value.CarerId), ResultTypeEnum.Success);
+        return Result<UserModel>.Success(Map(user, memberships), ResultTypeEnum.Success);
     }
 
     private async Task<User> UpsertUser(User? user, ExternalUserIdentity identity, CancellationToken cancellationToken)
@@ -96,8 +100,10 @@ public sealed class CurrentUserProvisioningService(IUserProvisioningRepository u
         return membership.Value;
     }
 
-    private static UserModel Map(User user, HouseholdId householdId, CarerId? carerId)
+    private static UserModel Map(User user, IReadOnlyList<(HouseholdId HouseholdId, CarerId? CarerId)> memberships)
     {
-        return new UserModel(user.DisplayName, user.Id, householdId, false, user.Status, carerId);
+        var activeMembership = memberships.First();
+        var accessibleHouseholdIds = memberships.Select(membership => membership.HouseholdId).Distinct().ToArray();
+        return new UserModel(user.DisplayName, user.Id, activeMembership.HouseholdId, accessibleHouseholdIds, user.Status, activeMembership.CarerId);
     }
 }
