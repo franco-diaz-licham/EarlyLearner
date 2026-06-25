@@ -1,10 +1,10 @@
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppDialog } from '../../../shared/ui/AppDialog';
 import { AppInputText } from '../../../shared/ui/AppInputText';
-import { useAddChildForm } from '../hooks/useAddChildForm';
+import { useAddChildForm } from '../hooks/useChildForm';
 import type { AddChildForm, ChildModel, HouseholdModel } from '../types/household.types';
 
-interface AddChildDialogProps {
+interface ChildFormProps {
   child: ChildModel | null;
   household: HouseholdModel | null;
   saving: boolean;
@@ -19,7 +19,7 @@ const getChildForm = (child: ChildModel): AddChildForm => ({
   dateOfBirth: child.dateOfBirth
 });
 
-export const AddChildDialog = ({ child, household, saving, visible, onHide, onSave }: AddChildDialogProps) => {
+export const ChildForm = ({ child, household, saving, visible, onHide, onSave }: ChildFormProps) => {
   const form = useAddChildForm(child ? getChildForm(child) : undefined);
   const { draft, errors } = form;
   const hasErrors = Object.keys(errors).length > 0;
@@ -42,34 +42,37 @@ export const AddChildDialog = ({ child, household, saving, visible, onHide, onSa
     <AppDialog header={household ? `${title} in ${household.name}` : title} visible={visible} onHide={onHide}>
       <div className="space-y-4 pt-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-brand-heading">First name</span>
+          <div>
             <AppInputText
               autoFocus
+              label="First name"
               placeholder="Sophia"
+              required
               value={draft.firstName}
               onChange={(event) => {
                 form.updateField('firstName', event.target.value);
               }}
             />
             {errors.firstName ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.firstName}</span> : null}
-          </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-semibold text-brand-heading">Last name</span>
+          </div>
+          <div>
             <AppInputText
+              label="Last name"
               placeholder="Rivera"
+              required
               value={draft.lastName}
               onChange={(event) => {
                 form.updateField('lastName', event.target.value);
               }}
             />
             {errors.lastName ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.lastName}</span> : null}
-          </label>
+          </div>
         </div>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-brand-heading">Date of birth</span>
+        <div>
           <AppInputText
+            label="Date of birth"
+            required
             type="date"
             value={draft.dateOfBirth}
             onChange={(event) => {
@@ -77,11 +80,11 @@ export const AddChildDialog = ({ child, household, saving, visible, onHide, onSa
             }}
           />
           {errors.dateOfBirth ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.dateOfBirth}</span> : null}
-        </label>
+        </div>
 
         <div className="flex justify-end gap-3 pt-2">
           <AppButton label="Cancel" variant="secondary" onClick={handleCancel} />
-          <AppButton disabled={!household || saving || (!form.isValid && hasErrors)} label={saving ? savingLabel : saveLabel} onClick={handleSave} />
+          <AppButton disabled={!household || saving || !form.isValid || hasErrors} label={saving ? savingLabel : saveLabel} onClick={handleSave} />
         </div>
       </div>
     </AppDialog>

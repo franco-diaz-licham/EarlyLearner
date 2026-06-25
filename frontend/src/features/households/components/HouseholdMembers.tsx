@@ -1,6 +1,7 @@
 import { UilBookOpen, UilCalendarAlt, UilEditAlt, UilTrashAlt, UilUserPlus, UilUsersAlt } from '@iconscout/react-unicons';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
+import { formatShortDate } from '../../../shared/utils/dateFormat';
 import type { ChildModel, HouseholdModel } from '../types/household.types';
 import { HouseholdSummaryCard } from './HouseholdSummaryCard';
 
@@ -13,13 +14,6 @@ interface HouseholdMembersProps {
   onRemoveCarer: (carerId: string) => void;
   onRemoveChild: (childId: string) => void;
 }
-
-const formatDate = (value: string): string =>
-  new Intl.DateTimeFormat('en-AU', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  }).format(new Date(value));
 
 const getInvitationName = (firstName: string | null, lastName: string | null, email: string): string => {
   const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim();
@@ -84,7 +78,7 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
                       <h2 className="font-bold text-brand-heading">
                         {child.firstName} {child.lastName}
                       </h2>
-                      <p className="mt-1 text-sm text-brand-muted">Born {formatDate(child.dateOfBirth)}</p>
+                      <p className="mt-1 text-sm text-brand-muted">Born {formatShortDate(child.dateOfBirth)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -128,7 +122,7 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
                         <AppStatusBadge tone={getStatusTone(invitation.status)}>{invitation.status}</AppStatusBadge>
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-muted">
                           <UilCalendarAlt aria-hidden="true" className="h-4 w-4" />
-                          Expires {formatDate(invitation.expiresAt)}
+                          Expires {formatShortDate(invitation.expiresAt)}
                         </span>
                       </div>
                     </div>

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { AddChildDialog } from '../components/AddChildDialog';
+import { ChildForm } from '../components/ChildForm';
 import { HouseholdHeader } from '../components/HouseholdHeader';
 import { HouseholdMembers } from '../components/HouseholdMembers';
 import { HouseholdSummaryCard } from '../components/HouseholdSummaryCard';
-import { InviteCarerDialog } from '../components/InviteCarerDialog';
+import { InviteCarerForm } from '../components/InviteCarerForm';
 import {
   useAddHouseholdChildMutation,
   useHouseholdsQuery,
@@ -13,7 +13,7 @@ import {
   useUpdateHouseholdChildMutation,
   useUpdateHouseholdMutation
 } from '../queries/household.queries';
-import type { AddChildForm, ChildModel, HouseholdModel, InviteCarerForm } from '../types/household.types';
+import type { AddChildForm, ChildModel, HouseholdModel, InviteCarerForm as InviteCarerFormModel } from '../types/household.types';
 
 const getStatusTone = (status: string): 'success' | 'warning' | 'neutral' => {
   const normalizedStatus = status.toLowerCase();
@@ -65,7 +65,7 @@ export const HouseholdsPage = () => {
     setIniviteCarer(true);
   };
 
-  const handleSaveInvite = async (form: InviteCarerForm) => {
+  const handleSaveInvite = async (form: InviteCarerFormModel) => {
     if (!inviteCarer || !household) return;
     await inviteHouseholdCarerMutation.mutateAsync({ householdId: household.id, form });
     setIniviteCarer(false);
@@ -159,18 +159,18 @@ export const HouseholdsPage = () => {
         </div>
       ) : null}
 
-      <InviteCarerDialog
+      <InviteCarerForm
         household={household}
         saving={inviteHouseholdCarerMutation.isPending}
         visible={inviteCarer}
         onHide={() => {
           setIniviteCarer(false);
         }}
-        onSave={(form) => {
+        onSave={(form: InviteCarerFormModel) => {
           void handleSaveInvite(form);
         }}
       />
-      <AddChildDialog
+      <ChildForm
         key={editChild && editingChild ? editingChild.id : addChild ? 'add-child-open' : 'add-child-closed'}
         child={editChild ? editingChild : null}
         household={household}

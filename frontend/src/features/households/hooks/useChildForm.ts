@@ -12,6 +12,7 @@ const addChildSchema = z.object({
 });
 
 type AddChildFormErrors = Partial<Record<keyof AddChildForm, string>>;
+type AddChildTouchedFields = Partial<Record<keyof AddChildForm, boolean>>;
 
 const createEmptyAddChildForm = (): AddChildForm => ({
   firstName: '',
@@ -30,17 +31,33 @@ const getAddChildFormErrors = (draft: AddChildForm): AddChildFormErrors => {
   }, {});
 };
 
+const getVisibleAddChildFormErrors = (validationErrors: AddChildFormErrors, touchedFields: AddChildTouchedFields, hasSubmitted: boolean): AddChildFormErrors => {
+  if (hasSubmitted) return validationErrors;
+
+  return Object.entries(validationErrors).reduce<AddChildFormErrors>((visibleErrors, [field, message]) => {
+    const formField = field as keyof AddChildForm;
+    if (touchedFields[formField]) visibleErrors[formField] = message;
+    return visibleErrors;
+  }, {});
+};
+
 export const useAddChildForm = (initialDraft: AddChildForm = createEmptyAddChildForm()) => {
   const [draft, setDraft] = useState<AddChildForm>(() => initialDraft);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<AddChildTouchedFields>({});
+
   const validationErrors = useMemo(() => getAddChildFormErrors(draft), [draft]);
-  const errors = useMemo(() => (hasSubmitted ? validationErrors : {}), [hasSubmitted, validationErrors]);
+  const errors = useMemo(() => getVisibleAddChildFormErrors(validationErrors, touchedFields, hasSubmitted), [hasSubmitted, touchedFields, validationErrors]);
   const isValid = useMemo(() => Object.keys(validationErrors).length === 0, [validationErrors]);
 
-  const reset = useCallback((nextDraft = initialDraft) => {
-    setHasSubmitted(false);
-    setDraft(nextDraft);
-  }, [initialDraft]);
+  const reset = useCallback(
+    (nextDraft = initialDraft) => {
+      setHasSubmitted(false);
+      setTouchedFields({});
+      setDraft(nextDraft);
+    },
+    [initialDraft]
+  );
 
   const getValidForm = useCallback((): AddChildForm | null => {
     setHasSubmitted(true);
@@ -50,6 +67,7 @@ export const useAddChildForm = (initialDraft: AddChildForm = createEmptyAddChild
 
   const updateField = <TField extends keyof AddChildForm>(field: TField, value: AddChildForm[TField]) => {
     setDraft((currentDraft) => ({ ...currentDraft, [field]: value }));
+    setTouchedFields((currentFields) => ({ ...currentFields, [field]: true }));
   };
 
   return {

@@ -8,6 +8,7 @@ const inviteCarerSchema = z.object({
 });
 
 type InviteCarerFormErrors = Partial<Record<keyof InviteCarerForm, string>>;
+type InviteCarerTouchedFields = Partial<Record<keyof InviteCarerForm, boolean>>;
 
 const createEmptyInviteCarerForm = (): InviteCarerForm => ({
   email: '',
@@ -25,15 +26,27 @@ const getInviteCarerFormErrors = (draft: InviteCarerForm): InviteCarerFormErrors
   }, {});
 };
 
+const getVisibleInviteCarerFormErrors = (validationErrors: InviteCarerFormErrors, touchedFields: InviteCarerTouchedFields, hasSubmitted: boolean): InviteCarerFormErrors => {
+  if (hasSubmitted) return validationErrors;
+
+  return Object.entries(validationErrors).reduce<InviteCarerFormErrors>((visibleErrors, [field, message]) => {
+    const formField = field as keyof InviteCarerForm;
+    if (touchedFields[formField]) visibleErrors[formField] = message;
+    return visibleErrors;
+  }, {});
+};
+
 export const useInviteCarerForm = () => {
   const [draft, setDraft] = useState<InviteCarerForm>(() => createEmptyInviteCarerForm());
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<InviteCarerTouchedFields>({});
   const validationErrors = useMemo(() => getInviteCarerFormErrors(draft), [draft]);
-  const errors = useMemo(() => (hasSubmitted ? validationErrors : {}), [hasSubmitted, validationErrors]);
+  const errors = useMemo(() => getVisibleInviteCarerFormErrors(validationErrors, touchedFields, hasSubmitted), [hasSubmitted, touchedFields, validationErrors]);
   const isValid = useMemo(() => Object.keys(validationErrors).length === 0, [validationErrors]);
 
   const reset = useCallback(() => {
     setHasSubmitted(false);
+    setTouchedFields({});
     setDraft(createEmptyInviteCarerForm());
   }, []);
 
@@ -45,6 +58,7 @@ export const useInviteCarerForm = () => {
 
   const updateField = <TField extends keyof InviteCarerForm>(field: TField, value: InviteCarerForm[TField]) => {
     setDraft((currentDraft) => ({ ...currentDraft, [field]: value }));
+    setTouchedFields((currentFields) => ({ ...currentFields, [field]: true }));
   };
 
   return {
