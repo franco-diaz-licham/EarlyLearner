@@ -1,7 +1,6 @@
 using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EarlyLearner.Infrastructure.Persistence;
@@ -22,13 +21,11 @@ public sealed class UnitOfWork(DatabaseContext db, IDomainEventDispatcher domain
             .SelectMany(entity => entity.DomainEvents)
             .ToList();
 
-        await domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+        // MassTransit captures integration publishes in the EF Bus Outbox here.
+        // SaveChanges then commits aggregate changes and outbox messages together.
+        if (domainEvents.Count > 0) await domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
         var result = await db.SaveChangesAsync(cancellationToken);
-
-        foreach (var entity in entitiesWithEvents) {
-            entity.ClearDomainEvents();
-        }
-
+        foreach (var entity in entitiesWithEvents) entity.ClearDomainEvents();
         return result;
     }
 

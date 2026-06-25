@@ -5,6 +5,20 @@ namespace EarlyLearner.Domain.IdentityContext.Entities;
 
 public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
 {
+    public HouseholdId HouseholdId { get; private set; }
+    public Household Household { get; private set; } = null!;
+    public string Email { get; private set; } = default!;
+    public string? FirstName { get; private set; }
+    public string? LastName { get; private set; }
+    public HouseholdRoleEnum Role { get; private set; }
+    public UserId InvitedByUserId { get; private set; }
+    public User InvitedByUser { get; private set; } = null!;
+    public DateTimeOffset InvitedAt { get; private set; }
+    public DateTimeOffset ExpiresAt { get; private set; }
+    public HouseholdInvitationStatusEnum Status { get; private set; }
+    public DateTimeOffset? AcceptedAt { get; private set; }
+    public UserId? AcceptedByUserId { get; private set; }
+
     private HouseholdInvitation() { }
 
     private HouseholdInvitation(
@@ -47,20 +61,6 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
             invitedByUserId,
             expiresAt);
     }
-
-    public HouseholdId HouseholdId { get; private set; }
-    public Household Household { get; private set; } = null!;
-    public string Email { get; private set; } = default!;
-    public string? FirstName { get; private set; }
-    public string? LastName { get; private set; }
-    public HouseholdRoleEnum Role { get; private set; }
-    public UserId InvitedByUserId { get; private set; }
-    public User InvitedByUser { get; private set; } = null!;
-    public DateTimeOffset InvitedAt { get; private set; }
-    public DateTimeOffset ExpiresAt { get; private set; }
-    public HouseholdInvitationStatusEnum Status { get; private set; }
-    public DateTimeOffset? AcceptedAt { get; private set; }
-    public UserId? AcceptedByUserId { get; private set; }
 
     public bool IsExpired(DateTimeOffset utcNow) => Status == HouseholdInvitationStatusEnum.Pending && ExpiresAt <= utcNow;
 

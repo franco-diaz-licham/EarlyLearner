@@ -3,6 +3,10 @@ using Microsoft.Extensions.Logging;
 
 namespace EarlyLearner.Infrastructure.Messaging;
 
+/// <summary>
+/// Mock Replacement for real Email Service.
+/// </summary>
+/// <param name="logger"></param>
 public sealed class ConsoleEmailSender(ILogger<ConsoleEmailSender> logger) : IEmailSender
 {
     public Task SendAsync(EmailMessage message, CancellationToken cancellationToken)

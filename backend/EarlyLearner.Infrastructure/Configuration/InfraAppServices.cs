@@ -151,7 +151,8 @@ public static class InfraAppServices
             .ValidateOnStart();
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-        services.AddScoped<IIntegrationEventPublisher, MassTransitIntegrationEventPublisher>();
+        services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedHandler>();
+        services.AddScoped<IIntegrationEventPublisher, IntegrationEventPublisher>();
 
         services.AddMassTransit(configurator => {
             configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(MessagingConstants.EndpointPrefix, includeNamespace: false));
