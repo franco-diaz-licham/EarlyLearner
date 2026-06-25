@@ -67,12 +67,9 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         var invitedUser = await householdRepo.GetUserByEmailAsync(command.Email, cancellationToken);
-        if (invitedUser is null) {
-            var expiresAt = DateTimeOffset.UtcNow.Add(InvitationLifetime);
-            household.InviteCarer(command.Email, command.Role, user.UserId, expiresAt);
-        } else {
-            household.AddCarer(invitedUser.Id, command.Role);
-        }
+        var expiresAt = DateTimeOffset.UtcNow.Add(InvitationLifetime);
+        if (invitedUser is null) household.InviteNewCarer(command.Email, command.Role, user.UserId, expiresAt);
+        else household.InviteExistingCarer(command.Email, command.Role, user.UserId, expiresAt);
 
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Carer invitation could not be saved.", ResultTypeEnum.Invalid);

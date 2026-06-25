@@ -68,35 +68,55 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
-    public HouseholdInvitation InviteCarer(string email, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
+    public HouseholdInvitation InviteNewCarer(string email, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
     {
         var normalizedEmail = Required(email, nameof(email)).ToLowerInvariant();
-        var existingInvitation = _invitations
-            .Where(invitation => invitation.Email == normalizedEmail)
-            .OrderByDescending(invitation => invitation.InvitedAt)
-            .FirstOrDefault();
+        var existingInvitation = GetLatestInvitation(normalizedEmail);
 
         if (existingInvitation is not null && existingInvitation.Status == HouseholdInvitationStatusEnum.Pending) {
             existingInvitation.Resend(expiresAt);
-            RaiseInvitationEvent(existingInvitation);
+            RaiseCarerInvited(existingInvitation);
             SetUpdatedOn();
             return existingInvitation;
         }
 
-        var invitation = HouseholdInvitation.CreatePending(
-            Id,
-            normalizedEmail,
-            role,
-            invitedByUserId,
-            expiresAt);
+        var invitation = HouseholdInvitation.CreatePending(Id, normalizedEmail, role, invitedByUserId, expiresAt);
 
         _invitations.Add(invitation);
-        RaiseInvitationEvent(invitation);
+        RaiseCarerInvited(invitation);
         SetUpdatedOn();
         return invitation;
     }
 
-    private void RaiseInvitationEvent(HouseholdInvitation invitation)
+    public HouseholdInvitation InviteExistingCarer(string email, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
+    {
+        var normalizedEmail = Required(email, nameof(email)).ToLowerInvariant();
+        var existingInvitation = GetLatestInvitation(normalizedEmail);
+
+        if (existingInvitation is not null && existingInvitation.Status == HouseholdInvitationStatusEnum.Pending) {
+            existingInvitation.Resend(expiresAt);
+            RaiseCarerInvited(existingInvitation);
+            SetUpdatedOn();
+            return existingInvitation;
+        }
+
+        var invitation = HouseholdInvitation.CreatePending(Id, normalizedEmail, role, invitedByUserId, expiresAt);
+
+        _invitations.Add(invitation);
+        RaiseCarerInvited(invitation);
+        SetUpdatedOn();
+        return invitation;
+    }
+
+    private HouseholdInvitation? GetLatestInvitation(string normalizedEmail)
+    {
+        return _invitations
+            .Where(invitation => invitation.Email == normalizedEmail)
+            .OrderByDescending(invitation => invitation.InvitedAt)
+            .FirstOrDefault();
+    }
+
+    private void RaiseCarerInvited(HouseholdInvitation invitation)
     {
         RaiseDomainEvent(new HouseholdCarerInvited(
             Id,
