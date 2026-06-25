@@ -1,8 +1,8 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using EarlyLearner.Worker.Messaging;
+using MassTransit;
+using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Configuration;
 
@@ -16,40 +16,34 @@ public static class WorkerAppServices
 
     private static IServiceCollection MessagingServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // services.AddSingleton<BusObserver>();
-        // services
-        //     .AddOptions<RabbitMqOptions>()
-        //     .Bind(configuration.GetSection(RabbitMqOptions.SECTION_NAME))
-        //     .ValidateDataAnnotations()
-        //     .ValidateOnStart();
+        services.AddScoped<IEmailSender, ConsoleEmailSender>();
 
-        // services.AddMassTransit(configurator => {
-        //     configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(MessagingConstants.EndpointPrefix, includeNamespace: false));
-        //     configurator.AddEntityFrameworkOutbox<DatabaseContext>(outboxConfigurator => {
-        //         outboxConfigurator.UsePostgres();
-        //         outboxConfigurator.UseBusOutbox();
-        //     });
-        //     configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor));
-        //     configurator.AddConfigureEndpointsCallback((context, _, endpointConfigurator) => {
-        //         endpointConfigurator.UseEntityFrameworkOutbox<DatabaseContext>(context);
-        //     });
+        services
+            .AddOptions<RabbitMqOptions>()
+            .Bind(configuration.GetSection(RabbitMqOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        //     configurator.UsingRabbitMq((context, configurator) => {
-        //         var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
-        //         configurator.Host(new Uri(options.HostUri), hostConfigurator => {
-        //             hostConfigurator.Username(options.Username);
-        //             hostConfigurator.Password(options.Password);
-        //         });
-        //         configurator.PrefetchCount = options.PrefetchCount ?? 1;                     // 1 message at a time
-        //         configurator.ConcurrentMessageLimit = options.ConcurrentMessageLimit ?? 1;   // 1 concurrent process
-        //         configurator.UseMessageRetry(r => r.None());                                 // no retry policy
-        //         configurator.UseTimeout(timeoutConfigurator => {
-        //             timeoutConfigurator.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds ?? 60);
-        //         });
-        //         configurator.ConnectBusObserver(context.GetRequiredService<BusObserver>());
-        //         configurator.ConfigureEndpoints(context);
-        //     });
-        // });
+        services.AddMassTransit(configurator => {
+            configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor));
+
+            configurator.UsingRabbitMq((context, busFactoryConfigurator) => {
+                var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+                busFactoryConfigurator.Host(new Uri(options.HostUri), hostConfigurator => {
+                    hostConfigurator.Username(options.Username);
+                    hostConfigurator.Password(options.Password);
+                });
+
+                busFactoryConfigurator.PrefetchCount = options.PrefetchCount ?? 1;
+                busFactoryConfigurator.ConcurrentMessageLimit = options.ConcurrentMessageLimit ?? 1;
+                busFactoryConfigurator.UseMessageRetry(retryConfigurator => retryConfigurator.None());
+                busFactoryConfigurator.UseTimeout(timeoutConfigurator => {
+                    timeoutConfigurator.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds ?? 60);
+                });
+                busFactoryConfigurator.ConfigureEndpoints(context);
+            });
+        });
 
         return services;
     }

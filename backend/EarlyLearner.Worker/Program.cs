@@ -1,7 +1,7 @@
-using EarlyLearner.Worker;
+using EarlyLearner.Worker.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
+WorkerAppServices.AddAppServices(builder);
 
 var host = builder.Build();
 host.Run();
