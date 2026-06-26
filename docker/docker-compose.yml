@@ -88,6 +88,23 @@ services:
       - "host.docker.internal:host-gateway"
       - "blobmock.localhost.me:host-gateway"
 
+  early-learner-worker:
+    build:
+      context: ..
+      dockerfile: docker/early-learner-worker.dockerfile
+    image: early-learner-worker:local
+    container_name: early-learner-worker
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner;Username=local-dev;Password=local-dev;Maximum Pool Size=50;Timeout=60"
+      RabbitMq__HostUri: "rabbitmq://rabbitmq"
+      RabbitMq__Username: "local-dev"
+      RabbitMq__Password: "local-dev"
+      EarlyLearner__Url: "http://localhost:5173"
+      Email__Provider: "Console"
+
 volumes:
   azurite-data:
     driver: local

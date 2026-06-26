@@ -75,6 +75,7 @@ backend/
 ├── EarlyLearner.Application/     # Use-case contracts, query/command results, application ports
 ├── EarlyLearner.Domain/          # Entities, value objects, enums, domain events, business rules
 ├── EarlyLearner.Infrastructure/  # EF Core DbContext, configurations, migrations, external adapters
+├── EarlyLearner.Worker/          # Message consumers, email delivery, worker-owned audit persistence
 └── EarlyLearner.Shared/          # Shared helpers and cross-cutting utility code
 ```
 
@@ -131,10 +132,11 @@ docker/docker-compose.yml
 Main local services:
 
 ```text
-API:        http://localhost:5136
-PostgreSQL: localhost:55432
-Azurite:    localhost:10000
-RabbitMQ:   http://localhost:15672
+API:         http://localhost:5136
+Worker:      early-learner-worker container
+PostgreSQL:  localhost:55432
+Azurite:     localhost:10000
+RabbitMQ:    http://localhost:15672
 ```
 
 Docker database credentials:
@@ -175,6 +177,18 @@ Build the API:
 
 ```powershell
 dotnet build backend/EarlyLearner.Api/EarlyLearner.Api.csproj
+```
+
+Run the worker locally:
+
+```powershell
+dotnet run --project backend/EarlyLearner.Worker
+```
+
+Build the worker:
+
+```powershell
+dotnet build backend/EarlyLearner.Worker/EarlyLearner.Worker.csproj
 ```
 
 ---
