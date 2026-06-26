@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Features.LearningContext;
@@ -7,6 +8,7 @@ using EarlyLearner.Application.Features.PlanningContext;
 using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Configuration.Options;
+using EarlyLearner.Infrastructure.Features.AuditContext;
 using EarlyLearner.Infrastructure.Features.CoreContext;
 using EarlyLearner.Infrastructure.Features.IdentityContext;
 using EarlyLearner.Infrastructure.Features.LearningContext;
@@ -87,6 +89,11 @@ public static class InfraAppServices
             });
         });
 
+        services.AddDbContext<AuditTrailReadDbContext>((sp, options) => {
+            var dbOpts = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            options.UseNpgsql(dbOpts.Db).UseSnakeCaseNamingConvention();
+        });
+
         return services;
     }
 
@@ -109,6 +116,7 @@ public static class InfraAppServices
         services.AddScoped<IReadinessOutcomeCommandRepository, ReadinessOutcomeRepository>();
         services.AddScoped<IReadinessProfileQueryRepository, ReadinessProfileRepository>();
         services.AddScoped<IReadinessProfileCommandRepository, ReadinessProfileRepository>();
+        services.AddScoped<IAuditTrailQueryRepository, AuditTrailQueryRepository>();
 
         return services;
     }
@@ -151,6 +159,8 @@ public static class InfraAppServices
             .ValidateOnStart();
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IDomainEventHandler, ChildCreatedAuditTrailHandler>();
+        services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedAuditTrailHandler>();
         services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedHandler>();
         services.AddScoped<IIntegrationEventPublisher, IntegrationEventPublisher>();
 

@@ -1,4 +1,5 @@
 using EarlyLearner.Api.Helpers;
+using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
@@ -16,6 +17,7 @@ public static class HouseholdEndpoints
 
         households.MapGet("/", ListHouseholds).WithName(nameof(ListHouseholds));
         households.MapGet("/{householdId:guid}", GetHousehold).WithName(nameof(GetHousehold));
+        households.MapGet("/{householdId:guid}/audit-trail", ListAuditTrail).WithName(nameof(ListAuditTrail));
         households.MapPut("/{householdId:guid}", UpdateHousehold).WithName(nameof(UpdateHousehold));
         households.MapPost("/{householdId:guid}/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
         households.MapDelete("/{householdId:guid}/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
@@ -37,6 +39,14 @@ public static class HouseholdEndpoints
         if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
         var result = await queryService.GetAsync(new HouseholdId(householdId), cancellationToken);
+        return result.ToApiResult();
+    }
+
+    public static async Task<IResult> ListAuditTrail(Guid householdId, string? search, IAuditTrailQueryService queryService, CancellationToken cancellationToken = default)
+    {
+        if (householdId == Guid.Empty) return Result<List<AuditTrailEntryResponse>>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var result = await queryService.ListAsync(new HouseholdId(householdId), search, cancellationToken);
         return result.ToApiResult();
     }
 
