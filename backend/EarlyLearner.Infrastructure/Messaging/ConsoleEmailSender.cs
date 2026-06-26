@@ -9,7 +9,7 @@ namespace EarlyLearner.Infrastructure.Messaging;
 /// <param name="logger"></param>
 public sealed class ConsoleEmailSender(ILogger<ConsoleEmailSender> logger) : IEmailSender
 {
-    public Task SendAsync(EmailMessage message, CancellationToken cancellationToken)
+    public Task SendAsync(EmailMessageModel message, CancellationToken cancellationToken)
     {
         logger.LogInformation(
             "Dev email sent to {EmailTo}. Subject: {EmailSubject}. Body: {EmailBody}",

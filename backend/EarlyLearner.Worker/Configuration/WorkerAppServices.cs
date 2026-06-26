@@ -1,6 +1,7 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
+using EarlyLearner.Worker.Options;
 using MassTransit;
 using Microsoft.Extensions.Options;
 
@@ -11,13 +12,44 @@ public static class WorkerAppServices
     public static void AddAppServices(HostApplicationBuilder builder)
     {
         builder.Services
+            .EarlyLearnerServices(builder.Configuration)
+            .EmailServices(builder.Configuration)
             .MessagingServices(builder.Configuration);
+    }
+
+    private static IServiceCollection EarlyLearnerServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<EarlyLearnerOptions>()
+            .Bind(configuration.GetSection(EarlyLearnerOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        return services;
+    }
+
+    private static IServiceCollection EmailServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<EmailOptions>()
+            .Bind(configuration.GetSection(EmailOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .Validate(HasRequiredProviderConfiguration, "Azure Communication Services email requires a connection string and sender address.")
+            .ValidateOnStart();
+
+        var emailProvider = configuration.GetValue<string>($"{EmailOptions.SECTION_NAME}:{nameof(EmailOptions.Provider)}");
+
+        if (string.Equals(emailProvider, EmailProvider.AzureCommunicationServices, StringComparison.OrdinalIgnoreCase)) {
+            services.AddScoped<IEmailSender, AzureCommunicationEmailSender>();
+            return services;
+        }
+
+        services.AddScoped<IEmailSender, ConsoleEmailSender>();
+        return services;
     }
 
     private static IServiceCollection MessagingServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IEmailSender, ConsoleEmailSender>();
-
         services
             .AddOptions<RabbitMqOptions>()
             .Bind(configuration.GetSection(RabbitMqOptions.SECTION_NAME))
@@ -46,5 +78,13 @@ public static class WorkerAppServices
         });
 
         return services;
+    }
+
+    private static bool HasRequiredProviderConfiguration(EmailOptions options)
+    {
+        if (!options.UsesAzureCommunicationServices()) return true;
+
+        return !string.IsNullOrWhiteSpace(options.AzureCommunicationConnectionString)
+            && !string.IsNullOrWhiteSpace(options.SenderAddress);
     }
 }

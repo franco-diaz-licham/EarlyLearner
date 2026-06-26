@@ -1,26 +1,26 @@
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Worker.Options;
 using MassTransit;
+using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Messaging;
 
 public sealed class HouseholdInvitationEmailRequestedConsumerDefinition : ConsumerDefinition<HouseholdInvitationEmailRequestedConsumer>
 {
-    public HouseholdInvitationEmailRequestedConsumerDefinition()
-    {
-        EndpointName = MessagingConstants.HouseholdInvitationEmailRequestedEndpoint;
-    }
+    public HouseholdInvitationEmailRequestedConsumerDefinition() => EndpointName = MessagingConstants.HouseholdInvitationEmailRequestedEndpoint;
 }
 
-public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender emailSender) : IConsumer<HouseholdInvitationEmailRequested>
+public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender emailSender, IOptions<EarlyLearnerOptions> options) : IConsumer<HouseholdInvitationEmailRequested>
 {
+    private readonly EarlyLearnerOptions options = options.Value;
+
     public async Task Consume(ConsumeContext<HouseholdInvitationEmailRequested> context)
     {
         var message = context.Message;
 
         try {
-            await emailSender.SendAsync(CreateEmail(message), context.CancellationToken);
-
+            await emailSender.SendAsync(EmailBuilder.BuildHouseholdInvitationEmail(message, options.Url), context.CancellationToken);
             await context.Publish(new HouseholdInvitationEmailSent(
                 Id: Guid.NewGuid(),
                 InvitationId: message.InvitationId,
@@ -36,14 +36,5 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender email
                 FailedAt: DateTimeOffset.UtcNow,
                 OccurredAt: DateTimeOffset.UtcNow), context.CancellationToken);
         }
-    }
-
-    private static EmailMessage CreateEmail(HouseholdInvitationEmailRequested message)
-    {
-        var greetingName = string.IsNullOrWhiteSpace(message.FirstName) ? "there" : message.FirstName.Trim();
-        var subject = $"You're invited to join {message.HouseholdName}";
-        var body = $"Hi {greetingName}, you have been invited to join {message.HouseholdName} on EarlyLearner. This invitation expires on {message.ExpiresAt:dd MMM yyyy}.";
-
-        return new EmailMessage(message.Email, subject, body);
     }
 }

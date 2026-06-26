@@ -1,8 +1,8 @@
 namespace EarlyLearner.Application.Ports;
 
-public sealed record EmailMessage(string To, string Subject, string Body);
+public sealed record EmailMessageModel(string To, string Subject, string Body, string? HtmlBody = null);
 
 public interface IEmailSender
 {
-    Task SendAsync(EmailMessage message, CancellationToken cancellationToken);
+    Task SendAsync(EmailMessageModel message, CancellationToken cancellationToken);
 }
