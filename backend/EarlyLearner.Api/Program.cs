@@ -2,11 +2,13 @@ using EarlyLearner.Api.Configuration;
 using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Api.Endpoints;
 using EarlyLearner.Infrastructure.Configuration;
+using EarlyLearner.Shared.Observability;
 using Serilog;
 
 try {
     var builder = WebApplication.CreateBuilder(args);
     builder.AddSerilog();
+    builder.AddEarlyLearnerObservability("earlylearner-api", includeAspNetCoreInstrumentation: true);
 
     try {
         ApiAppServices.AddAppServices(builder);

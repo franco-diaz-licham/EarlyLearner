@@ -1,4 +1,14 @@
 services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.127.0
+    container_name: otel-collector
+    command: ["--config=/etc/otelcol-contrib/config.yml"]
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yml:ro
+
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: blob-mock
@@ -73,11 +83,13 @@ services:
     depends_on:
       - azurite
       - db
+      - otel-collector
       - rabbitmq
     environment:
       ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
       AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;"
       RabbitMq__HostUri: "rabbitmq://rabbitmq"
+      OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost/health/ready"]
       interval: 30s
@@ -96,6 +108,7 @@ services:
     container_name: early-learner-worker
     depends_on:
       - db
+      - otel-collector
       - rabbitmq
     environment:
       ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner;Username=local-dev;Password=local-dev;Maximum Pool Size=50;Timeout=60"
@@ -104,6 +117,7 @@ services:
       RabbitMq__Password: "local-dev"
       EarlyLearner__Url: "http://localhost:5173"
       Email__Provider: "Console"
+      OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
 
 volumes:
   azurite-data:
