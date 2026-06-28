@@ -8,7 +8,7 @@ public sealed class AuditTrailReadModelConfig : IEntityTypeConfiguration<AuditTr
 {
     public void Configure(EntityTypeBuilder<AuditTrailReadModel> builder)
     {
-        builder.ToTable("audit_trail_entries", DatabaseSchemas.Application);
+        builder.ToTable("audit_trail_entries");
         builder.HasKey(entry => entry.Id);
         builder.Property(entry => entry.Id).ValueGeneratedNever();
         builder.Property(entry => entry.HouseholdId).IsRequired();

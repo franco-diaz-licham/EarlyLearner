@@ -12,12 +12,25 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.EnsureSchema(
-                name: "application");
+            migrationBuilder.CreateTable(
+                name: "audit_trail_entries",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    household_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    action = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    summary = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    details = table.Column<string>(type: "character varying(1200)", maxLength: 1200, nullable: true),
+                    actioned_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    recorded_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_audit_trail_entries", x => x.id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "households",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -32,7 +45,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "inbox_state",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -56,7 +68,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "outbox_state",
-                schema: "application",
                 columns: table => new
                 {
                     outbox_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -73,7 +84,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "readiness_outcomes",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -93,7 +103,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "users",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -113,7 +122,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "children",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -131,7 +139,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_children_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -139,7 +146,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -160,7 +166,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_stored_files_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -168,7 +173,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "outbox_message",
-                schema: "application",
                 columns: table => new
                 {
                     sequence_number = table.Column<long>(type: "bigint", nullable: false)
@@ -200,20 +204,17 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_outbox_message_inbox_state_inbox_message_id_inbox_consumer_",
                         columns: x => new { x.inbox_message_id, x.inbox_consumer_id },
-                        principalSchema: "application",
                         principalTable: "inbox_state",
                         principalColumns: new[] { "message_id", "consumer_id" });
                     table.ForeignKey(
                         name: "fk_outbox_message_outbox_state_outbox_id",
                         column: x => x.outbox_id,
-                        principalSchema: "application",
                         principalTable: "outbox_state",
                         principalColumn: "outbox_id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "carers",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -229,14 +230,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_carers_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_carers_users_user_id",
                         column: x => x.user_id,
-                        principalSchema: "application",
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -244,7 +243,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "household_invitations",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -268,14 +266,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_household_invitations_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_household_invitations_users_invited_by_user_id",
                         column: x => x.invited_by_user_id,
-                        principalSchema: "application",
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -283,7 +279,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "daily_logs",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -299,14 +294,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_daily_logs_children_child_id",
                         column: x => x.child_id,
-                        principalSchema: "application",
                         principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_daily_logs_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -314,7 +307,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "goals",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -334,14 +326,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_goals_children_child_id",
                         column: x => x.child_id,
-                        principalSchema: "application",
                         principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_goals_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -349,7 +339,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "learning_plans",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -367,14 +356,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_learning_plans_children_child_id",
                         column: x => x.child_id,
-                        principalSchema: "application",
                         principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_learning_plans_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -382,7 +369,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "observations",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -399,14 +385,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_observations_children_child_id",
                         column: x => x.child_id,
-                        principalSchema: "application",
                         principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_observations_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -414,7 +398,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "portfolio_items",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -434,14 +417,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_portfolio_items_children_child_id",
                         column: x => x.child_id,
-                        principalSchema: "application",
                         principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_portfolio_items_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -449,7 +430,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "readiness_profiles",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -464,14 +444,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_readiness_profiles_children_child_id",
                         column: x => x.child_id,
-                        principalSchema: "application",
                         principalTable: "children",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_readiness_profiles_households_household_id",
                         column: x => x.household_id,
-                        principalSchema: "application",
                         principalTable: "households",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -479,7 +457,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "completed_activities",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -494,7 +471,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_completed_activities_daily_logs_daily_log_id",
                         column: x => x.daily_log_id,
-                        principalSchema: "application",
                         principalTable: "daily_logs",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -502,7 +478,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "daily_log_stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     daily_log_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -514,14 +489,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_daily_log_stored_files_daily_logs_daily_log_id",
                         column: x => x.daily_log_id,
-                        principalSchema: "application",
                         principalTable: "daily_logs",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_daily_log_stored_files_stored_files_stored_file_id",
                         column: x => x.stored_file_id,
-                        principalSchema: "application",
                         principalTable: "stored_files",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -529,7 +502,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "reading_entries",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -546,7 +518,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_reading_entries_daily_logs_daily_log_id",
                         column: x => x.daily_log_id,
-                        principalSchema: "application",
                         principalTable: "daily_logs",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -554,7 +525,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "routine_entries",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -570,7 +540,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_routine_entries_daily_logs_daily_log_id",
                         column: x => x.daily_log_id,
-                        principalSchema: "application",
                         principalTable: "daily_logs",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -578,7 +547,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "goal_readiness_outcomes",
-                schema: "application",
                 columns: table => new
                 {
                     goal_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -590,14 +558,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_goal_readiness_outcomes_goals_goal_id",
                         column: x => x.goal_id,
-                        principalSchema: "application",
                         principalTable: "goals",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_goal_readiness_outcomes_readiness_outcomes_readiness_outcom",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -605,7 +571,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "planned_learning_sessions",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -622,7 +587,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_planned_learning_sessions_learning_plans_learning_plan_id",
                         column: x => x.learning_plan_id,
-                        principalSchema: "application",
                         principalTable: "learning_plans",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -630,7 +594,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "observation_readiness_outcomes",
-                schema: "application",
                 columns: table => new
                 {
                     observation_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -642,14 +605,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_observation_readiness_outcomes_observations_observation_id",
                         column: x => x.observation_id,
-                        principalSchema: "application",
                         principalTable: "observations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_observation_readiness_outcomes_readiness_outcomes_readiness",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -657,7 +618,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "observation_stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     observation_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -669,14 +629,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_observation_stored_files_observations_observation_id",
                         column: x => x.observation_id,
-                        principalSchema: "application",
                         principalTable: "observations",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_observation_stored_files_stored_files_stored_file_id",
                         column: x => x.stored_file_id,
-                        principalSchema: "application",
                         principalTable: "stored_files",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -684,7 +642,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "portfolio_item_readiness_outcomes",
-                schema: "application",
                 columns: table => new
                 {
                     portfolio_item_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -696,14 +653,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_portfolio_item_readiness_outcomes_portfolio_items_portfolio",
                         column: x => x.portfolio_item_id,
-                        principalSchema: "application",
                         principalTable: "portfolio_items",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_portfolio_item_readiness_outcomes_readiness_outcomes_readin",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -711,7 +666,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "portfolio_item_stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     portfolio_item_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -723,14 +677,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_portfolio_item_stored_files_portfolio_items_portfolio_item_",
                         column: x => x.portfolio_item_id,
-                        principalSchema: "application",
                         principalTable: "portfolio_items",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_portfolio_item_stored_files_stored_files_stored_file_id",
                         column: x => x.stored_file_id,
-                        principalSchema: "application",
                         principalTable: "stored_files",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -738,7 +690,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "readiness_outcome_progresses",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -753,14 +704,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_readiness_outcome_progresses_readiness_outcomes_readiness_o",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_readiness_outcome_progresses_readiness_profiles_readiness_p",
                         column: x => x.readiness_profile_id,
-                        principalSchema: "application",
                         principalTable: "readiness_profiles",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -768,7 +717,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "suggested_next_steps",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -784,14 +732,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_suggested_next_steps_readiness_outcomes_readiness_outcome_id",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_suggested_next_steps_readiness_profiles_readiness_profile_id",
                         column: x => x.readiness_profile_id,
-                        principalSchema: "application",
                         principalTable: "readiness_profiles",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -799,7 +745,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "completed_activity_readiness_outcomes",
-                schema: "application",
                 columns: table => new
                 {
                     completed_activity_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -811,14 +756,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_completed_activity_readiness_outcomes_completed_activities_",
                         column: x => x.completed_activity_id,
-                        principalSchema: "application",
                         principalTable: "completed_activities",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_completed_activity_readiness_outcomes_readiness_outcomes_re",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -826,7 +769,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "completed_activity_stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     completed_activity_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -838,14 +780,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_completed_activity_stored_files_completed_activities_comple",
                         column: x => x.completed_activity_id,
-                        principalSchema: "application",
                         principalTable: "completed_activities",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_completed_activity_stored_files_stored_files_stored_file_id",
                         column: x => x.stored_file_id,
-                        principalSchema: "application",
                         principalTable: "stored_files",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -853,7 +793,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "reading_entry_stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     reading_entry_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -865,14 +804,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_reading_entry_stored_files_reading_entries_reading_entry_id",
                         column: x => x.reading_entry_id,
-                        principalSchema: "application",
                         principalTable: "reading_entries",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_reading_entry_stored_files_stored_files_stored_file_id",
                         column: x => x.stored_file_id,
-                        principalSchema: "application",
                         principalTable: "stored_files",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -880,7 +817,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "routine_entry_stored_files",
-                schema: "application",
                 columns: table => new
                 {
                     routine_entry_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -892,14 +828,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_routine_entry_stored_files_routine_entries_routine_entry_id",
                         column: x => x.routine_entry_id,
-                        principalSchema: "application",
                         principalTable: "routine_entries",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_routine_entry_stored_files_stored_files_stored_file_id",
                         column: x => x.stored_file_id,
-                        principalSchema: "application",
                         principalTable: "stored_files",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -907,7 +841,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "planned_learning_session_goals",
-                schema: "application",
                 columns: table => new
                 {
                     planned_learning_session_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -919,14 +852,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_planned_learning_session_goals_goals_goal_id",
                         column: x => x.goal_id,
-                        principalSchema: "application",
                         principalTable: "goals",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_planned_learning_session_goals_planned_learning_sessions_pl",
                         column: x => x.planned_learning_session_id,
-                        principalSchema: "application",
                         principalTable: "planned_learning_sessions",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -934,7 +865,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "planned_learning_session_readiness_outcomes",
-                schema: "application",
                 columns: table => new
                 {
                     planned_learning_session_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -946,14 +876,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_planned_learning_session_readiness_outcomes_planned_learnin",
                         column: x => x.planned_learning_session_id,
-                        principalSchema: "application",
                         principalTable: "planned_learning_sessions",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_planned_learning_session_readiness_outcomes_readiness_outco",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -961,7 +889,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateTable(
                 name: "evidence_references",
-                schema: "application",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -980,14 +907,12 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     table.ForeignKey(
                         name: "fk_evidence_references_readiness_outcome_progress_readiness_ou",
                         column: x => x.readiness_outcome_progress_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcome_progresses",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_evidence_references_readiness_outcomes_readiness_outcome_id",
                         column: x => x.readiness_outcome_id,
-                        principalSchema: "application",
                         principalTable: "readiness_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -995,310 +920,260 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "ix_carers_household_id_user_id",
-                schema: "application",
                 table: "carers",
                 columns: new[] { "household_id", "user_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_carers_user_id",
-                schema: "application",
                 table: "carers",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_children_household_id_first_name",
-                schema: "application",
                 table: "children",
                 columns: new[] { "household_id", "first_name" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_completed_activities_daily_log_id",
-                schema: "application",
                 table: "completed_activities",
                 column: "daily_log_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_completed_activity_readiness_outcomes_readiness_outcome_id",
-                schema: "application",
                 table: "completed_activity_readiness_outcomes",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_completed_activity_stored_files_stored_file_id",
-                schema: "application",
                 table: "completed_activity_stored_files",
                 column: "stored_file_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_daily_log_stored_files_stored_file_id",
-                schema: "application",
                 table: "daily_log_stored_files",
                 column: "stored_file_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_daily_logs_child_id",
-                schema: "application",
                 table: "daily_logs",
                 column: "child_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_daily_logs_household_id_child_id_log_date",
-                schema: "application",
                 table: "daily_logs",
                 columns: new[] { "household_id", "child_id", "log_date" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_evidence_references_readiness_outcome_id",
-                schema: "application",
                 table: "evidence_references",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_evidence_references_readiness_outcome_progress_id",
-                schema: "application",
                 table: "evidence_references",
                 column: "readiness_outcome_progress_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_goal_readiness_outcomes_readiness_outcome_id",
-                schema: "application",
                 table: "goal_readiness_outcomes",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_goals_child_id",
-                schema: "application",
                 table: "goals",
                 column: "child_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_goals_household_id_child_id_status",
-                schema: "application",
                 table: "goals",
                 columns: new[] { "household_id", "child_id", "status" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_household_invitations_household_id_email_status",
-                schema: "application",
                 table: "household_invitations",
                 columns: new[] { "household_id", "email", "status" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_household_invitations_invited_by_user_id",
-                schema: "application",
                 table: "household_invitations",
                 column: "invited_by_user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_inbox_state_delivered",
-                schema: "application",
                 table: "inbox_state",
                 column: "delivered");
 
             migrationBuilder.CreateIndex(
                 name: "ix_learning_plans_child_id",
-                schema: "application",
                 table: "learning_plans",
                 column: "child_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_learning_plans_household_id_child_id",
-                schema: "application",
                 table: "learning_plans",
                 columns: new[] { "household_id", "child_id" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_observation_readiness_outcomes_readiness_outcome_id",
-                schema: "application",
                 table: "observation_readiness_outcomes",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_observation_stored_files_stored_file_id",
-                schema: "application",
                 table: "observation_stored_files",
                 column: "stored_file_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_observations_child_id",
-                schema: "application",
                 table: "observations",
                 column: "child_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_observations_household_id_child_id_observed_on",
-                schema: "application",
                 table: "observations",
                 columns: new[] { "household_id", "child_id", "observed_on" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_message_enqueue_time",
-                schema: "application",
                 table: "outbox_message",
                 column: "enqueue_time");
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_message_expiration_time",
-                schema: "application",
                 table: "outbox_message",
                 column: "expiration_time");
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_message_inbox_message_id_inbox_consumer_id_sequence_",
-                schema: "application",
                 table: "outbox_message",
                 columns: new[] { "inbox_message_id", "inbox_consumer_id", "sequence_number" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_message_outbox_id_sequence_number",
-                schema: "application",
                 table: "outbox_message",
                 columns: new[] { "outbox_id", "sequence_number" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_state_created",
-                schema: "application",
                 table: "outbox_state",
                 column: "created");
 
             migrationBuilder.CreateIndex(
                 name: "ix_planned_learning_session_goals_goal_id",
-                schema: "application",
                 table: "planned_learning_session_goals",
                 column: "goal_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_planned_learning_session_readiness_outcomes_readiness_outco",
-                schema: "application",
                 table: "planned_learning_session_readiness_outcomes",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_planned_learning_sessions_learning_plan_id_planned_date",
-                schema: "application",
                 table: "planned_learning_sessions",
                 columns: new[] { "learning_plan_id", "planned_date" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_portfolio_item_readiness_outcomes_readiness_outcome_id",
-                schema: "application",
                 table: "portfolio_item_readiness_outcomes",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_portfolio_item_stored_files_stored_file_id",
-                schema: "application",
                 table: "portfolio_item_stored_files",
                 column: "stored_file_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_portfolio_items_child_id",
-                schema: "application",
                 table: "portfolio_items",
                 column: "child_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_portfolio_items_household_id_child_id_captured_on",
-                schema: "application",
                 table: "portfolio_items",
                 columns: new[] { "household_id", "child_id", "captured_on" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_readiness_outcome_progresses_readiness_outcome_id",
-                schema: "application",
                 table: "readiness_outcome_progresses",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_readiness_outcome_progresses_readiness_profile_id_readiness",
-                schema: "application",
                 table: "readiness_outcome_progresses",
                 columns: new[] { "readiness_profile_id", "readiness_outcome_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_readiness_outcomes_category_sort_order",
-                schema: "application",
                 table: "readiness_outcomes",
                 columns: new[] { "category", "sort_order" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_readiness_outcomes_code",
-                schema: "application",
                 table: "readiness_outcomes",
                 column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_readiness_profiles_child_id",
-                schema: "application",
                 table: "readiness_profiles",
                 column: "child_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_readiness_profiles_household_id_child_id",
-                schema: "application",
                 table: "readiness_profiles",
                 columns: new[] { "household_id", "child_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_reading_entries_daily_log_id",
-                schema: "application",
                 table: "reading_entries",
                 column: "daily_log_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_reading_entry_stored_files_stored_file_id",
-                schema: "application",
                 table: "reading_entry_stored_files",
                 column: "stored_file_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_routine_entries_daily_log_id",
-                schema: "application",
                 table: "routine_entries",
                 column: "daily_log_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_routine_entry_stored_files_stored_file_id",
-                schema: "application",
                 table: "routine_entry_stored_files",
                 column: "stored_file_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stored_files_household_id_storage_key",
-                schema: "application",
                 table: "stored_files",
                 columns: new[] { "household_id", "storage_key" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_suggested_next_steps_readiness_outcome_id",
-                schema: "application",
                 table: "suggested_next_steps",
                 column: "readiness_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_suggested_next_steps_readiness_profile_id",
-                schema: "application",
                 table: "suggested_next_steps",
                 column: "readiness_profile_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_users_email",
-                schema: "application",
                 table: "users",
                 column: "email",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_users_external_object_id_external_tenant_id",
-                schema: "application",
                 table: "users",
                 columns: new[] { "external_object_id", "external_tenant_id" },
                 unique: true);
@@ -1308,144 +1183,112 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "carers",
-                schema: "application");
+                name: "audit_trail_entries");
 
             migrationBuilder.DropTable(
-                name: "completed_activity_readiness_outcomes",
-                schema: "application");
+                name: "carers");
 
             migrationBuilder.DropTable(
-                name: "completed_activity_stored_files",
-                schema: "application");
+                name: "completed_activity_readiness_outcomes");
 
             migrationBuilder.DropTable(
-                name: "daily_log_stored_files",
-                schema: "application");
+                name: "completed_activity_stored_files");
 
             migrationBuilder.DropTable(
-                name: "evidence_references",
-                schema: "application");
+                name: "daily_log_stored_files");
 
             migrationBuilder.DropTable(
-                name: "goal_readiness_outcomes",
-                schema: "application");
+                name: "evidence_references");
 
             migrationBuilder.DropTable(
-                name: "household_invitations",
-                schema: "application");
+                name: "goal_readiness_outcomes");
 
             migrationBuilder.DropTable(
-                name: "observation_readiness_outcomes",
-                schema: "application");
+                name: "household_invitations");
 
             migrationBuilder.DropTable(
-                name: "observation_stored_files",
-                schema: "application");
+                name: "observation_readiness_outcomes");
 
             migrationBuilder.DropTable(
-                name: "outbox_message",
-                schema: "application");
+                name: "observation_stored_files");
 
             migrationBuilder.DropTable(
-                name: "planned_learning_session_goals",
-                schema: "application");
+                name: "outbox_message");
 
             migrationBuilder.DropTable(
-                name: "planned_learning_session_readiness_outcomes",
-                schema: "application");
+                name: "planned_learning_session_goals");
 
             migrationBuilder.DropTable(
-                name: "portfolio_item_readiness_outcomes",
-                schema: "application");
+                name: "planned_learning_session_readiness_outcomes");
 
             migrationBuilder.DropTable(
-                name: "portfolio_item_stored_files",
-                schema: "application");
+                name: "portfolio_item_readiness_outcomes");
 
             migrationBuilder.DropTable(
-                name: "reading_entry_stored_files",
-                schema: "application");
+                name: "portfolio_item_stored_files");
 
             migrationBuilder.DropTable(
-                name: "routine_entry_stored_files",
-                schema: "application");
+                name: "reading_entry_stored_files");
 
             migrationBuilder.DropTable(
-                name: "suggested_next_steps",
-                schema: "application");
+                name: "routine_entry_stored_files");
 
             migrationBuilder.DropTable(
-                name: "completed_activities",
-                schema: "application");
+                name: "suggested_next_steps");
 
             migrationBuilder.DropTable(
-                name: "readiness_outcome_progresses",
-                schema: "application");
+                name: "completed_activities");
 
             migrationBuilder.DropTable(
-                name: "users",
-                schema: "application");
+                name: "readiness_outcome_progresses");
 
             migrationBuilder.DropTable(
-                name: "observations",
-                schema: "application");
+                name: "users");
 
             migrationBuilder.DropTable(
-                name: "inbox_state",
-                schema: "application");
+                name: "observations");
 
             migrationBuilder.DropTable(
-                name: "outbox_state",
-                schema: "application");
+                name: "inbox_state");
 
             migrationBuilder.DropTable(
-                name: "goals",
-                schema: "application");
+                name: "outbox_state");
 
             migrationBuilder.DropTable(
-                name: "planned_learning_sessions",
-                schema: "application");
+                name: "goals");
 
             migrationBuilder.DropTable(
-                name: "portfolio_items",
-                schema: "application");
+                name: "planned_learning_sessions");
 
             migrationBuilder.DropTable(
-                name: "reading_entries",
-                schema: "application");
+                name: "portfolio_items");
 
             migrationBuilder.DropTable(
-                name: "routine_entries",
-                schema: "application");
+                name: "reading_entries");
 
             migrationBuilder.DropTable(
-                name: "stored_files",
-                schema: "application");
+                name: "routine_entries");
 
             migrationBuilder.DropTable(
-                name: "readiness_outcomes",
-                schema: "application");
+                name: "stored_files");
 
             migrationBuilder.DropTable(
-                name: "readiness_profiles",
-                schema: "application");
+                name: "readiness_outcomes");
 
             migrationBuilder.DropTable(
-                name: "learning_plans",
-                schema: "application");
+                name: "readiness_profiles");
 
             migrationBuilder.DropTable(
-                name: "daily_logs",
-                schema: "application");
+                name: "learning_plans");
 
             migrationBuilder.DropTable(
-                name: "children",
-                schema: "application");
+                name: "daily_logs");
 
             migrationBuilder.DropTable(
-                name: "households",
-                schema: "application");
+                name: "children");
+
+            migrationBuilder.DropTable(
+                name: "households");
         }
     }
 }
