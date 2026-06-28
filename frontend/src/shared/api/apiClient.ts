@@ -45,8 +45,14 @@ export const apiClient = {
     return data.data;
   },
 
-  async postForm<T>(url: string, form: FormData): Promise<T> {
-    const { data } = await http.post<ApiSingleResponse<T>>(url, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  async postForm<T>(url: string, form: FormData, onUploadProgress?: (progress: number) => void): Promise<T> {
+    const { data } = await http.post<ApiSingleResponse<T>>(url, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (event) => {
+        if (!onUploadProgress || !event.total) return;
+        onUploadProgress(Math.round((event.loaded * 100) / event.total));
+      }
+    });
     return data.data;
   },
 
