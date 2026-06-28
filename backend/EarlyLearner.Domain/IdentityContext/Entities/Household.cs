@@ -118,6 +118,8 @@ public sealed class Household : Entity<HouseholdId>
 
     private void RaiseCarerInvited(HouseholdInvitation invitation)
     {
+        var occurredAt = DateTimeOffset.UtcNow;
+
         RaiseDomainEvent(new HouseholdCarerInvited(
             Id,
             invitation.Id,
@@ -126,7 +128,16 @@ public sealed class Household : Entity<HouseholdId>
             invitation.FirstName,
             invitation.LastName,
             invitation.ExpiresAt,
-            DateTimeOffset.UtcNow));
+            occurredAt));
+
+        RaiseTraceEvent(
+            entityName: nameof(HouseholdInvitation),
+            entityId: invitation.Id.Value.ToString(),
+            action: "HouseholdCarerInvited",
+            summary: "Carer invited",
+            details: $"{invitation.Email} was invited to join {Name}.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
     }
 
     public void RemoveCarer(CarerId carerId)
@@ -143,7 +154,16 @@ public sealed class Household : Entity<HouseholdId>
     {
         var child = new Child(new ChildId(Guid.NewGuid()), Id, firstName, lastName, dateOfBirth);
         _children.Add(child);
-        RaiseDomainEvent(new ChildCreated(Id, child.Id, DateTimeOffset.UtcNow));
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseDomainEvent(new ChildCreated(Id, child.Id, occurredAt));
+        RaiseTraceEvent(
+            entityName: nameof(Child),
+            entityId: child.Id.Value.ToString(),
+            action: "ChildCreated",
+            summary: "Child profile created",
+            details: $"Child profile {child.Id.Value} was created.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
         SetUpdatedOn();
         return child;
     }

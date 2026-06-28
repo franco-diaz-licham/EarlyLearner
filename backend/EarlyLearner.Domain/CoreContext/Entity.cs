@@ -29,12 +29,14 @@ public abstract class Entity
 
     protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
-    public void RaiseTraceEvent(string entityName, string entityId, string action, Guid householdId, DateTimeOffset occurredAt)
+    public void RaiseTraceEvent(string entityName, string entityId, string action, string summary, string? details, Guid householdId, DateTimeOffset occurredAt)
     {
         RaiseDomainEvent(new EntityTraceRecorded(
             EntityName: entityName,
             EntityId: entityId,
             Action: action,
+            Summary: summary,
+            Details: details,
             HouseholdId: householdId,
             OccurredAt: occurredAt));
     }
@@ -54,5 +56,7 @@ public sealed record EntityTraceRecorded(
     string EntityName,
     string EntityId,
     string Action,
+    string Summary,
+    string? Details,
     Guid HouseholdId,
     DateTimeOffset OccurredAt) : IDomainEvent;

@@ -155,8 +155,6 @@ public static class InfraAppServices
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IDomainEventHandler, EntityTraceAuditTrailHandler>();
-        services.AddScoped<IDomainEventHandler, ChildCreatedAuditTrailHandler>();
-        services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedAuditTrailHandler>();
         services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedHandler>();
         services.AddScoped<IIntegrationEventPublisher, IntegrationEventPublisher>();
 

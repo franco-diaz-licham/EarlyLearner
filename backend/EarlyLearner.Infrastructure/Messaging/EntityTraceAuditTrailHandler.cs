@@ -21,8 +21,8 @@ public sealed class EntityTraceAuditTrailHandler(DatabaseContext db) : IDomainEv
             Id = Guid.NewGuid(),
             HouseholdId = entityTrace.HouseholdId,
             Action = entityTrace.Action,
-            Summary = $"{entityTrace.EntityName} {entityTrace.Action.Replace("Entity", string.Empty).ToLowerInvariant()}",
-            Details = $"{entityTrace.EntityName} {entityTrace.EntityId} was {entityTrace.Action.Replace("Entity", string.Empty).ToLowerInvariant()}.",
+            Summary = entityTrace.Summary,
+            Details = entityTrace.Details,
             ActionedAt = entityTrace.OccurredAt,
             RecordedAt = DateTimeOffset.UtcNow
         });
