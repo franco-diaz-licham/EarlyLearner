@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Features.AuditContext;
 
-public sealed class AuditTrailQueryRepository(AuditTrailReadDbContext db) : IAuditTrailQueryRepository
+public sealed class AuditTrailQueryRepository(DatabaseContext db) : IAuditTrailQueryRepository
 {
     public Task<List<AuditTrailEntryResponse>> ListAsync(HouseholdId householdId, string? search, CancellationToken cancellationToken)
     {

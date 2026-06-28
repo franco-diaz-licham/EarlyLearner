@@ -3,6 +3,7 @@ using System;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EarlyLearner.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260628110743_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1174,47 +1177,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_portfolio_item_stored_files_stored_file_id");
 
                     b.ToTable("portfolio_item_stored_files", "application");
-                });
-
-            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Entities.AuditTrailReadModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)")
-                        .HasColumnName("action");
-
-                    b.Property<DateTimeOffset>("ActionedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("actioned_at");
-
-                    b.Property<string>("Details")
-                        .HasMaxLength(1200)
-                        .HasColumnType("character varying(1200)")
-                        .HasColumnName("details");
-
-                    b.Property<Guid>("HouseholdId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("household_id");
-
-                    b.Property<DateTimeOffset>("RecordedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("recorded_at");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("summary");
-
-                    b.HasKey("Id")
-                        .HasName("pk_audit_trail_entries");
-
-                    b.ToTable("audit_trail_entries", "application");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>

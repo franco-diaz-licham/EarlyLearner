@@ -89,11 +89,6 @@ public static class InfraAppServices
             });
         });
 
-        services.AddDbContext<AuditTrailReadDbContext>((sp, options) => {
-            var dbOpts = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            options.UseNpgsql(dbOpts.Db).UseSnakeCaseNamingConvention();
-        });
-
         return services;
     }
 
@@ -159,6 +154,7 @@ public static class InfraAppServices
             .ValidateOnStart();
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IDomainEventHandler, EntityTraceAuditTrailHandler>();
         services.AddScoped<IDomainEventHandler, ChildCreatedAuditTrailHandler>();
         services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedAuditTrailHandler>();
         services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedHandler>();

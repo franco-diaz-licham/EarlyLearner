@@ -1,17 +1,15 @@
-using EarlyLearner.Worker.Infrastructure.Persistence.Entities;
+using EarlyLearner.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EarlyLearner.Worker.Infrastructure.Persistence.Configurations;
+namespace EarlyLearner.Infrastructure.Persistence.Configurations.AuditContext;
 
-public sealed class AuditTrailEntryConfig : IEntityTypeConfiguration<AuditTrailEntry>
+public sealed class AuditTrailReadModelConfig : IEntityTypeConfiguration<AuditTrailReadModel>
 {
-    public void Configure(EntityTypeBuilder<AuditTrailEntry> builder)
+    public void Configure(EntityTypeBuilder<AuditTrailReadModel> builder)
     {
-        builder.ToTable("audit_trail_entries");
-
+        builder.ToTable("audit_trail_entries", DatabaseSchemas.Application);
         builder.HasKey(entry => entry.Id);
-
         builder.Property(entry => entry.Id).ValueGeneratedNever();
         builder.Property(entry => entry.HouseholdId).IsRequired();
         builder.Property(entry => entry.Action).HasMaxLength(120).IsRequired();
@@ -19,7 +17,5 @@ public sealed class AuditTrailEntryConfig : IEntityTypeConfiguration<AuditTrailE
         builder.Property(entry => entry.Details).HasMaxLength(1200).IsRequired(false);
         builder.Property(entry => entry.ActionedAt).IsRequired();
         builder.Property(entry => entry.RecordedAt).IsRequired();
-
-        builder.HasIndex(entry => new { entry.HouseholdId, entry.ActionedAt });
     }
 }

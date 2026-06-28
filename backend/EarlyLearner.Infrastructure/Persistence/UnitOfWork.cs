@@ -1,6 +1,8 @@
 using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.IdentityContext.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EarlyLearner.Infrastructure.Persistence;
@@ -11,6 +13,8 @@ public sealed class UnitOfWork(DatabaseContext db, IDomainEventDispatcher domain
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
+        RaiseEntityTraceEvents();
+
         var entitiesWithEvents = db.ChangeTracker
             .Entries<Entity>()
             .Where(entry => entry.Entity.DomainEvents.Count > 0)
@@ -27,6 +31,46 @@ public sealed class UnitOfWork(DatabaseContext db, IDomainEventDispatcher domain
         var result = await db.SaveChangesAsync(cancellationToken);
         foreach (var entity in entitiesWithEvents) entity.ClearDomainEvents();
         return result;
+    }
+
+    private void RaiseEntityTraceEvents()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var entries = db.ChangeTracker
+            .Entries<Entity>()
+            .Where(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .ToList();
+
+        foreach (var entry in entries) {
+            var householdId = TryGetHouseholdId(entry.Entity);
+            if (householdId is null) continue;
+
+            entry.Entity.RaiseTraceEvent(
+                entityName: entry.Entity.GetType().Name,
+                entityId: TryGetEntityId(entry.Entity) ?? "unknown",
+                action: $"Entity{entry.State}",
+                householdId: householdId.Value,
+                occurredAt: now);
+        }
+    }
+
+    private static Guid? TryGetHouseholdId(Entity entity)
+    {
+        if (entity is Household household) return household.Id.Value;
+
+        var householdIdProperty = entity.GetType().GetProperty("HouseholdId");
+        var householdId = householdIdProperty?.GetValue(entity);
+        var valueProperty = householdId?.GetType().GetProperty("Value");
+        return valueProperty?.GetValue(householdId) is Guid value ? value : null;
+    }
+
+    private static string? TryGetEntityId(Entity entity)
+    {
+        var id = entity.GetType().GetProperty("Id")?.GetValue(entity);
+        if (id is null) return null;
+
+        var value = id.GetType().GetProperty("Value")?.GetValue(id);
+        return value?.ToString() ?? id.ToString();
     }
 
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)

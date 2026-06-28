@@ -10,34 +10,6 @@ namespace EarlyLearner.Domain.CoreContext.Entities;
 /// </summary>
 public sealed class StoredFile : Entity<StoredFileId>
 {
-    private StoredFile() { }
-
-    private StoredFile(
-        StoredFileId id,
-        HouseholdId householdId,
-        string storageKey,
-        string fileName,
-        string contentType,
-        long sizeInBytes,
-        StoredFileMediaTypeEnum mediaType,
-        DateTimeOffset uploadedAt)
-    {
-        Id = id;
-        if (sizeInBytes <= 0) {
-            throw new DomainException("Stored file size must be greater than zero.");
-        }
-
-        HouseholdId = householdId;
-        StorageKey = Required(storageKey, nameof(storageKey));
-        FileName = Required(fileName, nameof(fileName));
-        ContentType = Required(contentType, nameof(contentType));
-        SizeInBytes = sizeInBytes;
-        MediaType = mediaType;
-        UploadedAt = uploadedAt;
-        Status = StoredFileStatusEnum.Pending;
-        SetCreatedOn();
-    }
-
     /// <summary>
     /// Household that owns the file and controls access to it.
     /// </summary>
@@ -77,6 +49,34 @@ public sealed class StoredFile : Entity<StoredFileId>
     /// UTC time the file metadata was created after upload.
     /// </summary>
     public DateTimeOffset UploadedAt { get; }
+
+    private StoredFile() { }
+
+    private StoredFile(
+        StoredFileId id,
+        HouseholdId householdId,
+        string storageKey,
+        string fileName,
+        string contentType,
+        long sizeInBytes,
+        StoredFileMediaTypeEnum mediaType,
+        DateTimeOffset uploadedAt)
+    {
+        Id = id;
+        if (sizeInBytes <= 0) {
+            throw new DomainException("Stored file size must be greater than zero.");
+        }
+
+        HouseholdId = householdId;
+        StorageKey = Required(storageKey, nameof(storageKey));
+        FileName = Required(fileName, nameof(fileName));
+        ContentType = Required(contentType, nameof(contentType));
+        SizeInBytes = sizeInBytes;
+        MediaType = mediaType;
+        UploadedAt = uploadedAt;
+        Status = StoredFileStatusEnum.Pending;
+        SetCreatedOn();
+    }
 
     public static StoredFile Create(
         HouseholdId householdId,

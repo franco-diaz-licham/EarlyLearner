@@ -3,6 +3,7 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Infrastructure.Persistence.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<ReadingEntry> ReadingEntries => Set<ReadingEntry>();
     public DbSet<RoutineEntry> RoutineEntries => Set<RoutineEntry>();
     public DbSet<Observation> Observations => Set<Observation>();
+    public DbSet<AuditTrailReadModel> AuditTrailEntries => Set<AuditTrailReadModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

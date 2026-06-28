@@ -1,12 +1,8 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Options;
-using EarlyLearner.Worker.Application.Ports;
-using EarlyLearner.Worker.Infrastructure.AuditTrail;
-using EarlyLearner.Worker.Infrastructure.Persistence;
 using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Configuration;
@@ -17,26 +13,8 @@ public static class WorkerAppServices
     {
         builder.Services
             .EarlyLearnerServices(builder.Configuration)
-            .DatabaseServices(builder.Configuration)
             .EmailServices(builder.Configuration)
             .MessagingServices(builder.Configuration);
-    }
-
-    private static IServiceCollection DatabaseServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services
-            .AddOptions<WorkerDatabaseOptions>()
-            .Bind(configuration.GetSection(WorkerDatabaseOptions.SECTION_NAME))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services.AddDbContext<WorkerDbContext>((sp, options) => {
-            var databaseOptions = sp.GetRequiredService<IOptions<WorkerDatabaseOptions>>().Value;
-            options.UseNpgsql(databaseOptions.Db).UseSnakeCaseNamingConvention();
-        });
-
-        services.AddScoped<IAuditTrailWriter, AuditTrailWriter>();
-        return services;
     }
 
     private static IServiceCollection EarlyLearnerServices(this IServiceCollection services, IConfiguration configuration)

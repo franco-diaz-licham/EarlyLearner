@@ -29,6 +29,16 @@ public abstract class Entity
 
     protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
+    public void RaiseTraceEvent(string entityName, string entityId, string action, Guid householdId, DateTimeOffset occurredAt)
+    {
+        RaiseDomainEvent(new EntityTraceRecorded(
+            EntityName: entityName,
+            EntityId: entityId,
+            Action: action,
+            HouseholdId: householdId,
+            OccurredAt: occurredAt));
+    }
+
     public void ClearDomainEvents() => _domainEvents.Clear();
 }
 
@@ -39,3 +49,10 @@ public abstract class Entity<TId> : Entity where TId : notnull
 {
     public TId Id { get; protected set; } = default!;
 }
+
+public sealed record EntityTraceRecorded(
+    string EntityName,
+    string EntityId,
+    string Action,
+    Guid HouseholdId,
+    DateTimeOffset OccurredAt) : IDomainEvent;

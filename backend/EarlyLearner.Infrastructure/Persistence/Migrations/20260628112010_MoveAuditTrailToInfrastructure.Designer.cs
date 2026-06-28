@@ -12,14 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EarlyLearner.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260624091716_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260628112010_MoveAuditTrailToInfrastructure")]
+    partial class MoveAuditTrailToInfrastructure
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("application")
                 .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -88,7 +89,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_stored_files_household_id_storage_key");
 
-                    b.ToTable("stored_files", (string)null);
+                    b.ToTable("stored_files", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.Carer", b =>
@@ -129,7 +130,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_carers_household_id_user_id");
 
-                    b.ToTable("carers", (string)null);
+                    b.ToTable("carers", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.Child", b =>
@@ -176,7 +177,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("HouseholdId", "FirstName")
                         .HasDatabaseName("ix_children_household_id_first_name");
 
-                    b.ToTable("children", (string)null);
+                    b.ToTable("children", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.Household", b =>
@@ -202,7 +203,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_households");
 
-                    b.ToTable("households", (string)null);
+                    b.ToTable("households", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.HouseholdInvitation", b =>
@@ -280,7 +281,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("HouseholdId", "Email", "Status")
                         .HasDatabaseName("ix_household_invitations_household_id_email_status");
 
-                    b.ToTable("household_invitations", (string)null);
+                    b.ToTable("household_invitations", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.IdentityContext.Entities.User", b =>
@@ -342,7 +343,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_external_object_id_external_tenant_id");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.CompletedActivity", b =>
@@ -375,7 +376,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("DailyLogId")
                         .HasDatabaseName("ix_completed_activities_daily_log_id");
 
-                    b.ToTable("completed_activities", (string)null);
+                    b.ToTable("completed_activities", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.DailyLog", b =>
@@ -414,7 +415,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_daily_logs_household_id_child_id_log_date");
 
-                    b.ToTable("daily_logs", (string)null);
+                    b.ToTable("daily_logs", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.Observation", b =>
@@ -458,7 +459,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("HouseholdId", "ChildId", "ObservedOn")
                         .HasDatabaseName("ix_observations_household_id_child_id_observed_on");
 
-                    b.ToTable("observations", (string)null);
+                    b.ToTable("observations", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.ReadingEntry", b =>
@@ -503,7 +504,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("DailyLogId")
                         .HasDatabaseName("ix_reading_entries_daily_log_id");
 
-                    b.ToTable("reading_entries", (string)null);
+                    b.ToTable("reading_entries", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.RoutineEntry", b =>
@@ -542,7 +543,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("DailyLogId")
                         .HasDatabaseName("ix_routine_entries_daily_log_id");
 
-                    b.ToTable("routine_entries", (string)null);
+                    b.ToTable("routine_entries", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.PlanningContext.Entities.Goal", b =>
@@ -594,7 +595,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("HouseholdId", "ChildId", "Status")
                         .HasDatabaseName("ix_goals_household_id_child_id_status");
 
-                    b.ToTable("goals", (string)null);
+                    b.ToTable("goals", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.PlanningContext.Entities.LearningPlan", b =>
@@ -634,7 +635,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("HouseholdId", "ChildId")
                         .HasDatabaseName("ix_learning_plans_household_id_child_id");
 
-                    b.ToTable("learning_plans", (string)null);
+                    b.ToTable("learning_plans", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.PlanningContext.Entities.PlannedLearningSession", b =>
@@ -677,7 +678,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("LearningPlanId", "PlannedDate")
                         .HasDatabaseName("ix_planned_learning_sessions_learning_plan_id_planned_date");
 
-                    b.ToTable("planned_learning_sessions", (string)null);
+                    b.ToTable("planned_learning_sessions", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.EvidenceReference", b =>
@@ -731,7 +732,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessOutcomeProgressId")
                         .HasDatabaseName("ix_evidence_references_readiness_outcome_progress_id");
 
-                    b.ToTable("evidence_references", (string)null);
+                    b.ToTable("evidence_references", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.PortfolioItem", b =>
@@ -775,7 +776,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("HouseholdId", "ChildId", "CapturedOn")
                         .HasDatabaseName("ix_portfolio_items_household_id_child_id_captured_on");
 
-                    b.ToTable("portfolio_items", (string)null);
+                    b.ToTable("portfolio_items", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessOutcome", b =>
@@ -836,7 +837,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("Category", "SortOrder")
                         .HasDatabaseName("ix_readiness_outcomes_category_sort_order");
 
-                    b.ToTable("readiness_outcomes", (string)null);
+                    b.ToTable("readiness_outcomes", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessOutcomeProgress", b =>
@@ -872,7 +873,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_readiness_outcome_progresses_readiness_profile_id_readiness");
 
-                    b.ToTable("readiness_outcome_progresses", (string)null);
+                    b.ToTable("readiness_outcome_progresses", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessProfile", b =>
@@ -907,7 +908,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_readiness_profiles_household_id_child_id");
 
-                    b.ToTable("readiness_profiles", (string)null);
+                    b.ToTable("readiness_profiles", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.SuggestedNextStep", b =>
@@ -947,7 +948,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessProfileId")
                         .HasDatabaseName("ix_suggested_next_steps_readiness_profile_id");
 
-                    b.ToTable("suggested_next_steps", (string)null);
+                    b.ToTable("suggested_next_steps", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.CompletedActivityConfig+CompletedActivityReadinessOutcome", b =>
@@ -966,7 +967,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessOutcomeId")
                         .HasDatabaseName("ix_completed_activity_readiness_outcomes_readiness_outcome_id");
 
-                    b.ToTable("completed_activity_readiness_outcomes", (string)null);
+                    b.ToTable("completed_activity_readiness_outcomes", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.CompletedActivityConfig+CompletedActivityStoredFile", b =>
@@ -985,7 +986,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("StoredFileId")
                         .HasDatabaseName("ix_completed_activity_stored_files_stored_file_id");
 
-                    b.ToTable("completed_activity_stored_files", (string)null);
+                    b.ToTable("completed_activity_stored_files", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.DailyLogConfig+DailyLogStoredFile", b =>
@@ -1004,7 +1005,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("StoredFileId")
                         .HasDatabaseName("ix_daily_log_stored_files_stored_file_id");
 
-                    b.ToTable("daily_log_stored_files", (string)null);
+                    b.ToTable("daily_log_stored_files", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.ObservationConfig+ObservationReadinessOutcome", b =>
@@ -1023,7 +1024,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessOutcomeId")
                         .HasDatabaseName("ix_observation_readiness_outcomes_readiness_outcome_id");
 
-                    b.ToTable("observation_readiness_outcomes", (string)null);
+                    b.ToTable("observation_readiness_outcomes", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.ObservationConfig+ObservationStoredFile", b =>
@@ -1042,7 +1043,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("StoredFileId")
                         .HasDatabaseName("ix_observation_stored_files_stored_file_id");
 
-                    b.ToTable("observation_stored_files", (string)null);
+                    b.ToTable("observation_stored_files", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.ReadingEntryConfig+ReadingEntryStoredFile", b =>
@@ -1061,7 +1062,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("StoredFileId")
                         .HasDatabaseName("ix_reading_entry_stored_files_stored_file_id");
 
-                    b.ToTable("reading_entry_stored_files", (string)null);
+                    b.ToTable("reading_entry_stored_files", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.RoutineEntryConfig+RoutineEntryStoredFile", b =>
@@ -1080,7 +1081,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("StoredFileId")
                         .HasDatabaseName("ix_routine_entry_stored_files_stored_file_id");
 
-                    b.ToTable("routine_entry_stored_files", (string)null);
+                    b.ToTable("routine_entry_stored_files", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.PlanningContext.GoalConfig+GoalReadinessOutcome", b =>
@@ -1099,7 +1100,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessOutcomeId")
                         .HasDatabaseName("ix_goal_readiness_outcomes_readiness_outcome_id");
 
-                    b.ToTable("goal_readiness_outcomes", (string)null);
+                    b.ToTable("goal_readiness_outcomes", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.PlanningContext.PlannedLearningSessionConfig+PlannedLearningSessionGoal", b =>
@@ -1118,7 +1119,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("GoalId")
                         .HasDatabaseName("ix_planned_learning_session_goals_goal_id");
 
-                    b.ToTable("planned_learning_session_goals", (string)null);
+                    b.ToTable("planned_learning_session_goals", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.PlanningContext.PlannedLearningSessionConfig+PlannedLearningSessionReadinessOutcome", b =>
@@ -1137,7 +1138,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessOutcomeId")
                         .HasDatabaseName("ix_planned_learning_session_readiness_outcomes_readiness_outco");
 
-                    b.ToTable("planned_learning_session_readiness_outcomes", (string)null);
+                    b.ToTable("planned_learning_session_readiness_outcomes", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.ReadinessContext.PortfolioItemConfig+PortfolioItemReadinessOutcome", b =>
@@ -1156,7 +1157,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReadinessOutcomeId")
                         .HasDatabaseName("ix_portfolio_item_readiness_outcomes_readiness_outcome_id");
 
-                    b.ToTable("portfolio_item_readiness_outcomes", (string)null);
+                    b.ToTable("portfolio_item_readiness_outcomes", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.ReadinessContext.PortfolioItemConfig+PortfolioItemStoredFile", b =>
@@ -1175,7 +1176,48 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("StoredFileId")
                         .HasDatabaseName("ix_portfolio_item_stored_files_stored_file_id");
 
-                    b.ToTable("portfolio_item_stored_files", (string)null);
+                    b.ToTable("portfolio_item_stored_files", "application");
+                });
+
+            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Entities.AuditTrailReadModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("action");
+
+                    b.Property<DateTimeOffset>("ActionedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actioned_at");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(1200)
+                        .HasColumnType("character varying(1200)")
+                        .HasColumnName("details");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("household_id");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("summary");
+
+                    b.HasKey("Id")
+                        .HasName("pk_audit_trail_entries");
+
+                    b.ToTable("audit_trail_entries", "application");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
@@ -1238,7 +1280,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("Delivered")
                         .HasDatabaseName("ix_inbox_state_delivered");
 
-                    b.ToTable("inbox_state", (string)null);
+                    b.ToTable("inbox_state", "application");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
@@ -1355,7 +1397,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_outbox_message_inbox_message_id_inbox_consumer_id_sequence_");
 
-                    b.ToTable("outbox_message", (string)null);
+                    b.ToTable("outbox_message", "application");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxState", b =>
@@ -1393,7 +1435,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.HasIndex("Created")
                         .HasDatabaseName("ix_outbox_state_created");
 
-                    b.ToTable("outbox_state", (string)null);
+                    b.ToTable("outbox_state", "application");
                 });
 
             modelBuilder.Entity("EarlyLearner.Domain.CoreContext.Entities.StoredFile", b =>
@@ -1572,7 +1614,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("GoalId");
 
-                            b1.ToTable("goals");
+                            b1.ToTable("goals", "application");
 
                             b1.WithOwner()
                                 .HasForeignKey("GoalId")
@@ -1619,7 +1661,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("LearningPlanId");
 
-                            b1.ToTable("learning_plans");
+                            b1.ToTable("learning_plans", "application");
 
                             b1.WithOwner()
                                 .HasForeignKey("LearningPlanId")
@@ -1705,7 +1747,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PortfolioItemId");
 
-                            b1.ToTable("portfolio_items");
+                            b1.ToTable("portfolio_items", "application");
 
                             b1.WithOwner()
                                 .HasForeignKey("PortfolioItemId")
