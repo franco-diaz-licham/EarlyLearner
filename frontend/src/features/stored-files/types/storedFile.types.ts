@@ -1,17 +1,17 @@
 export const StoredFileMediaType = {
-  Photo: 1,
-  Video: 2,
-  Document: 3,
-  Artwork: 4
+  Photo: 'photo',
+  Video: 'video',
+  Document: 'document',
+  Artwork: 'artwork'
 } as const;
 
 export type StoredFileMediaType = (typeof StoredFileMediaType)[keyof typeof StoredFileMediaType];
 
 export const StoredFileStatus = {
-  Pending: 1,
-  Available: 2,
-  Rejected: 3,
-  Deleted: 4
+  Pending: 'pending',
+  Available: 'available',
+  Rejected: 'rejected',
+  Deleted: 'deleted'
 } as const;
 
 export type StoredFileStatus = (typeof StoredFileStatus)[keyof typeof StoredFileStatus];

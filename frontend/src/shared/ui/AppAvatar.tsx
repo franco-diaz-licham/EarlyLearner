@@ -1,7 +1,8 @@
 import { UilEditAlt, UilTrashAlt, UilUsersAlt } from '@iconscout/react-unicons';
 import { Button } from 'primereact/button';
 import type { ChangeEvent } from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useStoredFileContentQuery } from '../queries/fileUpload.queries';
 import { mergeClassNames } from './mergeClassNames';
 
 type AppAvatarSize = 'sm' | 'md' | 'lg';
@@ -13,6 +14,7 @@ interface AppAvatarProps {
   disabled?: boolean;
   initials?: string;
   src?: string | null;
+  storedFileId?: string | null;
   size?: AppAvatarSize;
   onFileChange?: (file: File | null) => void;
 }
@@ -29,11 +31,13 @@ const iconSizeClasses: Record<AppAvatarSize, string> = {
   lg: 'h-10 w-10'
 };
 
-export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false, initials, src, size = 'md', onFileChange }: AppAvatarProps) => {
+export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false, initials, src, storedFileId, size = 'md', onFileChange }: AppAvatarProps) => {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const imageSrc = previewUrl ?? src;
+  const storedFileContentQuery = useStoredFileContentQuery(storedFileId);
+  const storedFileUrl = useMemo(() => (storedFileContentQuery.data ? URL.createObjectURL(storedFileContentQuery.data) : null), [storedFileContentQuery.data]);
+  const imageSrc = previewUrl ?? storedFileUrl ?? src;
   const hasImage = Boolean(imageSrc);
   const visibleInitials = initials?.trim().slice(0, 2).toUpperCase();
 
@@ -42,6 +46,12 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (storedFileUrl) URL.revokeObjectURL(storedFileUrl);
+    };
+  }, [storedFileUrl]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;

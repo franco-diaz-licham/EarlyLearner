@@ -150,6 +150,7 @@ public static class ApiAppServices
 
     private static IServiceCollection AddRequestValidators(this IServiceCollection services)
     {
+        services.AddScoped<IValidator<StoredFileRequest>, StoredFileRequestValidator>();
         services.AddScoped<IValidator<CreateStoredFileRequest>, CreateStoredFileRequestValidator>();
         services.AddScoped<IValidator<UpdateStoredFileStatusRequest>, UpdateStoredFileStatusRequestValidator>();
         services.AddScoped<IValidator<UpdateHouseholdRequest>, UpdateHouseholdRequestValidator>();

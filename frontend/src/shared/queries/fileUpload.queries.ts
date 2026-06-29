@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { StoredFileMediaType, StoredFileStatus } from '../../features/stored-files/types/storedFile.types';
 import { apiClient } from '../api/apiClient';
 
 const STORED_FILES_URL = '/stored-files';
@@ -9,7 +10,7 @@ const storedFileKeys = {
 
 export interface StoredFileUploadRequest {
   file: File;
-  mediaType: number;
+  mediaType: StoredFileMediaType;
   storageKey?: string;
   uploadedAt?: string;
 }
@@ -21,8 +22,8 @@ export interface StoredFileUploadResponse {
   fileName: string;
   contentType: string;
   sizeInBytes: number;
-  mediaType: number;
-  status: number;
+  mediaType: StoredFileMediaType;
+  status: StoredFileStatus;
   uploadedAt: string;
 }
 
@@ -50,6 +51,14 @@ export const useCreateStoredFileUploadMutation = () => {
     }
   });
 };
+
+export const useStoredFileContentQuery = (storedFileId: string | null | undefined) =>
+  useQuery({
+    queryKey: storedFileId ? [...storedFileKeys.detail(storedFileId), 'content'] : [...storedFileKeys.detail('none'), 'content'],
+    queryFn: () => apiClient.getBlob(`${STORED_FILES_URL}/${storedFileId ?? ''}/content`),
+    enabled: Boolean(storedFileId),
+    staleTime: 5 * 60 * 1000
+  });
 
 export const useDeleteStoredFileUploadMutation = () => {
   const queryClient = useQueryClient();

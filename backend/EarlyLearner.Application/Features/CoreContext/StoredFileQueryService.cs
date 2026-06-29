@@ -39,7 +39,7 @@ public sealed class StoredFileQueryService(IStoredFileQueryRepository storedFile
     public async Task<Result<StoredFileResponse>> GetAsync(Guid storedFileId, CancellationToken cancellationToken)
     {
         var file = await storedFileRepo.GetResponseAsync(storedFileId, cancellationToken);
-        return file is null
+        return file is null || file.HouseholdId != currentUser.HouseholdId.Value
             ? Result<StoredFileResponse>.Fail("Stored file was not found.", ResultTypeEnum.NotFound)
             : Result<StoredFileResponse>.Success(file, ResultTypeEnum.Success);
     }

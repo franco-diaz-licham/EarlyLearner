@@ -51,7 +51,15 @@ export const ChildForm = ({ child, household, saving, visible, onHide, onSave }:
   return (
     <AppDialog header={household ? `${title} in ${household.name}` : title} visible={visible} onHide={onHide}>
       <div className="space-y-4 pt-4">
-        <AppAvatar key={`${child?.id ?? 'new'}-${visible ? 'visible' : 'hidden'}`} alt="Child avatar preview" disabled={saving} initials={childInitials} size="lg" onFileChange={handleFileChanged} />
+        <AppAvatar
+          key={`${child?.id ?? 'new'}-${visible ? 'visible' : 'hidden'}`}
+          alt="Child avatar preview"
+          disabled={saving}
+          initials={childInitials}
+          size="lg"
+          storedFileId={draft.avatarStoredFileId}
+          onFileChange={handleFileChanged}
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <AppInputText
