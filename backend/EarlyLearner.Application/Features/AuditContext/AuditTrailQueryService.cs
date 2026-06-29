@@ -1,5 +1,4 @@
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -16,16 +15,14 @@ public sealed record AuditTrailEntryResponse(
 
 public interface IAuditTrailQueryService
 {
-    Task<Result<List<AuditTrailEntryResponse>>> ListAsync(HouseholdId householdId, string? search, CancellationToken cancellationToken);
+    Task<Result<List<AuditTrailEntryResponse>>> ListAsync(string? search, CancellationToken cancellationToken);
 }
 
 public sealed class AuditTrailQueryService(IAuditTrailQueryRepository auditTrailRepo, ICurrentUser currentUser) : IAuditTrailQueryService
 {
-    public async Task<Result<List<AuditTrailEntryResponse>>> ListAsync(HouseholdId householdId, string? search, CancellationToken cancellationToken)
+    public async Task<Result<List<AuditTrailEntryResponse>>> ListAsync(string? search, CancellationToken cancellationToken)
     {
-        if (!currentUser.CanAccess(householdId)) return Result<List<AuditTrailEntryResponse>>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
-
-        var entries = await auditTrailRepo.ListAsync(householdId, search, cancellationToken);
+        var entries = await auditTrailRepo.ListAsync(currentUser.HouseholdId, search, cancellationToken);
         return Result<List<AuditTrailEntryResponse>>.Success(entries, ResultTypeEnum.Success, entries.Count);
     }
 }

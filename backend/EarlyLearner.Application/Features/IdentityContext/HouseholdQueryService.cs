@@ -13,7 +13,7 @@ public sealed record HouseholdInvitationResponse(Guid Id, string Email, string? 
 public interface IHouseholdQueryService
 {
     Task<Result<List<HouseholdResponse>>> ListAsync(CancellationToken cancellationToken);
-    Task<Result<HouseholdResponse>> GetAsync(HouseholdId id, CancellationToken cancellationToken);
+    Task<Result<HouseholdResponse>> GetAsync(CancellationToken cancellationToken);
 }
 
 
@@ -25,11 +25,9 @@ public sealed class HouseholdQueryService(IHouseholdQueryRepository householdRep
         return Result<List<HouseholdResponse>>.Success(households, ResultTypeEnum.Success, households.Count);
     }
 
-    public async Task<Result<HouseholdResponse>> GetAsync(HouseholdId id, CancellationToken cancellationToken)
+    public async Task<Result<HouseholdResponse>> GetAsync(CancellationToken cancellationToken)
     {
-        if (!currentUser.CanAccess(id)) return Result<HouseholdResponse>.Fail("Household access denied.", ResultTypeEnum.Forbidden);
-
-        var household = await householdRepo.GetResponseAsync(id, cancellationToken);
+        var household = await householdRepo.GetResponseAsync(currentUser.HouseholdId, cancellationToken);
         return household is null
             ? Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound)
             : Result<HouseholdResponse>.Success(household, ResultTypeEnum.Success);

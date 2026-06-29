@@ -2,7 +2,6 @@ using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Domain.IdentityContext;
-using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -16,14 +15,14 @@ public static class HouseholdEndpoints
         var households = endpoints.MapGroup("/households").WithTags("Households");
 
         households.MapGet("/", ListHouseholds).WithName(nameof(ListHouseholds));
-        households.MapGet("/{householdId:guid}", GetHousehold).WithName(nameof(GetHousehold));
-        households.MapGet("/{householdId:guid}/audit-trail", ListAuditTrail).WithName(nameof(ListAuditTrail));
-        households.MapPut("/{householdId:guid}", UpdateHousehold).WithName(nameof(UpdateHousehold));
-        households.MapPost("/{householdId:guid}/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
-        households.MapDelete("/{householdId:guid}/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
-        households.MapPost("/{householdId:guid}/children", AddChild).WithName(nameof(AddChild));
-        households.MapPut("/{householdId:guid}/children/{childId:guid}", UpdateChild).WithName(nameof(UpdateChild));
-        households.MapDelete("/{householdId:guid}/children/{childId:guid}", RemoveChild).WithName(nameof(RemoveChild));
+        households.MapGet("/current", GetHousehold).WithName(nameof(GetHousehold));
+        households.MapGet("/audit-trail", ListAuditTrail).WithName(nameof(ListAuditTrail));
+        households.MapPut("/", UpdateHousehold).WithName(nameof(UpdateHousehold));
+        households.MapPost("/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
+        households.MapDelete("/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
+        households.MapPost("/children", AddChild).WithName(nameof(AddChild));
+        households.MapPut("/children/{childId:guid}", UpdateChild).WithName(nameof(UpdateChild));
+        households.MapDelete("/children/{childId:guid}", RemoveChild).WithName(nameof(RemoveChild));
 
         return endpoints;
     }
@@ -34,65 +33,53 @@ public static class HouseholdEndpoints
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> GetHousehold(Guid householdId, IHouseholdQueryService queryService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> GetHousehold(IHouseholdQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
-        var result = await queryService.GetAsync(new HouseholdId(householdId), cancellationToken);
+        var result = await queryService.GetAsync(cancellationToken);
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> ListAuditTrail(Guid householdId, string? search, IAuditTrailQueryService queryService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> ListAuditTrail(string? search, IAuditTrailQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<List<AuditTrailEntryResponse>>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
-        var result = await queryService.ListAsync(new HouseholdId(householdId), search, cancellationToken);
+        var result = await queryService.ListAsync(search, cancellationToken);
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> UpdateHousehold(Guid householdId, UpdateHouseholdRequest request, IValidator<UpdateHouseholdRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> UpdateHousehold(UpdateHouseholdRequest request, IValidator<UpdateHouseholdRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new UpdateHouseholdCommand(HouseholdId: householdId, Name: request.Name);
+        var command = new UpdateHouseholdCommand(Name: request.Name);
         var result = await commandService.UpdateAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> InviteCarer(Guid householdId, InviteHouseholdCarerRequest request, IValidator<InviteHouseholdCarerRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> InviteCarer(InviteHouseholdCarerRequest request, IValidator<InviteHouseholdCarerRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new AddHouseholdCarerCommand(HouseholdId: householdId, Email: request.Email, Role: request.Role);
+        var command = new AddHouseholdCarerCommand(Email: request.Email, Role: request.Role);
         var result = await commandService.AddCarerAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> RemoveCarer(Guid householdId, Guid carerId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> RemoveCarer(Guid carerId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
         if (carerId == Guid.Empty) return Result<HouseholdResponse>.Fail("Carer id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var command = new RemoveHouseholdCarerCommand(HouseholdId: householdId, CarerId: carerId);
+        var command = new RemoveHouseholdCarerCommand(CarerId: carerId);
         var result = await commandService.RemoveCarerAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> AddChild(Guid householdId, AddHouseholdChildRequest request, IValidator<AddHouseholdChildRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> AddChild(AddHouseholdChildRequest request, IValidator<AddHouseholdChildRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new AddHouseholdChildCommand(
-            HouseholdId: householdId,
             FirstName: request.FirstName,
             LastName: request.LastName,
             DateOfBirth: request.DateOfBirth);
@@ -101,26 +88,23 @@ public static class HouseholdEndpoints
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> RemoveChild(Guid householdId, Guid childId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> RemoveChild(Guid childId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
         if (childId == Guid.Empty) return Result<HouseholdResponse>.Fail("Child id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var command = new RemoveHouseholdChildCommand(HouseholdId: householdId, ChildId: childId);
+        var command = new RemoveHouseholdChildCommand(ChildId: childId);
         var result = await commandService.RemoveChildAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> UpdateChild(Guid householdId, Guid childId, UpdateHouseholdChildRequest request, IValidator<UpdateHouseholdChildRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> UpdateChild(Guid childId, UpdateHouseholdChildRequest request, IValidator<UpdateHouseholdChildRequest> validator, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<HouseholdResponse>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
         if (childId == Guid.Empty) return Result<HouseholdResponse>.Fail("Child id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new UpdateHouseholdChildCommand(
-            HouseholdId: householdId,
             ChildId: childId,
             FirstName: request.FirstName,
             LastName: request.LastName,
