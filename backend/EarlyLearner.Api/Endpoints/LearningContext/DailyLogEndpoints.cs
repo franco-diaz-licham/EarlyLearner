@@ -1,6 +1,8 @@
 using EarlyLearner.Api.Models;
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.LearningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -37,7 +39,7 @@ public static class DailyLogEndpoints
                 .ToApiResult();
         }
 
-        var result = await queryService.GetAsync(dailyLogId, cancellationToken);
+        var result = await queryService.GetAsync(new DailyLogId(dailyLogId), cancellationToken);
         return result.ToApiResult();
     }
 
@@ -51,7 +53,7 @@ public static class DailyLogEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateDailyLogCommand(
-            ChildId: request.ChildId,
+            ChildId: new ChildId(request.ChildId),
             LogDate: request.LogDate);
 
         var result = await commandService.CreateAsync(command, cancellationToken);
@@ -68,7 +70,7 @@ public static class DailyLogEndpoints
             return Result.Fail("Daily log id is required.", ResultTypeEnum.Invalid).ToApiResult();
         }
 
-        var result = await commandService.DeleteAsync(dailyLogId, cancellationToken);
+        var result = await commandService.DeleteAsync(new DailyLogId(dailyLogId), cancellationToken);
         return result.ToApiResult();
     }
 }

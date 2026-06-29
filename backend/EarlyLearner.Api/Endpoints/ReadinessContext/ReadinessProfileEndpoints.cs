@@ -1,5 +1,7 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.ReadinessContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -30,7 +32,7 @@ public static class ReadinessProfileEndpoints
     {
         if (readinessProfileId == Guid.Empty) return Result<ReadinessProfileResponse>.Fail("Readiness profile id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await queryService.GetAsync(readinessProfileId, cancellationToken);
+        var result = await queryService.GetAsync(new ReadinessProfileId(readinessProfileId), cancellationToken);
         return result.ToApiResult();
     }
 
@@ -40,8 +42,8 @@ public static class ReadinessProfileEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateReadinessProfileCommand(
-            ChildId: request.ChildId,
-            ReadinessOutcomeIds: request.ReadinessOutcomeIds);
+            ChildId: new ChildId(request.ChildId),
+            ReadinessOutcomeIds: request.ReadinessOutcomeIds.Select(id => new ReadinessOutcomeId(id)).ToList());
 
         var result = await commandService.CreateAsync(command, cancellationToken);
         var locationUrl = result.IsSuccess ? $"/readiness-profiles/{result.Value.ReadinessProfileId}" : null;
@@ -52,7 +54,7 @@ public static class ReadinessProfileEndpoints
     {
         if (readinessProfileId == Guid.Empty) return Result.Fail("Readiness profile id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await commandService.DeleteAsync(readinessProfileId, cancellationToken);
+        var result = await commandService.DeleteAsync(new ReadinessProfileId(readinessProfileId), cancellationToken);
         return result.ToApiResult();
     }
 }

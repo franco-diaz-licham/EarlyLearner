@@ -12,11 +12,11 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
 {
     public async Task<Result<GetHomeDashboardResponse>> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken)
     {
-        var householdId = currentUser.HouseholdId.Value;
+        var householdId = currentUser.HouseholdId;
 
         var children = await db.Children
             .AsNoTracking()
-            .Where(child => child.HouseholdId.Value == householdId && !child.IsArchived)
+            .Where(child => child.HouseholdId == householdId && !child.IsArchived)
             .OrderBy(child => child.FirstName)
             .Select(child => new HomeDashboardChildResponse(
                 ChildId: child.Id.Value,
@@ -27,14 +27,14 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
         var activeGoalCount = await db.Goals
             .AsNoTracking()
             .CountAsync(
-                goal => goal.HouseholdId.Value == householdId && goal.Status == GoalStatusEnum.Active,
+                goal => goal.HouseholdId == householdId && goal.Status == GoalStatusEnum.Active,
                 cancellationToken);
 
         var plannedSessionCount = await db.PlannedLearningSessions
             .AsNoTracking()
             .CountAsync(
                 session =>
-                    session.LearningPlan.HouseholdId.Value == householdId &&
+                    session.LearningPlan.HouseholdId == householdId &&
                     session.Status == SessionStatusEnum.Planned &&
                     session.PlannedDate >= query.Today,
                 cancellationToken);
@@ -42,13 +42,13 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
         var weeklyRecordCount = await db.DailyLogs
             .AsNoTracking()
             .CountAsync(
-                log => log.HouseholdId.Value == householdId && log.LogDate >= query.Today.AddDays(-6),
+                log => log.HouseholdId == householdId && log.LogDate >= query.Today.AddDays(-6),
                 cancellationToken);
 
         var upcomingSessions = await db.PlannedLearningSessions
             .AsNoTracking()
             .Where(session =>
-                session.LearningPlan.HouseholdId.Value == householdId &&
+                session.LearningPlan.HouseholdId == householdId &&
                 session.Status == SessionStatusEnum.Planned &&
                 session.PlannedDate >= query.Today)
             .OrderBy(session => session.PlannedDate)
@@ -64,7 +64,7 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
 
         var recentActivities = await db.DailyLogs
             .AsNoTracking()
-            .Where(log => log.HouseholdId.Value == householdId)
+            .Where(log => log.HouseholdId == householdId)
             .OrderByDescending(log => log.LogDate)
             .Select(log => new HomeDashboardRecentActivityResponse(
                 DailyLogId: log.Id.Value,

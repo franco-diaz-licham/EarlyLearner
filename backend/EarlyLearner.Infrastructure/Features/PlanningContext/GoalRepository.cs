@@ -1,5 +1,7 @@
 using EarlyLearner.Application.Features.PlanningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.PlanningContext.Entities;
+using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
@@ -9,11 +11,11 @@ namespace EarlyLearner.Infrastructure.Features.PlanningContext;
 
 public sealed class GoalRepository(DatabaseContext db) : IGoalQueryRepository, IGoalCommandRepository
 {
-    public async Task<List<GoalResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<List<GoalResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken)
     {
         return await db.Goals
             .AsNoTracking()
-            .Where(goal => goal.HouseholdId.Value == householdId)
+            .Where(goal => goal.HouseholdId == householdId)
             .OrderBy(goal => goal.ChildId.Value)
             .ThenBy(goal => goal.Title)
             .Select(goal => new GoalResponse(
@@ -29,36 +31,36 @@ public sealed class GoalRepository(DatabaseContext db) : IGoalQueryRepository, I
             .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken)
+    public Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken)
     {
-        return db.Children.AnyAsync(child => child.Id.Value == childId && child.HouseholdId.Value == householdId, cancellationToken);
+        return db.Children.AnyAsync(child => child.Id == childId && child.HouseholdId == householdId, cancellationToken);
     }
 
-    public async Task<List<ReadinessOutcome>> GetReadinessOutcomesAsync(IReadOnlyList<Guid> readinessOutcomeIds, CancellationToken cancellationToken)
+    public async Task<List<ReadinessOutcome>> GetReadinessOutcomesAsync(IReadOnlyList<ReadinessOutcomeId> readinessOutcomeIds, CancellationToken cancellationToken)
     {
-        var ids = readinessOutcomeIds.Distinct().Select(id => new ReadinessOutcomeId(id)).ToArray();
+        var ids = readinessOutcomeIds.Distinct().ToArray();
         return await db.ReadinessOutcomes
             .Where(outcome => ids.Contains(outcome.Id))
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Goal?> GetAsync(Guid goalId, CancellationToken cancellationToken)
+    public Task<Goal?> GetAsync(GoalId goalId, CancellationToken cancellationToken)
     {
-        return db.Goals.SingleOrDefaultAsync(item => item.Id.Value == goalId, cancellationToken);
+        return db.Goals.SingleOrDefaultAsync(item => item.Id == goalId, cancellationToken);
     }
 
-    public Task<Goal?> GetWithReadinessOutcomesAsync(Guid goalId, CancellationToken cancellationToken)
+    public Task<Goal?> GetWithReadinessOutcomesAsync(GoalId goalId, CancellationToken cancellationToken)
     {
         return db.Goals
             .Include(item => item.ReadinessOutcomes)
-            .SingleOrDefaultAsync(item => item.Id.Value == goalId, cancellationToken);
+            .SingleOrDefaultAsync(item => item.Id == goalId, cancellationToken);
     }
 
-    public async Task<GoalResponse?> GetResponseAsync(Guid goalId, CancellationToken cancellationToken)
+    public async Task<GoalResponse?> GetResponseAsync(GoalId goalId, CancellationToken cancellationToken)
     {
         return await db.Goals
             .AsNoTracking()
-            .Where(item => item.Id.Value == goalId)
+            .Where(item => item.Id == goalId)
             .Select(item => new GoalResponse(
                 GoalId: item.Id.Value,
                 HouseholdId: item.HouseholdId.Value,

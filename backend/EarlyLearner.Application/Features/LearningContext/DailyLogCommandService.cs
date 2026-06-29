@@ -2,24 +2,25 @@ using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.LearningContext;
 
-public sealed record CreateDailyLogCommand(Guid ChildId, DateOnly LogDate);
+public sealed record CreateDailyLogCommand(ChildId ChildId, DateOnly LogDate);
 
 public interface IDailyLogCommandService
 {
     Task<Result<DailyLogResponse>> CreateAsync(CreateDailyLogCommand command, CancellationToken cancellationToken);
-    Task<Result> DeleteAsync(Guid dailyLogId, CancellationToken cancellationToken);
+    Task<Result> DeleteAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
 }
 
 public interface IDailyLogCommandRepository
 {
-    Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken);
-    Task<DailyLog?> GetAsync(Guid dailyLogId, CancellationToken cancellationToken);
-    Task<DailyLogResponse?> GetResponseAsync(Guid dailyLogId, CancellationToken cancellationToken);
+    Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken);
+    Task<DailyLog?> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
+    Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
     void Add(DailyLog dailyLog);
     void Remove(DailyLog dailyLog);
 }
@@ -28,22 +29,21 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
 {
     public async Task<Result<DailyLogResponse>> CreateAsync(CreateDailyLogCommand command, CancellationToken cancellationToken)
     {
-        var householdId = currentUser.HouseholdId.Value;
-        var childExists = await dailyLogRepo.ChildExistsAsync(householdId, command.ChildId, cancellationToken);
+        var childExists = await dailyLogRepo.ChildExistsAsync(currentUser.HouseholdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<DailyLogResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
-        var log = DailyLog.Create(new HouseholdId(householdId), new ChildId(command.ChildId), command.LogDate);
+        var log = DailyLog.Create(currentUser.HouseholdId, command.ChildId, command.LogDate);
         dailyLogRepo.Add(log);
 
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<DailyLogResponse>.Fail("Daily log could not be created.", ResultTypeEnum.Invalid);
 
-        var result = await dailyLogRepo.GetResponseAsync(log.Id.Value, cancellationToken);
+        var result = await dailyLogRepo.GetResponseAsync(log.Id, cancellationToken);
         if (result is null) return Result<DailyLogResponse>.Fail("Daily log could not be retrieved after creation.", ResultTypeEnum.Invalid);
         return Result<DailyLogResponse>.Success(result, ResultTypeEnum.Created);
     }
 
-    public async Task<Result> DeleteAsync(Guid dailyLogId, CancellationToken cancellationToken)
+    public async Task<Result> DeleteAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)
     {
         var log = await dailyLogRepo.GetAsync(dailyLogId, cancellationToken);
         if (log is null) return Result.Fail("Daily log was not found.", ResultTypeEnum.NotFound);

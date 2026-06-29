@@ -1,5 +1,7 @@
 using EarlyLearner.Application.Features.LearningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +9,11 @@ namespace EarlyLearner.Infrastructure.Features.LearningContext;
 
 public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepository, IDailyLogCommandRepository
 {
-    public async Task<List<DailyLogResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<List<DailyLogResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken)
     {
         return await db.DailyLogs
             .AsNoTracking()
-            .Where(log => log.HouseholdId.Value == householdId)
+            .Where(log => log.HouseholdId == householdId)
             .OrderByDescending(log => log.LogDate)
             .Select(log => new DailyLogResponse(
                 DailyLogId: log.Id.Value,
@@ -24,21 +26,21 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
             .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken)
+    public Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken)
     {
-        return db.Children.AnyAsync(child => child.Id.Value == childId && child.HouseholdId.Value == householdId, cancellationToken);
+        return db.Children.AnyAsync(child => child.Id == childId && child.HouseholdId == householdId, cancellationToken);
     }
 
-    public Task<DailyLog?> GetAsync(Guid dailyLogId, CancellationToken cancellationToken)
+    public Task<DailyLog?> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)
     {
-        return db.DailyLogs.SingleOrDefaultAsync(item => item.Id.Value == dailyLogId, cancellationToken);
+        return db.DailyLogs.SingleOrDefaultAsync(item => item.Id == dailyLogId, cancellationToken);
     }
 
-    public async Task<DailyLogResponse?> GetResponseAsync(Guid dailyLogId, CancellationToken cancellationToken)
+    public async Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)
     {
         return await db.DailyLogs
             .AsNoTracking()
-            .Where(item => item.Id.Value == dailyLogId)
+            .Where(item => item.Id == dailyLogId)
             .Select(item => new DailyLogResponse(
                 DailyLogId: item.Id.Value,
                 HouseholdId: item.HouseholdId.Value,

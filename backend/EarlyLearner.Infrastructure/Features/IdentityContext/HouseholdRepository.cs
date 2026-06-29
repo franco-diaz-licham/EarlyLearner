@@ -114,9 +114,9 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
             .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    public Task<User?> GetUserByIdAsync(UserId userId, CancellationToken cancellationToken)
     {
-        return db.Users.SingleOrDefaultAsync(user => user.Id.Value == userId, cancellationToken);
+        return db.Users.SingleOrDefaultAsync(user => user.Id == userId, cancellationToken);
     }
 
     public Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)

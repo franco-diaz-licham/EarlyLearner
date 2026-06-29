@@ -1,7 +1,9 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -69,7 +71,7 @@ public static class HouseholdEndpoints
     {
         if (carerId == Guid.Empty) return Result<HouseholdResponse>.Fail("Carer id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var command = new RemoveHouseholdCarerCommand(CarerId: carerId);
+        var command = new RemoveHouseholdCarerCommand(CarerId: new CarerId(carerId));
         var result = await commandService.RemoveCarerAsync(command, cancellationToken);
         return result.ToApiResult();
     }
@@ -83,7 +85,7 @@ public static class HouseholdEndpoints
             FirstName: request.FirstName,
             LastName: request.LastName,
             DateOfBirth: request.DateOfBirth,
-            AvatarStoredFileId: request.AvatarStoredFileId);
+            AvatarStoredFileId: request.AvatarStoredFileId is { } avatarStoredFileId ? new StoredFileId(avatarStoredFileId) : null);
 
         var result = await commandService.AddChildAsync(command, cancellationToken);
         return result.ToApiResult();
@@ -93,7 +95,7 @@ public static class HouseholdEndpoints
     {
         if (childId == Guid.Empty) return Result<HouseholdResponse>.Fail("Child id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var command = new RemoveHouseholdChildCommand(ChildId: childId);
+        var command = new RemoveHouseholdChildCommand(ChildId: new ChildId(childId));
         var result = await commandService.RemoveChildAsync(command, cancellationToken);
         return result.ToApiResult();
     }
@@ -106,11 +108,11 @@ public static class HouseholdEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new UpdateHouseholdChildCommand(
-            ChildId: childId,
+            ChildId: new ChildId(childId),
             FirstName: request.FirstName,
             LastName: request.LastName,
             DateOfBirth: request.DateOfBirth,
-            AvatarStoredFileId: request.AvatarStoredFileId);
+            AvatarStoredFileId: request.AvatarStoredFileId is { } avatarStoredFileId ? new StoredFileId(avatarStoredFileId) : null);
 
         var result = await commandService.UpdateChildAsync(command, cancellationToken);
         return result.ToApiResult();

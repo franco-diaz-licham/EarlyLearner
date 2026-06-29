@@ -1,6 +1,9 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.PlanningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.PlanningContext;
+using EarlyLearner.Domain.PlanningContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -31,7 +34,7 @@ public static class GoalEndpoints
     public static async Task<IResult> GetGoal(Guid goalId, IGoalQueryService queryService, CancellationToken cancellationToken = default)
     {
         if (goalId == Guid.Empty) return Result<GoalResponse>.Fail("Goal id is required.", ResultTypeEnum.Invalid).ToApiResult();
-        var result = await queryService.GetAsync(goalId, cancellationToken);
+        var result = await queryService.GetAsync(new GoalId(goalId), cancellationToken);
         return result.ToApiResult();
     }
 
@@ -41,12 +44,12 @@ public static class GoalEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateGoalCommand(
-            ChildId: request.ChildId,
+            ChildId: new ChildId(request.ChildId),
             Title: request.Title,
             Type: request.Type,
             StartDate: request.StartDate,
             EndDate: request.EndDate,
-            ReadinessOutcomeIds: request.ReadinessOutcomeIds);
+            ReadinessOutcomeIds: request.ReadinessOutcomeIds.Select(id => new ReadinessOutcomeId(id)).ToList());
 
         var result = await commandService.CreateAsync(command, cancellationToken);
         var locationUrl = result.IsSuccess ? $"/goals/{result.Value.GoalId}" : null;
@@ -60,7 +63,7 @@ public static class GoalEndpoints
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new UpdateGoalCommand(GoalId: goalId, Title: request.Title);
+        var command = new UpdateGoalCommand(GoalId: new GoalId(goalId), Title: request.Title);
         var result = await commandService.UpdateAsync(command, cancellationToken);
         return result.ToApiResult();
     }
@@ -69,7 +72,7 @@ public static class GoalEndpoints
     {
         if (goalId == Guid.Empty) return Result.Fail("Goal id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await commandService.DeleteAsync(goalId, cancellationToken);
+        var result = await commandService.DeleteAsync(new GoalId(goalId), cancellationToken);
         return result.ToApiResult();
     }
 }

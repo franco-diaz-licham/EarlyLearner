@@ -1,4 +1,6 @@
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -9,24 +11,24 @@ public sealed record ReadinessProfileResponse(Guid ReadinessProfileId, Guid Hous
 public interface IReadinessProfileQueryService
 {
     Task<Result<List<ReadinessProfileResponse>>> ListAsync(CancellationToken cancellationToken);
-    Task<Result<ReadinessProfileResponse>> GetAsync(Guid readinessProfileId, CancellationToken cancellationToken);
+    Task<Result<ReadinessProfileResponse>> GetAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken);
 }
 
 public interface IReadinessProfileQueryRepository
 {
-    Task<List<ReadinessProfileResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken);
-    Task<ReadinessProfileResponse?> GetResponseAsync(Guid readinessProfileId, CancellationToken cancellationToken);
+    Task<List<ReadinessProfileResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken);
+    Task<ReadinessProfileResponse?> GetResponseAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken);
 }
 
 public sealed class ReadinessProfileQueryService(IReadinessProfileQueryRepository readinessProfileRepo, ICurrentUser currentUser) : IReadinessProfileQueryService
 {
     public async Task<Result<List<ReadinessProfileResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var profiles = await readinessProfileRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
+        var profiles = await readinessProfileRepo.ListAsync(currentUser.HouseholdId, cancellationToken);
         return Result<List<ReadinessProfileResponse>>.Success(profiles, ResultTypeEnum.Success, profiles.Count);
     }
 
-    public async Task<Result<ReadinessProfileResponse>> GetAsync(Guid readinessProfileId, CancellationToken cancellationToken)
+    public async Task<Result<ReadinessProfileResponse>> GetAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken)
     {
         var profile = await readinessProfileRepo.GetResponseAsync(readinessProfileId, cancellationToken);
         return profile is null

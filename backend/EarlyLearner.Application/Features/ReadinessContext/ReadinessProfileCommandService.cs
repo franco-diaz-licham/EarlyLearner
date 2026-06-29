@@ -2,25 +2,26 @@ using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.ReadinessContext;
 
-public sealed record CreateReadinessProfileCommand(Guid ChildId, IReadOnlyList<Guid> ReadinessOutcomeIds);
+public sealed record CreateReadinessProfileCommand(ChildId ChildId, IReadOnlyList<ReadinessOutcomeId> ReadinessOutcomeIds);
 
 public interface IReadinessProfileCommandService
 {
     Task<Result<ReadinessProfileResponse>> CreateAsync(CreateReadinessProfileCommand command, CancellationToken cancellationToken);
-    Task<Result> DeleteAsync(Guid readinessProfileId, CancellationToken cancellationToken);
+    Task<Result> DeleteAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken);
 }
 
 public interface IReadinessProfileCommandRepository
 {
-    Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken);
-    Task<List<ReadinessOutcome>> GetReadinessOutcomesAsync(IReadOnlyList<Guid> readinessOutcomeIds, CancellationToken cancellationToken);
-    Task<ReadinessProfile?> GetAsync(Guid readinessProfileId, CancellationToken cancellationToken);
-    Task<ReadinessProfileResponse?> GetResponseAsync(Guid readinessProfileId, CancellationToken cancellationToken);
+    Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken);
+    Task<List<ReadinessOutcome>> GetReadinessOutcomesAsync(IReadOnlyList<ReadinessOutcomeId> readinessOutcomeIds, CancellationToken cancellationToken);
+    Task<ReadinessProfile?> GetAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken);
+    Task<ReadinessProfileResponse?> GetResponseAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken);
     void Add(ReadinessProfile readinessProfile);
     void Remove(ReadinessProfile readinessProfile);
 }
@@ -29,25 +30,24 @@ public sealed class ReadinessProfileCommandService(IReadinessProfileCommandRepos
 {
     public async Task<Result<ReadinessProfileResponse>> CreateAsync(CreateReadinessProfileCommand command, CancellationToken cancellationToken)
     {
-        var householdId = currentUser.HouseholdId.Value;
-        var childExists = await readinessProfileRepo.ChildExistsAsync(householdId, command.ChildId, cancellationToken);
+        var childExists = await readinessProfileRepo.ChildExistsAsync(currentUser.HouseholdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<ReadinessProfileResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
         var outcomes = await readinessProfileRepo.GetReadinessOutcomesAsync(command.ReadinessOutcomeIds, cancellationToken);
         if (outcomes.Count != command.ReadinessOutcomeIds.Distinct().Count()) return Result<ReadinessProfileResponse>.Fail("One or more readiness outcomes were not found.", ResultTypeEnum.NotFound);
 
-        var profile = ReadinessProfile.Create(new HouseholdId(householdId), new ChildId(command.ChildId), outcomes);
+        var profile = ReadinessProfile.Create(currentUser.HouseholdId, command.ChildId, outcomes);
         readinessProfileRepo.Add(profile);
 
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<ReadinessProfileResponse>.Fail("Readiness profile could not be created.", ResultTypeEnum.Invalid);
 
-        var result = await readinessProfileRepo.GetResponseAsync(profile.Id.Value, cancellationToken);
+        var result = await readinessProfileRepo.GetResponseAsync(profile.Id, cancellationToken);
         if (result is null) return Result<ReadinessProfileResponse>.Fail("Readiness profile could not be retrieved after creation.", ResultTypeEnum.Invalid);
         return Result<ReadinessProfileResponse>.Success(result, ResultTypeEnum.Created);
     }
 
-    public async Task<Result> DeleteAsync(Guid readinessProfileId, CancellationToken cancellationToken)
+    public async Task<Result> DeleteAsync(ReadinessProfileId readinessProfileId, CancellationToken cancellationToken)
     {
         var profile = await readinessProfileRepo.GetAsync(readinessProfileId, cancellationToken);
         if (profile is null) return Result.Fail("Readiness profile was not found.", ResultTypeEnum.NotFound);

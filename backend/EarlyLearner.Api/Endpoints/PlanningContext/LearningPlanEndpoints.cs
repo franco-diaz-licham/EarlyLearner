@@ -1,5 +1,7 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.PlanningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -31,7 +33,7 @@ public static class LearningPlanEndpoints
     {
         if (learningPlanId == Guid.Empty) return Result<LearningPlanResponse>.Fail("Learning plan id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await queryService.GetAsync(learningPlanId, cancellationToken);
+        var result = await queryService.GetAsync(new LearningPlanId(learningPlanId), cancellationToken);
         return result.ToApiResult();
     }
 
@@ -41,7 +43,7 @@ public static class LearningPlanEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateLearningPlanCommand(
-            ChildId: request.ChildId,
+            ChildId: new ChildId(request.ChildId),
             StartDate: request.StartDate,
             EndDate: request.EndDate,
             Focus: request.Focus);
@@ -59,7 +61,7 @@ public static class LearningPlanEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new UpdateLearningPlanCommand(
-            LearningPlanId: learningPlanId,
+            LearningPlanId: new LearningPlanId(learningPlanId),
             StartDate: request.StartDate,
             EndDate: request.EndDate,
             Focus: request.Focus);
@@ -72,7 +74,7 @@ public static class LearningPlanEndpoints
     {
         if (learningPlanId == Guid.Empty) return Result.Fail("Learning plan id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await commandService.DeleteAsync(learningPlanId, cancellationToken);
+        var result = await commandService.DeleteAsync(new LearningPlanId(learningPlanId), cancellationToken);
         return result.ToApiResult();
     }
 }

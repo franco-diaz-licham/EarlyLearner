@@ -1,4 +1,6 @@
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -9,24 +11,24 @@ public sealed record LearningPlanResponse(Guid LearningPlanId, Guid HouseholdId,
 public interface ILearningPlanQueryService
 {
     Task<Result<List<LearningPlanResponse>>> ListAsync(CancellationToken cancellationToken);
-    Task<Result<LearningPlanResponse>> GetAsync(Guid learningPlanId, CancellationToken cancellationToken);
+    Task<Result<LearningPlanResponse>> GetAsync(LearningPlanId learningPlanId, CancellationToken cancellationToken);
 }
 
 public interface ILearningPlanQueryRepository
 {
-    Task<List<LearningPlanResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken);
-    Task<LearningPlanResponse?> GetResponseAsync(Guid learningPlanId, CancellationToken cancellationToken);
+    Task<List<LearningPlanResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken);
+    Task<LearningPlanResponse?> GetResponseAsync(LearningPlanId learningPlanId, CancellationToken cancellationToken);
 }
 
 public sealed class LearningPlanQueryService(ILearningPlanQueryRepository learningPlanRepo, ICurrentUser currentUser) : ILearningPlanQueryService
 {
     public async Task<Result<List<LearningPlanResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var plans = await learningPlanRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
+        var plans = await learningPlanRepo.ListAsync(currentUser.HouseholdId, cancellationToken);
         return Result<List<LearningPlanResponse>>.Success(plans, ResultTypeEnum.Success, plans.Count);
     }
 
-    public async Task<Result<LearningPlanResponse>> GetAsync(Guid learningPlanId, CancellationToken cancellationToken)
+    public async Task<Result<LearningPlanResponse>> GetAsync(LearningPlanId learningPlanId, CancellationToken cancellationToken)
     {
         var plan = await learningPlanRepo.GetResponseAsync(learningPlanId, cancellationToken);
         return plan is null

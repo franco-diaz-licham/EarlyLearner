@@ -2,7 +2,7 @@ using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
-using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -16,20 +16,19 @@ public sealed record CreateStoredFileCommand(
     StoredFileMediaTypeEnum MediaType,
     DateTimeOffset UploadedAt);
 
-public sealed record UpdateStoredFileStatusCommand(Guid StoredFileId, StoredFileStatusEnum Status);
+public sealed record UpdateStoredFileStatusCommand(StoredFileId StoredFileId, StoredFileStatusEnum Status);
 
 public interface IStoredFileCommandService
 {
     Task<Result<StoredFileResponse>> CreateAsync(CreateStoredFileCommand command, CancellationToken cancellationToken);
     Task<Result<StoredFileResponse>> UpdateStatusAsync(UpdateStoredFileStatusCommand command, CancellationToken cancellationToken);
-    Task<Result> DeleteAsync(Guid storedFileId, CancellationToken cancellationToken);
+    Task<Result> DeleteAsync(StoredFileId storedFileId, CancellationToken cancellationToken);
 }
 
 public interface IStoredFileCommandRepository
 {
-    Task<bool> HouseholdExistsAsync(Guid householdId, CancellationToken cancellationToken);
-    Task<StoredFile?> GetAsync(Guid storedFileId, CancellationToken cancellationToken);
-    Task<StoredFileResponse?> GetResponseAsync(Guid storedFileId, CancellationToken cancellationToken);
+    Task<StoredFile?> GetAsync(StoredFileId storedFileId, CancellationToken cancellationToken);
+    Task<StoredFileResponse?> GetResponseAsync(StoredFileId storedFileId, CancellationToken cancellationToken);
     void Add(StoredFile storedFile);
 }
 
@@ -37,12 +36,8 @@ public sealed class StoredFileCommandService(IStoredFileCommandRepository stored
 {
     public async Task<Result<StoredFileResponse>> CreateAsync(CreateStoredFileCommand command, CancellationToken cancellationToken)
     {
-        var householdId = currentUser.HouseholdId.Value;
-        var householdExists = await storedFileRepo.HouseholdExistsAsync(householdId, cancellationToken);
-        if (!householdExists) return Result<StoredFileResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
-
         var file = StoredFile.Create(
-            new HouseholdId(householdId),
+            currentUser.HouseholdId,
             command.StorageKey,
             command.FileName,
             command.ContentType,
@@ -54,7 +49,7 @@ public sealed class StoredFileCommandService(IStoredFileCommandRepository stored
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<StoredFileResponse>.Fail("Stored file could not be created.", ResultTypeEnum.Invalid);
 
-        var result = await storedFileRepo.GetResponseAsync(file.Id.Value, cancellationToken);
+        var result = await storedFileRepo.GetResponseAsync(file.Id, cancellationToken);
         if (result is null) return Result<StoredFileResponse>.Fail("Stored file could not be retrieved after creation.", ResultTypeEnum.Invalid);
         return Result<StoredFileResponse>.Success(result, ResultTypeEnum.Created);
     }
@@ -81,12 +76,12 @@ public sealed class StoredFileCommandService(IStoredFileCommandRepository stored
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<StoredFileResponse>.Fail("Stored file could not be updated.", ResultTypeEnum.Invalid);
 
-        var result = await storedFileRepo.GetResponseAsync(file.Id.Value, cancellationToken);
+        var result = await storedFileRepo.GetResponseAsync(file.Id, cancellationToken);
         if (result is null) return Result<StoredFileResponse>.Fail("Stored file could not be retrieved after update.", ResultTypeEnum.Invalid);
         return Result<StoredFileResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
-    public async Task<Result> DeleteAsync(Guid storedFileId, CancellationToken cancellationToken)
+    public async Task<Result> DeleteAsync(StoredFileId storedFileId, CancellationToken cancellationToken)
     {
         var file = await storedFileRepo.GetAsync(storedFileId, cancellationToken);
         if (file is null) return Result.Fail("Stored file was not found.", ResultTypeEnum.NotFound);

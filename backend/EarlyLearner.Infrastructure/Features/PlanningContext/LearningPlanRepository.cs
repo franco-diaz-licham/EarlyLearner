@@ -1,5 +1,7 @@
 using EarlyLearner.Application.Features.PlanningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.PlanningContext.Entities;
+using EarlyLearner.Domain.PlanningContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +9,11 @@ namespace EarlyLearner.Infrastructure.Features.PlanningContext;
 
 public sealed class LearningPlanRepository(DatabaseContext db) : ILearningPlanQueryRepository, ILearningPlanCommandRepository
 {
-    public async Task<List<LearningPlanResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<List<LearningPlanResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken)
     {
         return await db.LearningPlans
             .AsNoTracking()
-            .Where(plan => plan.HouseholdId.Value == householdId)
+            .Where(plan => plan.HouseholdId == householdId)
             .OrderByDescending(plan => plan.Period.StartDate)
             .Select(plan => new LearningPlanResponse(
                 LearningPlanId: plan.Id.Value,
@@ -23,21 +25,21 @@ public sealed class LearningPlanRepository(DatabaseContext db) : ILearningPlanQu
             .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> ChildExistsAsync(Guid householdId, Guid childId, CancellationToken cancellationToken)
+    public Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken)
     {
-        return db.Children.AnyAsync(child => child.Id.Value == childId && child.HouseholdId.Value == householdId, cancellationToken);
+        return db.Children.AnyAsync(child => child.Id == childId && child.HouseholdId == householdId, cancellationToken);
     }
 
-    public Task<LearningPlan?> GetAsync(Guid learningPlanId, CancellationToken cancellationToken)
+    public Task<LearningPlan?> GetAsync(LearningPlanId learningPlanId, CancellationToken cancellationToken)
     {
-        return db.LearningPlans.SingleOrDefaultAsync(item => item.Id.Value == learningPlanId, cancellationToken);
+        return db.LearningPlans.SingleOrDefaultAsync(item => item.Id == learningPlanId, cancellationToken);
     }
 
-    public async Task<LearningPlanResponse?> GetResponseAsync(Guid learningPlanId, CancellationToken cancellationToken)
+    public async Task<LearningPlanResponse?> GetResponseAsync(LearningPlanId learningPlanId, CancellationToken cancellationToken)
     {
         return await db.LearningPlans
             .AsNoTracking()
-            .Where(item => item.Id.Value == learningPlanId)
+            .Where(item => item.Id == learningPlanId)
             .Select(item => new LearningPlanResponse(
                 LearningPlanId: item.Id.Value,
                 HouseholdId: item.HouseholdId.Value,

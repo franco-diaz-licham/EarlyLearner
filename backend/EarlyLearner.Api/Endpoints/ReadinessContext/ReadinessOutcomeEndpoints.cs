@@ -1,5 +1,6 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.ReadinessContext;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -31,7 +32,7 @@ public static class ReadinessOutcomeEndpoints
     {
         if (readinessOutcomeId == Guid.Empty) return Result<ReadinessOutcomeResponse>.Fail("Readiness outcome id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await queryService.GetAsync(readinessOutcomeId, cancellationToken);
+        var result = await queryService.GetAsync(new ReadinessOutcomeId(readinessOutcomeId), cancellationToken);
         return result.ToApiResult();
     }
 
@@ -60,7 +61,7 @@ public static class ReadinessOutcomeEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new UpdateReadinessOutcomeCommand(
-            ReadinessOutcomeId: readinessOutcomeId,
+            ReadinessOutcomeId: new ReadinessOutcomeId(readinessOutcomeId),
             Name: request.Name,
             Description: request.Description,
             Category: request.Category,
@@ -74,7 +75,7 @@ public static class ReadinessOutcomeEndpoints
     {
         if (readinessOutcomeId == Guid.Empty) return Result.Fail("Readiness outcome id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
-        var result = await commandService.DeleteAsync(readinessOutcomeId, cancellationToken);
+        var result = await commandService.DeleteAsync(new ReadinessOutcomeId(readinessOutcomeId), cancellationToken);
         return result.ToApiResult();
     }
 }

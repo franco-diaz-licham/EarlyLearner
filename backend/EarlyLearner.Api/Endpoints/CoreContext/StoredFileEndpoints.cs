@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -36,7 +37,7 @@ public static class StoredFileEndpoints
         var validation = validator.Validate(new StoredFileRequest(storedFileId)).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var result = await queryService.GetAsync(storedFileId, cancellationToken);
+        var result = await queryService.GetAsync(new StoredFileId(storedFileId), cancellationToken);
         return result.ToApiResult();
     }
 
@@ -45,7 +46,7 @@ public static class StoredFileEndpoints
         var validation = validator.Validate(new StoredFileRequest(storedFileId)).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var result = await queryService.GetAsync(storedFileId, cancellationToken);
+        var result = await queryService.GetAsync(new StoredFileId(storedFileId), cancellationToken);
         if (!result.IsSuccess || result.Value is null) return result.ToApiResult();
 
         var storedFile = result.Value;
@@ -82,7 +83,7 @@ public static class StoredFileEndpoints
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new UpdateStoredFileStatusCommand(StoredFileId: storedFileId, Status: request.Status);
+        var command = new UpdateStoredFileStatusCommand(StoredFileId: new StoredFileId(storedFileId), Status: request.Status);
         var result = await commandService.UpdateStatusAsync(command, cancellationToken);
         return result.ToApiResult();
     }
@@ -92,7 +93,7 @@ public static class StoredFileEndpoints
         var validation = validator.Validate(new StoredFileRequest(storedFileId)).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var result = await commandService.DeleteAsync(storedFileId, cancellationToken);
+        var result = await commandService.DeleteAsync(new StoredFileId(storedFileId), cancellationToken);
         return result.ToApiResult();
     }
 }

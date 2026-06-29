@@ -1,5 +1,6 @@
 using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,16 +24,16 @@ public sealed class ReadinessOutcomeRepository(DatabaseContext db) : IReadinessO
             .ToListAsync(cancellationToken);
     }
 
-    public Task<ReadinessOutcome?> GetAsync(Guid readinessOutcomeId, CancellationToken cancellationToken)
+    public Task<ReadinessOutcome?> GetAsync(ReadinessOutcomeId readinessOutcomeId, CancellationToken cancellationToken)
     {
-        return db.ReadinessOutcomes.SingleOrDefaultAsync(item => item.Id.Value == readinessOutcomeId, cancellationToken);
+        return db.ReadinessOutcomes.SingleOrDefaultAsync(item => item.Id == readinessOutcomeId, cancellationToken);
     }
 
-    public async Task<ReadinessOutcomeResponse?> GetResponseAsync(Guid readinessOutcomeId, CancellationToken cancellationToken)
+    public async Task<ReadinessOutcomeResponse?> GetResponseAsync(ReadinessOutcomeId readinessOutcomeId, CancellationToken cancellationToken)
     {
         return await db.ReadinessOutcomes
             .AsNoTracking()
-            .Where(item => item.Id.Value == readinessOutcomeId)
+            .Where(item => item.Id == readinessOutcomeId)
             .Select(item => new ReadinessOutcomeResponse(
                 ReadinessOutcomeId: item.Id.Value,
                 Code: item.Code,

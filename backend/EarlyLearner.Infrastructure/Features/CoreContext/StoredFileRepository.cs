@@ -1,5 +1,7 @@
 using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +9,11 @@ namespace EarlyLearner.Infrastructure.Features.CoreContext;
 
 public sealed class StoredFileRepository(DatabaseContext db) : IStoredFileQueryRepository, IStoredFileCommandRepository
 {
-    public async Task<List<StoredFileResponse>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<List<StoredFileResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken)
     {
         return await db.StoredFiles
             .AsNoTracking()
-            .Where(file => file.HouseholdId.Value == householdId)
+            .Where(file => file.HouseholdId == householdId)
             .OrderByDescending(file => file.UploadedAt)
             .Select(file => new StoredFileResponse(
                 StoredFileId: file.Id.Value,
@@ -26,21 +28,16 @@ public sealed class StoredFileRepository(DatabaseContext db) : IStoredFileQueryR
             .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> HouseholdExistsAsync(Guid householdId, CancellationToken cancellationToken)
+    public Task<StoredFile?> GetAsync(StoredFileId storedFileId, CancellationToken cancellationToken)
     {
-        return db.Households.AnyAsync(household => household.Id.Value == householdId, cancellationToken);
+        return db.StoredFiles.SingleOrDefaultAsync(item => item.Id == storedFileId, cancellationToken);
     }
 
-    public Task<StoredFile?> GetAsync(Guid storedFileId, CancellationToken cancellationToken)
-    {
-        return db.StoredFiles.SingleOrDefaultAsync(item => item.Id.Value == storedFileId, cancellationToken);
-    }
-
-    public async Task<StoredFileResponse?> GetResponseAsync(Guid storedFileId, CancellationToken cancellationToken)
+    public async Task<StoredFileResponse?> GetResponseAsync(StoredFileId storedFileId, CancellationToken cancellationToken)
     {
         return await db.StoredFiles
             .AsNoTracking()
-            .Where(item => item.Id.Value == storedFileId)
+            .Where(item => item.Id == storedFileId)
             .Select(item => new StoredFileResponse(
                 StoredFileId: item.Id.Value,
                 HouseholdId: item.HouseholdId.Value,
