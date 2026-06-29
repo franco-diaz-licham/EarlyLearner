@@ -2,7 +2,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EarlyLearner.Application.Ports;
 using System.Net.Mime;
-using System.Security.Cryptography;
 
 namespace EarlyLearner.Infrastructure.Ports;
 
@@ -20,21 +19,11 @@ public sealed class AzureFileStorageService(BlobContainerClient containerClient)
         if (stream.CanSeek) stream.Position = 0;
         var blobClient = _container.GetBlobClient(key);
 
-        // Compute SHA256 hash while streaming upload to avoid buffering large files in memory.
-        using var sha256 = SHA256.Create();
-        using var hashingStream = new CryptoStream(stream, sha256, CryptoStreamMode.Read, leaveOpen: true);
         var headers = new BlobHttpHeaders { ContentType = contentType.MediaType };
         var uploadOptions = new BlobUploadOptions { HttpHeaders = headers };
 
-        // Upload will read the hashingStream to completion and compute hash.
-        await blobClient.UploadAsync(hashingStream, uploadOptions, cancellationToken).ConfigureAwait(false);
-
-        // Ensure any remaining reads are consumed so hash is complete
-        if (stream.CanSeek && stream.Position < stream.Length) stream.Position = stream.Length;
-
-        var hashBytes = sha256.Hash ?? Array.Empty<byte>();
-        // Return hex string of SHA256 (uppercase). Use Convert.ToHexString (available in .NET)
-        return Convert.ToHexString(hashBytes);
+        var response = await blobClient.UploadAsync(stream, uploadOptions, cancellationToken).ConfigureAwait(false);
+        return response.Value.ContentHash is { Length: > 0 } contentHash ? Convert.ToHexString(contentHash) : string.Empty;
     }
 
     public async Task<Stream> DownloadAsync(string key, CancellationToken cancellationToken)

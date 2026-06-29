@@ -41,18 +41,6 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
   const hasImage = Boolean(imageSrc);
   const visibleInitials = initials?.trim().slice(0, 2).toUpperCase();
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  useEffect(() => {
-    return () => {
-      if (storedFileUrl) URL.revokeObjectURL(storedFileUrl);
-    };
-  }, [storedFileUrl]);
-
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
 
@@ -62,6 +50,7 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
     });
 
     onFileChange?.(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
   };
 
   const handleClear = () => {
