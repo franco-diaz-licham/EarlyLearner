@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.Entities;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -36,6 +37,12 @@ public sealed class ChildConfig : IEntityTypeConfiguration<Child>
 
         builder.Property(child => child.DateOfBirth)
             .IsRequired();
+
+        builder.Property(child => child.AvatarStoredFileId)
+            .HasConversion(
+                id => id.HasValue ? id.Value.Value : (Guid?)null,
+                value => value.HasValue ? new StoredFileId(value.Value) : null)
+            .IsRequired(false);
 
         builder.Property(child => child.IsArchived)
             .IsRequired();

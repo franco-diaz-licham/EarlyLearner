@@ -82,7 +82,8 @@ public static class HouseholdEndpoints
         var command = new AddHouseholdChildCommand(
             FirstName: request.FirstName,
             LastName: request.LastName,
-            DateOfBirth: request.DateOfBirth);
+            DateOfBirth: request.DateOfBirth,
+            AvatarStoredFileId: request.AvatarStoredFileId);
 
         var result = await commandService.AddChildAsync(command, cancellationToken);
         return result.ToApiResult();
@@ -108,7 +109,8 @@ public static class HouseholdEndpoints
             ChildId: childId,
             FirstName: request.FirstName,
             LastName: request.LastName,
-            DateOfBirth: request.DateOfBirth);
+            DateOfBirth: request.DateOfBirth,
+            AvatarStoredFileId: request.AvatarStoredFileId);
 
         var result = await commandService.UpdateChildAsync(command, cancellationToken);
         return result.ToApiResult();
@@ -139,9 +141,9 @@ public sealed class InviteHouseholdCarerRequestValidator : AbstractValidator<Inv
     }
 }
 
-public sealed record AddHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth);
+public sealed record AddHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth, Guid? AvatarStoredFileId);
 
-public sealed record UpdateHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth);
+public sealed record UpdateHouseholdChildRequest(string FirstName, string LastName, DateOnly DateOfBirth, Guid? AvatarStoredFileId);
 
 public sealed class AddHouseholdChildRequestValidator : AbstractValidator<AddHouseholdChildRequest>
 {

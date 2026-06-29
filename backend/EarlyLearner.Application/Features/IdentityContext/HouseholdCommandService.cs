@@ -5,6 +5,7 @@ using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 
 namespace EarlyLearner.Application.Features.IdentityContext;
 
@@ -14,9 +15,9 @@ public sealed record AddHouseholdCarerCommand(string Email, HouseholdRoleEnum Ro
 
 public sealed record RemoveHouseholdCarerCommand(Guid CarerId);
 
-public sealed record AddHouseholdChildCommand(string FirstName, string LastName, DateOnly DateOfBirth);
+public sealed record AddHouseholdChildCommand(string FirstName, string LastName, DateOnly DateOfBirth, Guid? AvatarStoredFileId);
 
-public sealed record UpdateHouseholdChildCommand(Guid ChildId, string FirstName, string LastName, DateOnly DateOfBirth);
+public sealed record UpdateHouseholdChildCommand(Guid ChildId, string FirstName, string LastName, DateOnly DateOfBirth, Guid? AvatarStoredFileId);
 
 public sealed record RemoveHouseholdChildCommand(Guid ChildId);
 
@@ -94,7 +95,7 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         var household = await householdRepo.GetAsync(user.HouseholdId, cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
-        household.AddChild(command.FirstName, command.LastName, command.DateOfBirth);
+        household.AddChild(command.FirstName, command.LastName, command.DateOfBirth, ToStoredFileId(command.AvatarStoredFileId));
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Child could not be added.", ResultTypeEnum.Invalid);
 
@@ -122,7 +123,7 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         var household = await householdRepo.GetAsync(user.HouseholdId, cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
-        household.UpdateChild(new ChildId(command.ChildId), command.FirstName, command.LastName, command.DateOfBirth);
+        household.UpdateChild(new ChildId(command.ChildId), command.FirstName, command.LastName, command.DateOfBirth, ToStoredFileId(command.AvatarStoredFileId));
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<HouseholdResponse>.Fail("Child could not be updated.", ResultTypeEnum.Invalid);
 
@@ -131,4 +132,8 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
+    private static StoredFileId? ToStoredFileId(Guid? storedFileId)
+    {
+        return storedFileId is { } value ? new StoredFileId(value) : null;
+    }
 }

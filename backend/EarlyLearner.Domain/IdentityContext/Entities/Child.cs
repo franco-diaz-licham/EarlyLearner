@@ -1,5 +1,6 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 
 namespace EarlyLearner.Domain.IdentityContext.Entities;
 
@@ -11,13 +12,14 @@ public sealed class Child : Entity<ChildId>
 {
     private Child() { }
 
-    internal Child(ChildId id, HouseholdId householdId, string firstName, string lastName, DateOnly dateOfBirth)
+    internal Child(ChildId id, HouseholdId householdId, string firstName, string lastName, DateOnly dateOfBirth, StoredFileId? avatarStoredFileId)
     {
         Id = id;
         HouseholdId = householdId;
         FirstName = Required(firstName, nameof(firstName));
         LastName = Required(lastName, nameof(lastName));
         DateOfBirth = dateOfBirth;
+        AvatarStoredFileId = avatarStoredFileId;
         IsArchived = false;
         SetCreatedOn();
     }
@@ -43,6 +45,11 @@ public sealed class Child : Entity<ChildId>
     public DateOnly DateOfBirth { get; private set; }
 
     /// <summary>
+    /// Optional stored file used as the child's profile avatar.
+    /// </summary>
+    public StoredFileId? AvatarStoredFileId { get; private set; }
+
+    /// <summary>
     /// Indicates the child profile is no longer actively managed while preserving historical records.
     /// </summary>
     public bool IsArchived { get; private set; }
@@ -54,11 +61,12 @@ public sealed class Child : Entity<ChildId>
         SetUpdatedOn();
     }
 
-    internal void UpdateDetails(string firstName, string lastName, DateOnly dateOfBirth)
+    internal void UpdateDetails(string firstName, string lastName, DateOnly dateOfBirth, StoredFileId? avatarStoredFileId)
     {
         FirstName = Required(firstName, nameof(firstName));
         LastName = Required(lastName, nameof(lastName));
         DateOfBirth = dateOfBirth;
+        AvatarStoredFileId = avatarStoredFileId;
         SetUpdatedOn();
     }
 

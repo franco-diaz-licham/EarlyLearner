@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EarlyLearner.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260628121629_InitialCreate")]
+    [Migration("20260629112712_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -137,6 +137,10 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("AvatarStoredFileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("avatar_stored_file_id");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone")

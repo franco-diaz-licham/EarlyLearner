@@ -1,5 +1,6 @@
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.CoreContext.ValueObjects;
 
 namespace EarlyLearner.Domain.IdentityContext.Entities;
 
@@ -150,9 +151,9 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
-    public Child AddChild(string firstName, string lastName, DateOnly dateOfBirth)
+    public Child AddChild(string firstName, string lastName, DateOnly dateOfBirth, StoredFileId? avatarStoredFileId)
     {
-        var child = new Child(new ChildId(Guid.NewGuid()), Id, firstName, lastName, dateOfBirth);
+        var child = new Child(new ChildId(Guid.NewGuid()), Id, firstName, lastName, dateOfBirth, avatarStoredFileId);
         _children.Add(child);
         var occurredAt = DateTimeOffset.UtcNow;
         RaiseDomainEvent(new ChildCreated(Id, child.Id, occurredAt));
@@ -177,12 +178,12 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
-    public void UpdateChild(ChildId childId, string firstName, string lastName, DateOnly dateOfBirth)
+    public void UpdateChild(ChildId childId, string firstName, string lastName, DateOnly dateOfBirth, StoredFileId? avatarStoredFileId)
     {
         var child = _children.SingleOrDefault(existingChild => existingChild.Id == childId);
         if (child is null) throw new DomainException("Child does not belong to this household.");
 
-        child.UpdateDetails(firstName, lastName, dateOfBirth);
+        child.UpdateDetails(firstName, lastName, dateOfBirth, avatarStoredFileId);
         SetUpdatedOn();
     }
 

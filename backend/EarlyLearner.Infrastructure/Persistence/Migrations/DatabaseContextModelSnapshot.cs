@@ -135,6 +135,10 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid?>("AvatarStoredFileId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("avatar_stored_file_id");
+
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");

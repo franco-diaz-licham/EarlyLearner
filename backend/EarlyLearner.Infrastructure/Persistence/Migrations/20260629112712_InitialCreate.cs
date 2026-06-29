@@ -129,6 +129,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     first_name = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     last_name = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
                     date_of_birth = table.Column<DateOnly>(type: "date", nullable: false),
+                    avatar_stored_file_id = table.Column<Guid>(type: "uuid", nullable: true),
                     is_archived = table.Column<bool>(type: "boolean", nullable: false),
                     created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)

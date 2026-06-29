@@ -7,7 +7,7 @@ namespace EarlyLearner.Application.Features.IdentityContext;
 
 public sealed record HouseholdResponse(Guid Id, string Name, List<CarerResponse> Carers, List<ChildResponse> Children, List<HouseholdInvitationResponse> Invitations);
 public sealed record CarerResponse(Guid Id, Guid UserId, string Email, string FirstName, string LastName, string Role, string AccountStatus);
-public sealed record ChildResponse(Guid Id, string FirstName, string LastName, DateOnly DateOfBirth);
+public sealed record ChildResponse(Guid Id, string FirstName, string LastName, DateOnly DateOfBirth, Guid? AvatarStoredFileId);
 public sealed record HouseholdInvitationResponse(Guid Id, string Email, string? FirstName, string? LastName, string Role, string Status, DateTimeOffset InvitedAt, DateTimeOffset ExpiresAt);
 
 public interface IHouseholdQueryService

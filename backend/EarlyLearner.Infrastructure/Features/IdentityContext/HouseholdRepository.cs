@@ -41,7 +41,8 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         child.Id.Value,
                         child.FirstName,
                         child.LastName,
-                        child.DateOfBirth))
+                        child.DateOfBirth,
+                        child.AvatarStoredFileId == null ? null : child.AvatarStoredFileId.Value.Value))
                     .ToList(),
                 household.Invitations
                     .OrderByDescending(invitation => invitation.InvitedAt)
@@ -95,7 +96,8 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
                         child.Id.Value,
                         child.FirstName,
                         child.LastName,
-                        child.DateOfBirth))
+                        child.DateOfBirth,
+                        child.AvatarStoredFileId == null ? null : child.AvatarStoredFileId.Value.Value))
                     .ToList(),
                 item.Invitations
                     .OrderByDescending(invitation => invitation.InvitedAt)
