@@ -5,8 +5,8 @@ import type { CreateGoalRequest, GoalModel, GoalResponse, UpdateGoalRequest } fr
 const GOALS_URL = '/goals';
 
 export const goalService = {
-  async list(householdId: string): Promise<GoalModel[]> {
-    const goals = await apiClient.getList<GoalResponse>(`${GOALS_URL}/`, { householdId });
+  async list(): Promise<GoalModel[]> {
+    const goals = await apiClient.getList<GoalResponse>(`${GOALS_URL}/`);
     return mapGoalResponsesToModels(goals);
   },
 

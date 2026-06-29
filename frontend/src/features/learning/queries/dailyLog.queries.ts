@@ -5,16 +5,15 @@ import type { CreateDailyLogRequest } from '../types/dailyLog.types';
 export const dailyLogKeys = {
   all: ['dailyLogs'] as const,
   lists: () => [...dailyLogKeys.all, 'list'] as const,
-  list: (householdId: string) => [...dailyLogKeys.lists(), householdId] as const,
+  list: () => [...dailyLogKeys.lists(), 'current'] as const,
   details: () => [...dailyLogKeys.all, 'detail'] as const,
   detail: (dailyLogId: string) => [...dailyLogKeys.details(), dailyLogId] as const
 };
 
-export const useDailyLogsQuery = (householdId: string) =>
+export const useDailyLogsQuery = () =>
   useQuery({
-    queryKey: dailyLogKeys.list(householdId),
-    queryFn: () => dailyLogService.list(householdId),
-    enabled: Boolean(householdId)
+    queryKey: dailyLogKeys.list(),
+    queryFn: () => dailyLogService.list()
   });
 
 export const useDailyLogQuery = (dailyLogId: string) =>
@@ -30,7 +29,7 @@ export const useCreateDailyLogMutation = () => {
   return useMutation({
     mutationFn: (request: CreateDailyLogRequest) => dailyLogService.create(request),
     onSuccess: (dailyLog) => {
-      void queryClient.invalidateQueries({ queryKey: dailyLogKeys.list(dailyLog.householdId) });
+      void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
       queryClient.setQueryData(dailyLogKeys.detail(dailyLog.dailyLogId), dailyLog);
     }
   });

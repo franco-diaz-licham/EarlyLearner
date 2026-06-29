@@ -71,6 +71,5 @@ export interface HomeRecentActivityModel {
 }
 
 export interface GetHomeParams {
-  householdId: string;
   today?: string;
 }

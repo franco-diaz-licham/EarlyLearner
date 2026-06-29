@@ -59,7 +59,7 @@ export const HouseholdsPage = () => {
       cancelRename();
       return;
     }
-    await updateHouseholdMutation.mutateAsync({ householdId: household.id, form: { name } });
+    await updateHouseholdMutation.mutateAsync({ name });
     cancelRename();
   };
 
@@ -69,7 +69,7 @@ export const HouseholdsPage = () => {
 
   const handleSaveInvite = async (form: InviteCarerFormModel) => {
     if (!inviteCarer || !household) return;
-    await inviteHouseholdCarerMutation.mutateAsync({ householdId: household.id, form });
+    await inviteHouseholdCarerMutation.mutateAsync(form);
     setIniviteCarer(false);
   };
 
@@ -85,15 +85,15 @@ export const HouseholdsPage = () => {
   };
 
   const uploadChildAvatar = async (childId: string, avatarFile: File | null) => {
-    if (!household || !avatarFile) return;
-    await uploadHouseholdChildAvatarMutation.mutateAsync({ householdId: household.id, childId, file: avatarFile });
+    if (!avatarFile) return;
+    await uploadHouseholdChildAvatarMutation.mutateAsync({ childId, file: avatarFile });
   };
 
   const handleSaveChild = async ({ child: form, avatarFile }: SaveChildForm) => {
     if (!household) return;
 
     if (editChild && editingChild) {
-      await updateHouseholdChildMutation.mutateAsync({ householdId: household.id, childId: editingChild.id, form });
+      await updateHouseholdChildMutation.mutateAsync({ childId: editingChild.id, form });
       await uploadChildAvatar(editingChild.id, avatarFile);
       setEditChild(false);
       setEditingChild(null);
@@ -101,7 +101,7 @@ export const HouseholdsPage = () => {
     }
 
     if (!addChild) return;
-    const updatedHousehold = await addHouseholdChildMutation.mutateAsync({ householdId: household.id, form });
+    const updatedHousehold = await addHouseholdChildMutation.mutateAsync(form);
     const addedChild = getAddedChild(household, updatedHousehold);
     if (addedChild) await uploadChildAvatar(addedChild.id, avatarFile);
     setAddChild(false);
@@ -121,12 +121,12 @@ export const HouseholdsPage = () => {
 
   const removeChild = async (childId: string) => {
     if (!household) return;
-    await removeHouseholdChildMutation.mutateAsync({ householdId: household.id, childId });
+    await removeHouseholdChildMutation.mutateAsync(childId);
   };
 
   const removeCarer = async (carerId: string) => {
     if (!household) return;
-    await removeHouseholdCarerMutation.mutateAsync({ householdId: household.id, carerId });
+    await removeHouseholdCarerMutation.mutateAsync(carerId);
   };
 
   return (

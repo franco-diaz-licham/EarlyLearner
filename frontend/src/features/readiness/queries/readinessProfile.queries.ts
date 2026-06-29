@@ -5,16 +5,15 @@ import type { CreateReadinessProfileRequest } from '../types/readinessProfile.ty
 export const readinessProfileKeys = {
   all: ['readinessProfiles'] as const,
   lists: () => [...readinessProfileKeys.all, 'list'] as const,
-  list: (householdId: string) => [...readinessProfileKeys.lists(), householdId] as const,
+  list: () => [...readinessProfileKeys.lists(), 'current'] as const,
   details: () => [...readinessProfileKeys.all, 'detail'] as const,
   detail: (readinessProfileId: string) => [...readinessProfileKeys.details(), readinessProfileId] as const
 };
 
-export const useReadinessProfilesQuery = (householdId: string) =>
+export const useReadinessProfilesQuery = () =>
   useQuery({
-    queryKey: readinessProfileKeys.list(householdId),
-    queryFn: () => readinessProfileService.list(householdId),
-    enabled: Boolean(householdId)
+    queryKey: readinessProfileKeys.list(),
+    queryFn: () => readinessProfileService.list()
   });
 
 export const useReadinessProfileQuery = (readinessProfileId: string) =>
@@ -30,7 +29,7 @@ export const useCreateReadinessProfileMutation = () => {
   return useMutation({
     mutationFn: (request: CreateReadinessProfileRequest) => readinessProfileService.create(request),
     onSuccess: (readinessProfile) => {
-      void queryClient.invalidateQueries({ queryKey: readinessProfileKeys.list(readinessProfile.householdId) });
+      void queryClient.invalidateQueries({ queryKey: readinessProfileKeys.lists() });
       queryClient.setQueryData(readinessProfileKeys.detail(readinessProfile.readinessProfileId), readinessProfile);
     }
   });

@@ -13,7 +13,6 @@ export interface ReadinessProfileModel {
 }
 
 export interface CreateReadinessProfileRequest {
-  householdId: string;
   childId: string;
   readinessOutcomeIds: string[];
 }

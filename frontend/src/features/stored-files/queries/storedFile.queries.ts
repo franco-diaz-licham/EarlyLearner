@@ -5,16 +5,15 @@ import type { CreateStoredFileRequest, UpdateStoredFileStatusRequest } from '../
 export const storedFileKeys = {
   all: ['storedFiles'] as const,
   lists: () => [...storedFileKeys.all, 'list'] as const,
-  list: (householdId: string) => [...storedFileKeys.lists(), householdId] as const,
+  list: () => [...storedFileKeys.lists(), 'current'] as const,
   details: () => [...storedFileKeys.all, 'detail'] as const,
   detail: (storedFileId: string) => [...storedFileKeys.details(), storedFileId] as const
 };
 
-export const useStoredFilesQuery = (householdId: string) =>
+export const useStoredFilesQuery = () =>
   useQuery({
-    queryKey: storedFileKeys.list(householdId),
-    queryFn: () => storedFileService.list(householdId),
-    enabled: Boolean(householdId)
+    queryKey: storedFileKeys.list(),
+    queryFn: () => storedFileService.list()
   });
 
 export const useStoredFileQuery = (storedFileId: string) =>
@@ -30,7 +29,7 @@ export const useCreateStoredFileMutation = () => {
   return useMutation({
     mutationFn: (request: CreateStoredFileRequest) => storedFileService.create(request),
     onSuccess: (storedFile) => {
-      void queryClient.invalidateQueries({ queryKey: storedFileKeys.list(storedFile.householdId) });
+      void queryClient.invalidateQueries({ queryKey: storedFileKeys.lists() });
       queryClient.setQueryData(storedFileKeys.detail(storedFile.storedFileId), storedFile);
     }
   });
@@ -42,7 +41,7 @@ export const useUpdateStoredFileStatusMutation = () => {
   return useMutation({
     mutationFn: ({ storedFileId, request }: { storedFileId: string; request: UpdateStoredFileStatusRequest }) => storedFileService.updateStatus(storedFileId, request),
     onSuccess: (storedFile) => {
-      void queryClient.invalidateQueries({ queryKey: storedFileKeys.list(storedFile.householdId) });
+      void queryClient.invalidateQueries({ queryKey: storedFileKeys.lists() });
       queryClient.setQueryData(storedFileKeys.detail(storedFile.storedFileId), storedFile);
     }
   });

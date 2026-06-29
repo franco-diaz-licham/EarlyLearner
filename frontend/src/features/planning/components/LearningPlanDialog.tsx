@@ -14,7 +14,7 @@ interface LearningPlanDialogProps {
 }
 
 export const LearningPlanDialog = ({ learningPlan, saving = false, visible, onChange, onHide, onSave }: LearningPlanDialogProps) => {
-  const canSave = Boolean(learningPlan.householdId && learningPlan.childId && learningPlan.startDate && learningPlan.endDate && learningPlan.focus.trim());
+  const canSave = Boolean(learningPlan.childId && learningPlan.startDate && learningPlan.endDate && learningPlan.focus.trim());
 
   const updateField = (field: keyof LearningPlanModel, value: string) => {
     onChange({ ...learningPlan, [field]: value });
@@ -23,16 +23,6 @@ export const LearningPlanDialog = ({ learningPlan, saving = false, visible, onCh
   return (
     <AppDialog header="New learning plan" visible={visible} onHide={onHide}>
       <div className="space-y-4 pt-4">
-        <label className="block">
-          <span className="mb-2 block text-sm font-semibold text-brand-heading">Household ID</span>
-          <AppInputText
-            value={learningPlan.householdId}
-            onChange={(event) => {
-              updateField('householdId', event.target.value);
-            }}
-          />
-        </label>
-
         <label className="block">
           <span className="mb-2 block text-sm font-semibold text-brand-heading">Child ID</span>
           <AppInputText

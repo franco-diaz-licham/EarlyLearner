@@ -41,7 +41,6 @@ export interface StoredFileModel {
 }
 
 export interface CreateStoredFileRequest {
-  householdId: string;
   storageKey: string;
   fileName: string;
   contentType: string;

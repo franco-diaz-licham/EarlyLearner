@@ -5,16 +5,15 @@ import type { CreateLearningPlanRequest, UpdateLearningPlanRequest } from '../ty
 export const learningPlanKeys = {
   all: ['learningPlans'] as const,
   lists: () => [...learningPlanKeys.all, 'list'] as const,
-  list: (householdId: string) => [...learningPlanKeys.lists(), householdId] as const,
+  list: () => [...learningPlanKeys.lists(), 'current'] as const,
   details: () => [...learningPlanKeys.all, 'detail'] as const,
   detail: (learningPlanId: string) => [...learningPlanKeys.details(), learningPlanId] as const
 };
 
-export const useLearningPlansQuery = (householdId: string) =>
+export const useLearningPlansQuery = () =>
   useQuery({
-    queryKey: learningPlanKeys.list(householdId),
-    queryFn: () => learningPlanService.list(householdId),
-    enabled: Boolean(householdId)
+    queryKey: learningPlanKeys.list(),
+    queryFn: () => learningPlanService.list()
   });
 
 export const useLearningPlanQuery = (learningPlanId: string) =>
@@ -30,7 +29,7 @@ export const useCreateLearningPlanMutation = () => {
   return useMutation({
     mutationFn: (request: CreateLearningPlanRequest) => learningPlanService.create(request),
     onSuccess: (learningPlan) => {
-      void queryClient.invalidateQueries({ queryKey: learningPlanKeys.list(learningPlan.householdId) });
+      void queryClient.invalidateQueries({ queryKey: learningPlanKeys.lists() });
       queryClient.setQueryData(learningPlanKeys.detail(learningPlan.learningPlanId), learningPlan);
     }
   });
@@ -42,7 +41,7 @@ export const useUpdateLearningPlanMutation = () => {
   return useMutation({
     mutationFn: ({ learningPlanId, request }: { learningPlanId: string; request: UpdateLearningPlanRequest }) => learningPlanService.update(learningPlanId, request),
     onSuccess: (learningPlan) => {
-      void queryClient.invalidateQueries({ queryKey: learningPlanKeys.list(learningPlan.householdId) });
+      void queryClient.invalidateQueries({ queryKey: learningPlanKeys.lists() });
       queryClient.setQueryData(learningPlanKeys.detail(learningPlan.learningPlanId), learningPlan);
     }
   });

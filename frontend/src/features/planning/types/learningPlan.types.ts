@@ -17,7 +17,6 @@ export interface LearningPlanModel {
 }
 
 export interface CreateLearningPlanRequest {
-  householdId: string;
   childId: string;
   startDate: string;
   endDate: string;

@@ -19,7 +19,6 @@ export interface DailyLogModel {
 }
 
 export interface CreateDailyLogRequest {
-  householdId: string;
   childId: string;
   logDate: string;
 }

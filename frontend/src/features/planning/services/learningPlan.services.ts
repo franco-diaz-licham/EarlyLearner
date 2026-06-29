@@ -5,8 +5,8 @@ import type { CreateLearningPlanRequest, LearningPlanModel, LearningPlanResponse
 const LEARNING_PLANS_URL = '/learning-plans';
 
 export const learningPlanService = {
-  async list(householdId: string): Promise<LearningPlanModel[]> {
-    const learningPlans = await apiClient.getList<LearningPlanResponse>(`${LEARNING_PLANS_URL}/`, { householdId });
+  async list(): Promise<LearningPlanModel[]> {
+    const learningPlans = await apiClient.getList<LearningPlanResponse>(`${LEARNING_PLANS_URL}/`);
     return mapLearningPlanResponsesToModels(learningPlans);
   },
 

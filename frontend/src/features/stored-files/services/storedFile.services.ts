@@ -5,8 +5,8 @@ import type { CreateStoredFileRequest, StoredFileModel, StoredFileResponse, Upda
 const STORED_FILES_URL = '/stored-files';
 
 export const storedFileService = {
-  async list(householdId: string): Promise<StoredFileModel[]> {
-    const storedFiles = await apiClient.getList<StoredFileResponse>(`${STORED_FILES_URL}/`, { householdId });
+  async list(): Promise<StoredFileModel[]> {
+    const storedFiles = await apiClient.getList<StoredFileResponse>(`${STORED_FILES_URL}/`);
     return mapStoredFileResponsesToModels(storedFiles);
   },
 

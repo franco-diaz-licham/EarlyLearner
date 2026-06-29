@@ -5,8 +5,8 @@ import type { CreateDailyLogRequest, DailyLogModel, DailyLogResponse } from '../
 const DAILY_LOGS_URL = '/daily-logs';
 
 export const dailyLogService = {
-  async list(householdId: string): Promise<DailyLogModel[]> {
-    const dailyLogs = await apiClient.getList<DailyLogResponse>(`${DAILY_LOGS_URL}/`, { householdId });
+  async list(): Promise<DailyLogModel[]> {
+    const dailyLogs = await apiClient.getList<DailyLogResponse>(`${DAILY_LOGS_URL}/`);
     return mapDailyLogResponsesToModels(dailyLogs);
   },
 

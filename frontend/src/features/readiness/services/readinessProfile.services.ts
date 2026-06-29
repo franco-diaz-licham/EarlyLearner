@@ -5,8 +5,8 @@ import type { CreateReadinessProfileRequest, ReadinessProfileModel, ReadinessPro
 const READINESS_PROFILES_URL = '/readiness-profiles';
 
 export const readinessProfileService = {
-  async list(householdId: string): Promise<ReadinessProfileModel[]> {
-    const readinessProfiles = await apiClient.getList<ReadinessProfileResponse>(`${READINESS_PROFILES_URL}/`, { householdId });
+  async list(): Promise<ReadinessProfileModel[]> {
+    const readinessProfiles = await apiClient.getList<ReadinessProfileResponse>(`${READINESS_PROFILES_URL}/`);
     return mapReadinessProfileResponsesToModels(readinessProfiles);
   },
 

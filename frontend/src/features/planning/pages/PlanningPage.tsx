@@ -9,12 +9,11 @@ import { LearningPlanDialog } from '../components/LearningPlanDialog';
 import { useCreateLearningPlanMutation } from '../queries/learningPlan.queries';
 import type { LearningPlanModel } from '../types/learningPlan.types';
 
-const demoHouseholdId = '11111111-1111-1111-1111-111111111111';
 const demoChildId = '44444444-4444-4444-4444-444444444441';
 
 const createEmptyLearningPlan = (): LearningPlanModel => ({
   learningPlanId: '',
-  householdId: demoHouseholdId,
+  householdId: '',
   childId: demoChildId,
   startDate: '',
   endDate: '',
@@ -42,7 +41,6 @@ export const PlanningPage = () => {
   const handleCreateLearningPlan = () => {
     createLearningPlanMutation.mutate(
       {
-        householdId: learningPlanDraft.householdId,
         childId: learningPlanDraft.childId,
         startDate: learningPlanDraft.startDate,
         endDate: learningPlanDraft.endDate,

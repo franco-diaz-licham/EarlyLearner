@@ -5,16 +5,15 @@ import type { CreateGoalRequest, UpdateGoalRequest } from '../types/goal.types';
 export const goalKeys = {
   all: ['goals'] as const,
   lists: () => [...goalKeys.all, 'list'] as const,
-  list: (householdId: string) => [...goalKeys.lists(), householdId] as const,
+  list: () => [...goalKeys.lists(), 'current'] as const,
   details: () => [...goalKeys.all, 'detail'] as const,
   detail: (goalId: string) => [...goalKeys.details(), goalId] as const
 };
 
-export const useGoalsQuery = (householdId: string) =>
+export const useGoalsQuery = () =>
   useQuery({
-    queryKey: goalKeys.list(householdId),
-    queryFn: () => goalService.list(householdId),
-    enabled: Boolean(householdId)
+    queryKey: goalKeys.list(),
+    queryFn: () => goalService.list()
   });
 
 export const useGoalQuery = (goalId: string) =>
@@ -30,7 +29,7 @@ export const useCreateGoalMutation = () => {
   return useMutation({
     mutationFn: (request: CreateGoalRequest) => goalService.create(request),
     onSuccess: (goal) => {
-      void queryClient.invalidateQueries({ queryKey: goalKeys.list(goal.householdId) });
+      void queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
       queryClient.setQueryData(goalKeys.detail(goal.goalId), goal);
     }
   });
@@ -42,7 +41,7 @@ export const useUpdateGoalMutation = () => {
   return useMutation({
     mutationFn: ({ goalId, request }: { goalId: string; request: UpdateGoalRequest }) => goalService.update(goalId, request),
     onSuccess: (goal) => {
-      void queryClient.invalidateQueries({ queryKey: goalKeys.list(goal.householdId) });
+      void queryClient.invalidateQueries({ queryKey: goalKeys.lists() });
       queryClient.setQueryData(goalKeys.detail(goal.goalId), goal);
     }
   });

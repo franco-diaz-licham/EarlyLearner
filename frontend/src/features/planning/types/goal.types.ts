@@ -38,7 +38,6 @@ export interface GoalModel {
 }
 
 export interface CreateGoalRequest {
-  householdId: string;
   childId: string;
   title: string;
   type: GoalType;
