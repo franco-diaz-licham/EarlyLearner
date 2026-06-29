@@ -55,7 +55,7 @@ export const useCreateStoredFileUploadMutation = () => {
 export const useStoredFileContentQuery = (storedFileId: string | null | undefined) =>
   useQuery({
     queryKey: storedFileId ? [...storedFileKeys.detail(storedFileId), 'content'] : [...storedFileKeys.detail('none'), 'content'],
-    queryFn: () => apiClient.getBlob(`${STORED_FILES_URL}/${storedFileId ?? ''}/content`),
+    queryFn: () => apiClient.getBlob(`${STORED_FILES_URL}/${storedFileId ?? ''}`),
     enabled: Boolean(storedFileId),
     staleTime: 5 * 60 * 1000
   });

@@ -16,6 +16,7 @@ using EarlyLearner.Infrastructure.Features.PlanningContext;
 using EarlyLearner.Infrastructure.Features.ReadinessContext;
 using EarlyLearner.Infrastructure.Messaging;
 using EarlyLearner.Infrastructure.Persistence;
+using EarlyLearner.Infrastructure.Ports;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -136,10 +137,7 @@ public static class InfraAppServices
             return client.GetBlobContainerClient(opts.ContainerName);
         });
 
-        // services.AddSingleton<IFileStorageService>(sp => {
-        //     var containerClient = sp.GetRequiredService<BlobContainerClient>();
-        //     return new AzureFileStorageService(containerClient);
-        // });
+        services.AddSingleton<IFileStorageService, AzureFileStorageService>();
 
         return services;
     }

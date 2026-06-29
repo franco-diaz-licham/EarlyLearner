@@ -1,12 +1,11 @@
-using Azure.Storage.Blobs;
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.CoreContext;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -18,7 +17,6 @@ public static class StoredFileEndpoints
 
         files.MapGet("/", ListStoredFiles).WithName(nameof(ListStoredFiles));
         files.MapGet("/{storedFileId:guid}", GetStoredFile).WithName(nameof(GetStoredFile));
-        files.MapGet("/{storedFileId:guid}/content", GetStoredFileContent).WithName(nameof(GetStoredFileContent));
         files.MapPost("/", CreateStoredFile).WithName(nameof(CreateStoredFile));
         files.MapPut("/{storedFileId:guid}/status", UpdateStoredFileStatus).WithName(nameof(UpdateStoredFileStatus));
         files.MapDelete("/{storedFileId:guid}", DeleteStoredFile).WithName(nameof(DeleteStoredFile));
@@ -32,16 +30,7 @@ public static class StoredFileEndpoints
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> GetStoredFile(Guid storedFileId, IValidator<StoredFileRequest> validator, IStoredFileQueryService queryService, CancellationToken cancellationToken = default)
-    {
-        var validation = validator.Validate(new StoredFileRequest(storedFileId)).ToResult();
-        if (!validation.IsSuccess) return validation.ToApiResult();
-
-        var result = await queryService.GetAsync(new StoredFileId(storedFileId), cancellationToken);
-        return result.ToApiResult();
-    }
-
-    public static async Task<IResult> GetStoredFileContent(Guid storedFileId, IValidator<StoredFileRequest> validator, IStoredFileQueryService queryService, BlobContainerClient blobContainerClient, CancellationToken cancellationToken = default)
+    public static async Task<IResult> GetStoredFile(Guid storedFileId, IValidator<StoredFileRequest> validator, IStoredFileQueryService queryService, IFileStorageService fileStorageService, CancellationToken cancellationToken = default)
     {
         var validation = validator.Validate(new StoredFileRequest(storedFileId)).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
@@ -50,10 +39,7 @@ public static class StoredFileEndpoints
         if (!result.IsSuccess || result.Value is null) return result.ToApiResult();
 
         var storedFile = result.Value;
-        var blobClient = blobContainerClient.GetBlobClient(storedFile.StorageKey);
-        if (!await blobClient.ExistsAsync(cancellationToken)) return Result.Fail("Stored file content was not found.", ResultTypeEnum.NotFound).ToApiResult();
-
-        var stream = await blobClient.OpenReadAsync(cancellationToken: cancellationToken);
+        var stream = await fileStorageService.DownloadAsync(storedFile.StorageKey, cancellationToken);
         return Results.File(stream, storedFile.ContentType, storedFile.FileName);
     }
 
