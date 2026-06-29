@@ -1,4 +1,5 @@
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
@@ -8,7 +9,6 @@ using EarlyLearner.Shared.Utilities;
 namespace EarlyLearner.Application.Features.CoreContext;
 
 public sealed record CreateStoredFileCommand(
-    Guid HouseholdId,
     string StorageKey,
     string FileName,
     string ContentType,
@@ -33,15 +33,16 @@ public interface IStoredFileCommandRepository
     void Add(StoredFile storedFile);
 }
 
-public sealed class StoredFileCommandService(IStoredFileCommandRepository storedFileRepo, IUnitOfWork uow) : IStoredFileCommandService
+public sealed class StoredFileCommandService(IStoredFileCommandRepository storedFileRepo, IUnitOfWork uow, ICurrentUser currentUser) : IStoredFileCommandService
 {
     public async Task<Result<StoredFileResponse>> CreateAsync(CreateStoredFileCommand command, CancellationToken cancellationToken)
     {
-        var householdExists = await storedFileRepo.HouseholdExistsAsync(command.HouseholdId, cancellationToken);
+        var householdId = currentUser.HouseholdId.Value;
+        var householdExists = await storedFileRepo.HouseholdExistsAsync(householdId, cancellationToken);
         if (!householdExists) return Result<StoredFileResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
 
         var file = StoredFile.Create(
-            new HouseholdId(command.HouseholdId),
+            new HouseholdId(householdId),
             command.StorageKey,
             command.FileName,
             command.ContentType,

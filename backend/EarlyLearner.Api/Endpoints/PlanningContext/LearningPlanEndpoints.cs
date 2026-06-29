@@ -21,11 +21,9 @@ public static class LearningPlanEndpoints
         return endpoints;
     }
 
-    public static async Task<IResult> ListLearningPlans(Guid householdId, ILearningPlanQueryService queryService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> ListLearningPlans(ILearningPlanQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<List<LearningPlanResponse>>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
-        var result = await queryService.ListAsync(householdId, cancellationToken);
+        var result = await queryService.ListAsync(cancellationToken);
         return result.ToApiResult();
     }
 
@@ -43,7 +41,6 @@ public static class LearningPlanEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateLearningPlanCommand(
-            HouseholdId: request.HouseholdId,
             ChildId: request.ChildId,
             StartDate: request.StartDate,
             EndDate: request.EndDate,
@@ -80,13 +77,12 @@ public static class LearningPlanEndpoints
     }
 }
 
-public sealed record CreateLearningPlanRequest(Guid HouseholdId, Guid ChildId, DateOnly StartDate, DateOnly EndDate, string Focus);
+public sealed record CreateLearningPlanRequest(Guid ChildId, DateOnly StartDate, DateOnly EndDate, string Focus);
 
 public sealed class CreateLearningPlanRequestValidator : AbstractValidator<CreateLearningPlanRequest>
 {
     public CreateLearningPlanRequestValidator()
     {
-        RuleFor(request => request.HouseholdId).NotEmpty();
         RuleFor(request => request.ChildId).NotEmpty();
         RuleFor(request => request.StartDate).NotEqual(default(DateOnly));
         RuleFor(request => request.EndDate).NotEqual(default(DateOnly));

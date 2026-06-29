@@ -20,11 +20,9 @@ public static class ReadinessProfileEndpoints
         return endpoints;
     }
 
-    public static async Task<IResult> ListReadinessProfiles(Guid householdId, IReadinessProfileQueryService queryService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> ListReadinessProfiles(IReadinessProfileQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<List<ReadinessProfileResponse>>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
-        var result = await queryService.ListAsync(householdId, cancellationToken);
+        var result = await queryService.ListAsync(cancellationToken);
         return result.ToApiResult();
     }
 
@@ -42,7 +40,6 @@ public static class ReadinessProfileEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateReadinessProfileCommand(
-            HouseholdId: request.HouseholdId,
             ChildId: request.ChildId,
             ReadinessOutcomeIds: request.ReadinessOutcomeIds);
 
@@ -60,13 +57,12 @@ public static class ReadinessProfileEndpoints
     }
 }
 
-public sealed record CreateReadinessProfileRequest(Guid HouseholdId, Guid ChildId, IReadOnlyList<Guid> ReadinessOutcomeIds);
+public sealed record CreateReadinessProfileRequest(Guid ChildId, IReadOnlyList<Guid> ReadinessOutcomeIds);
 
 public sealed class CreateReadinessProfileRequestValidator : AbstractValidator<CreateReadinessProfileRequest>
 {
     public CreateReadinessProfileRequestValidator()
     {
-        RuleFor(request => request.HouseholdId).NotEmpty();
         RuleFor(request => request.ChildId).NotEmpty();
         RuleFor(request => request.ReadinessOutcomeIds).NotNull();
     }

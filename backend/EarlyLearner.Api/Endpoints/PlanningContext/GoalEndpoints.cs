@@ -22,10 +22,9 @@ public static class GoalEndpoints
         return endpoints;
     }
 
-    public static async Task<IResult> ListGoals(Guid householdId, IGoalQueryService queryService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> ListGoals(IGoalQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<List<GoalResponse>>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-        var result = await queryService.ListAsync(householdId, cancellationToken);
+        var result = await queryService.ListAsync(cancellationToken);
         return result.ToApiResult();
     }
 
@@ -42,7 +41,6 @@ public static class GoalEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateGoalCommand(
-            HouseholdId: request.HouseholdId,
             ChildId: request.ChildId,
             Title: request.Title,
             Type: request.Type,
@@ -76,13 +74,12 @@ public static class GoalEndpoints
     }
 }
 
-public sealed record CreateGoalRequest(Guid HouseholdId, Guid ChildId, string Title, GoalTypeEnum Type, DateOnly StartDate, DateOnly EndDate, IReadOnlyList<Guid> ReadinessOutcomeIds);
+public sealed record CreateGoalRequest(Guid ChildId, string Title, GoalTypeEnum Type, DateOnly StartDate, DateOnly EndDate, IReadOnlyList<Guid> ReadinessOutcomeIds);
 
 public sealed class CreateGoalRequestValidator : AbstractValidator<CreateGoalRequest>
 {
     public CreateGoalRequestValidator()
     {
-        RuleFor(request => request.HouseholdId).NotEmpty();
         RuleFor(request => request.ChildId).NotEmpty();
         RuleFor(request => request.Title).NotEmpty();
         RuleFor(request => request.Type).IsInEnum();

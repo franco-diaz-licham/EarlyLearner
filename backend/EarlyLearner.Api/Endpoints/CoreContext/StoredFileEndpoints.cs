@@ -22,11 +22,9 @@ public static class StoredFileEndpoints
         return endpoints;
     }
 
-    public static async Task<IResult> ListStoredFiles(Guid householdId, IStoredFileQueryService queryService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> ListStoredFiles(IStoredFileQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) return Result<List<StoredFileResponse>>.Fail("Household id is required.", ResultTypeEnum.Invalid).ToApiResult();
-
-        var result = await queryService.ListAsync(householdId, cancellationToken);
+        var result = await queryService.ListAsync(cancellationToken);
         return result.ToApiResult();
     }
 
@@ -44,7 +42,6 @@ public static class StoredFileEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateStoredFileCommand(
-            HouseholdId: request.HouseholdId,
             StorageKey: request.StorageKey,
             FileName: request.FileName,
             ContentType: request.ContentType,
@@ -64,10 +61,7 @@ public static class StoredFileEndpoints
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new UpdateStoredFileStatusCommand(
-            StoredFileId: storedFileId,
-            Status: request.Status);
-
+        var command = new UpdateStoredFileStatusCommand(StoredFileId: storedFileId, Status: request.Status);
         var result = await commandService.UpdateStatusAsync(command, cancellationToken);
         return result.ToApiResult();
     }
@@ -82,7 +76,6 @@ public static class StoredFileEndpoints
 }
 
 public sealed record CreateStoredFileRequest(
-    Guid HouseholdId,
     string StorageKey,
     string FileName,
     string ContentType,
@@ -94,7 +87,6 @@ public sealed class CreateStoredFileRequestValidator : AbstractValidator<CreateS
 {
     public CreateStoredFileRequestValidator()
     {
-        RuleFor(request => request.HouseholdId).NotEmpty();
         RuleFor(request => request.StorageKey).NotEmpty();
         RuleFor(request => request.FileName).NotEmpty();
         RuleFor(request => request.ContentType).NotEmpty();

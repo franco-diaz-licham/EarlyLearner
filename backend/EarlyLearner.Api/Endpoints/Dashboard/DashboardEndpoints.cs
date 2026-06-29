@@ -1,7 +1,5 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.Dashboard;
-using EarlyLearner.Shared.Enums;
-using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -20,18 +18,11 @@ public static class DashboardEndpoints
     }
 
     private static async Task<IResult> GetHomeDashboardAsync(
-        Guid householdId,
         DateOnly? today,
         IGetHomeDashboardQueryHandler handler,
         CancellationToken cancellationToken)
     {
-        if (householdId == Guid.Empty) {
-            return Result<GetHomeDashboardResponse>
-                .Fail("A household id is required to load the dashboard.", ResultTypeEnum.Invalid)
-                .ToApiResult();
-        }
-
-        var query = new GetHomeDashboardQuery(householdId, today ?? DateOnly.FromDateTime(DateTime.UtcNow));
+        var query = new GetHomeDashboardQuery(today ?? DateOnly.FromDateTime(DateTime.UtcNow));
         var dashboard = await handler.HandleAsync(query, cancellationToken);
         return dashboard.ToApiResult();
     }

@@ -1,4 +1,5 @@
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Shared.Enums;
@@ -6,7 +7,7 @@ using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.LearningContext;
 
-public sealed record CreateDailyLogCommand(Guid HouseholdId, Guid ChildId, DateOnly LogDate);
+public sealed record CreateDailyLogCommand(Guid ChildId, DateOnly LogDate);
 
 public interface IDailyLogCommandService
 {
@@ -23,14 +24,15 @@ public interface IDailyLogCommandRepository
     void Remove(DailyLog dailyLog);
 }
 
-public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRepo, IUnitOfWork uow) : IDailyLogCommandService
+public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRepo, IUnitOfWork uow, ICurrentUser currentUser) : IDailyLogCommandService
 {
     public async Task<Result<DailyLogResponse>> CreateAsync(CreateDailyLogCommand command, CancellationToken cancellationToken)
     {
-        var childExists = await dailyLogRepo.ChildExistsAsync(command.HouseholdId, command.ChildId, cancellationToken);
+        var householdId = currentUser.HouseholdId.Value;
+        var childExists = await dailyLogRepo.ChildExistsAsync(householdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<DailyLogResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
-        var log = DailyLog.Create(new HouseholdId(command.HouseholdId), new ChildId(command.ChildId), command.LogDate);
+        var log = DailyLog.Create(new HouseholdId(householdId), new ChildId(command.ChildId), command.LogDate);
         dailyLogRepo.Add(log);
 
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;

@@ -1,4 +1,5 @@
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Shared.Enums;
@@ -6,7 +7,7 @@ using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.ReadinessContext;
 
-public sealed record CreateReadinessProfileCommand(Guid HouseholdId, Guid ChildId, IReadOnlyList<Guid> ReadinessOutcomeIds);
+public sealed record CreateReadinessProfileCommand(Guid ChildId, IReadOnlyList<Guid> ReadinessOutcomeIds);
 
 public interface IReadinessProfileCommandService
 {
@@ -24,17 +25,18 @@ public interface IReadinessProfileCommandRepository
     void Remove(ReadinessProfile readinessProfile);
 }
 
-public sealed class ReadinessProfileCommandService(IReadinessProfileCommandRepository readinessProfileRepo, IUnitOfWork uow) : IReadinessProfileCommandService
+public sealed class ReadinessProfileCommandService(IReadinessProfileCommandRepository readinessProfileRepo, IUnitOfWork uow, ICurrentUser currentUser) : IReadinessProfileCommandService
 {
     public async Task<Result<ReadinessProfileResponse>> CreateAsync(CreateReadinessProfileCommand command, CancellationToken cancellationToken)
     {
-        var childExists = await readinessProfileRepo.ChildExistsAsync(command.HouseholdId, command.ChildId, cancellationToken);
+        var householdId = currentUser.HouseholdId.Value;
+        var childExists = await readinessProfileRepo.ChildExistsAsync(householdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<ReadinessProfileResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
         var outcomes = await readinessProfileRepo.GetReadinessOutcomesAsync(command.ReadinessOutcomeIds, cancellationToken);
         if (outcomes.Count != command.ReadinessOutcomeIds.Distinct().Count()) return Result<ReadinessProfileResponse>.Fail("One or more readiness outcomes were not found.", ResultTypeEnum.NotFound);
 
-        var profile = ReadinessProfile.Create(new HouseholdId(command.HouseholdId), new ChildId(command.ChildId), outcomes);
+        var profile = ReadinessProfile.Create(new HouseholdId(householdId), new ChildId(command.ChildId), outcomes);
         readinessProfileRepo.Add(profile);
 
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;

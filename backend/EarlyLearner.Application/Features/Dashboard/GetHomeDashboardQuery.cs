@@ -2,7 +2,7 @@ using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.Dashboard;
 
-public sealed record GetHomeDashboardQuery(Guid HouseholdId, DateOnly Today);
+public sealed record GetHomeDashboardQuery(DateOnly Today);
 
 public sealed record GetHomeDashboardResponse(
     IReadOnlyList<HomeDashboardChildResponse> Children,

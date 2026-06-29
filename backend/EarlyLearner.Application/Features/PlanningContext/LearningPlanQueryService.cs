@@ -1,3 +1,4 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -7,7 +8,7 @@ public sealed record LearningPlanResponse(Guid LearningPlanId, Guid HouseholdId,
 
 public interface ILearningPlanQueryService
 {
-    Task<Result<List<LearningPlanResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Result<List<LearningPlanResponse>>> ListAsync(CancellationToken cancellationToken);
     Task<Result<LearningPlanResponse>> GetAsync(Guid learningPlanId, CancellationToken cancellationToken);
 }
 
@@ -17,11 +18,11 @@ public interface ILearningPlanQueryRepository
     Task<LearningPlanResponse?> GetResponseAsync(Guid learningPlanId, CancellationToken cancellationToken);
 }
 
-public sealed class LearningPlanQueryService(ILearningPlanQueryRepository learningPlanRepo) : ILearningPlanQueryService
+public sealed class LearningPlanQueryService(ILearningPlanQueryRepository learningPlanRepo, ICurrentUser currentUser) : ILearningPlanQueryService
 {
-    public async Task<Result<List<LearningPlanResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<Result<List<LearningPlanResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var plans = await learningPlanRepo.ListAsync(householdId, cancellationToken);
+        var plans = await learningPlanRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
         return Result<List<LearningPlanResponse>>.Success(plans, ResultTypeEnum.Success, plans.Count);
     }
 

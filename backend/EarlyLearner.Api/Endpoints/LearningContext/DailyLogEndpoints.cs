@@ -20,18 +20,9 @@ public static class DailyLogEndpoints
         return endpoints;
     }
 
-    public static async Task<IResult> ListDailyLogs(
-        Guid householdId,
-        IDailyLogQueryService queryService,
-        CancellationToken cancellationToken = default)
+    public static async Task<IResult> ListDailyLogs(IDailyLogQueryService queryService, CancellationToken cancellationToken = default)
     {
-        if (householdId == Guid.Empty) {
-            return Result<List<DailyLogResponse>>
-                .Fail("Household id is required.", ResultTypeEnum.Invalid)
-                .ToApiResult();
-        }
-
-        var result = await queryService.ListAsync(householdId, cancellationToken);
+        var result = await queryService.ListAsync(cancellationToken);
         return result.ToApiResult();
     }
 
@@ -60,7 +51,6 @@ public static class DailyLogEndpoints
         if (!validation.IsSuccess) return validation.ToApiResult();
 
         var command = new CreateDailyLogCommand(
-            HouseholdId: request.HouseholdId,
             ChildId: request.ChildId,
             LogDate: request.LogDate);
 
@@ -83,13 +73,12 @@ public static class DailyLogEndpoints
     }
 }
 
-public sealed record CreateDailyLogRequest(Guid HouseholdId, Guid ChildId, DateOnly LogDate);
+public sealed record CreateDailyLogRequest(Guid ChildId, DateOnly LogDate);
 
 public sealed class CreateDailyLogRequestValidator : AbstractValidator<CreateDailyLogRequest>
 {
     public CreateDailyLogRequestValidator()
     {
-        RuleFor(request => request.HouseholdId).NotEmpty();
         RuleFor(request => request.ChildId).NotEmpty();
         RuleFor(request => request.LogDate).NotEqual(default(DateOnly));
     }

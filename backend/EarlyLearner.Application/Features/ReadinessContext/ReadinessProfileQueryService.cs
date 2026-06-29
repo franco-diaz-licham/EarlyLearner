@@ -1,3 +1,4 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -7,7 +8,7 @@ public sealed record ReadinessProfileResponse(Guid ReadinessProfileId, Guid Hous
 
 public interface IReadinessProfileQueryService
 {
-    Task<Result<List<ReadinessProfileResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Result<List<ReadinessProfileResponse>>> ListAsync(CancellationToken cancellationToken);
     Task<Result<ReadinessProfileResponse>> GetAsync(Guid readinessProfileId, CancellationToken cancellationToken);
 }
 
@@ -17,11 +18,11 @@ public interface IReadinessProfileQueryRepository
     Task<ReadinessProfileResponse?> GetResponseAsync(Guid readinessProfileId, CancellationToken cancellationToken);
 }
 
-public sealed class ReadinessProfileQueryService(IReadinessProfileQueryRepository readinessProfileRepo) : IReadinessProfileQueryService
+public sealed class ReadinessProfileQueryService(IReadinessProfileQueryRepository readinessProfileRepo, ICurrentUser currentUser) : IReadinessProfileQueryService
 {
-    public async Task<Result<List<ReadinessProfileResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<Result<List<ReadinessProfileResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var profiles = await readinessProfileRepo.ListAsync(householdId, cancellationToken);
+        var profiles = await readinessProfileRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
         return Result<List<ReadinessProfileResponse>>.Success(profiles, ResultTypeEnum.Success, profiles.Count);
     }
 

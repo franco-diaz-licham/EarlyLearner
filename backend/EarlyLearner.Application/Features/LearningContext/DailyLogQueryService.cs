@@ -1,3 +1,4 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
@@ -14,7 +15,7 @@ public sealed record DailyLogResponse(
 
 public interface IDailyLogQueryService
 {
-    Task<Result<List<DailyLogResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Result<List<DailyLogResponse>>> ListAsync(CancellationToken cancellationToken);
     Task<Result<DailyLogResponse>> GetAsync(Guid dailyLogId, CancellationToken cancellationToken);
 }
 
@@ -24,11 +25,11 @@ public interface IDailyLogQueryRepository
     Task<DailyLogResponse?> GetResponseAsync(Guid dailyLogId, CancellationToken cancellationToken);
 }
 
-public sealed class DailyLogQueryService(IDailyLogQueryRepository dailyLogRepo) : IDailyLogQueryService
+public sealed class DailyLogQueryService(IDailyLogQueryRepository dailyLogRepo, ICurrentUser currentUser) : IDailyLogQueryService
 {
-    public async Task<Result<List<DailyLogResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<Result<List<DailyLogResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var logs = await dailyLogRepo.ListAsync(householdId, cancellationToken);
+        var logs = await dailyLogRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
         return Result<List<DailyLogResponse>>.Success(logs, ResultTypeEnum.Success, logs.Count);
     }
 

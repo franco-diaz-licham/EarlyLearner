@@ -1,4 +1,5 @@
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.PlanningContext.Entities;
@@ -7,7 +8,7 @@ using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.PlanningContext;
 
-public sealed record CreateLearningPlanCommand(Guid HouseholdId, Guid ChildId, DateOnly StartDate, DateOnly EndDate, string Focus);
+public sealed record CreateLearningPlanCommand(Guid ChildId, DateOnly StartDate, DateOnly EndDate, string Focus);
 
 public sealed record UpdateLearningPlanCommand(Guid LearningPlanId, DateOnly StartDate, DateOnly EndDate, string Focus);
 
@@ -27,15 +28,16 @@ public interface ILearningPlanCommandRepository
     void Remove(LearningPlan learningPlan);
 }
 
-public sealed class LearningPlanCommandService(ILearningPlanCommandRepository learningPlanRepo, IUnitOfWork uow) : ILearningPlanCommandService
+public sealed class LearningPlanCommandService(ILearningPlanCommandRepository learningPlanRepo, IUnitOfWork uow, ICurrentUser currentUser) : ILearningPlanCommandService
 {
     public async Task<Result<LearningPlanResponse>> CreateAsync(CreateLearningPlanCommand command, CancellationToken cancellationToken)
     {
-        var childExists = await learningPlanRepo.ChildExistsAsync(command.HouseholdId, command.ChildId, cancellationToken);
+        var householdId = currentUser.HouseholdId.Value;
+        var childExists = await learningPlanRepo.ChildExistsAsync(householdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<LearningPlanResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
         var period = DateRange.Create(command.StartDate, command.EndDate);
-        var plan = LearningPlan.Create(new HouseholdId(command.HouseholdId), new ChildId(command.ChildId), period, command.Focus);
+        var plan = LearningPlan.Create(new HouseholdId(householdId), new ChildId(command.ChildId), period, command.Focus);
 
         learningPlanRepo.Add(plan);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;

@@ -1,3 +1,4 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
@@ -17,7 +18,7 @@ public sealed record StoredFileResponse(
 
 public interface IStoredFileQueryService
 {
-    Task<Result<List<StoredFileResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Result<List<StoredFileResponse>>> ListAsync(CancellationToken cancellationToken);
     Task<Result<StoredFileResponse>> GetAsync(Guid storedFileId, CancellationToken cancellationToken);
 }
 
@@ -27,11 +28,11 @@ public interface IStoredFileQueryRepository
     Task<StoredFileResponse?> GetResponseAsync(Guid storedFileId, CancellationToken cancellationToken);
 }
 
-public sealed class StoredFileQueryService(IStoredFileQueryRepository storedFileRepo) : IStoredFileQueryService
+public sealed class StoredFileQueryService(IStoredFileQueryRepository storedFileRepo, ICurrentUser currentUser) : IStoredFileQueryService
 {
-    public async Task<Result<List<StoredFileResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<Result<List<StoredFileResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var files = await storedFileRepo.ListAsync(householdId, cancellationToken);
+        var files = await storedFileRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
         return Result<List<StoredFileResponse>>.Success(files, ResultTypeEnum.Success, files.Count);
     }
 

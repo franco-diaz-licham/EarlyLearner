@@ -1,3 +1,4 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.PlanningContext;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
@@ -8,7 +9,7 @@ public sealed record GoalResponse(Guid GoalId, Guid HouseholdId, Guid ChildId, s
 
 public interface IGoalQueryService
 {
-    Task<Result<List<GoalResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken);
+    Task<Result<List<GoalResponse>>> ListAsync(CancellationToken cancellationToken);
     Task<Result<GoalResponse>> GetAsync(Guid goalId, CancellationToken cancellationToken);
 }
 
@@ -18,11 +19,11 @@ public interface IGoalQueryRepository
     Task<GoalResponse?> GetResponseAsync(Guid goalId, CancellationToken cancellationToken);
 }
 
-public sealed class GoalQueryService(IGoalQueryRepository goalRepo) : IGoalQueryService
+public sealed class GoalQueryService(IGoalQueryRepository goalRepo, ICurrentUser currentUser) : IGoalQueryService
 {
-    public async Task<Result<List<GoalResponse>>> ListAsync(Guid householdId, CancellationToken cancellationToken)
+    public async Task<Result<List<GoalResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var goals = await goalRepo.ListAsync(householdId, cancellationToken);
+        var goals = await goalRepo.ListAsync(currentUser.HouseholdId.Value, cancellationToken);
         return Result<List<GoalResponse>>.Success(goals, ResultTypeEnum.Success, goals.Count);
     }
 
