@@ -49,4 +49,9 @@ export interface AddChildForm {
   dateOfBirth: string;
 }
 
+export interface SaveChildForm {
+  child: AddChildForm;
+  avatarFile: File | null;
+}
+
 export type HouseholdRole = 'caregiver' | 'viewer';

@@ -10,10 +10,11 @@ import {
   useInviteHouseholdCarerMutation,
   useRemoveHouseholdCarerMutation,
   useRemoveHouseholdChildMutation,
+  useUploadHouseholdChildAvatarMutation,
   useUpdateHouseholdChildMutation,
   useUpdateHouseholdMutation
 } from '../queries/household.queries';
-import type { AddChildForm, ChildModel, HouseholdModel, InviteCarerForm as InviteCarerFormModel } from '../types/household.types';
+import type { ChildModel, HouseholdModel, InviteCarerForm as InviteCarerFormModel, SaveChildForm } from '../types/household.types';
 
 const getStatusTone = (status: string): 'success' | 'warning' | 'neutral' => {
   const normalizedStatus = status.toLowerCase();
@@ -30,6 +31,7 @@ export const HouseholdsPage = () => {
   const addHouseholdChildMutation = useAddHouseholdChildMutation();
   const updateHouseholdChildMutation = useUpdateHouseholdChildMutation();
   const removeHouseholdChildMutation = useRemoveHouseholdChildMutation();
+  const uploadHouseholdChildAvatarMutation = useUploadHouseholdChildAvatarMutation();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -77,18 +79,31 @@ export const HouseholdsPage = () => {
     setAddChild(true);
   };
 
-  const handleSaveChild = async (form: AddChildForm) => {
+  const getAddedChild = (previousHousehold: HouseholdModel, updatedHousehold: HouseholdModel): ChildModel | null => {
+    const previousChildIds = new Set(previousHousehold.children.map((child) => child.id));
+    return updatedHousehold.children.find((child) => !previousChildIds.has(child.id)) ?? null;
+  };
+
+  const uploadChildAvatar = async (childId: string, avatarFile: File | null) => {
+    if (!household || !avatarFile) return;
+    await uploadHouseholdChildAvatarMutation.mutateAsync({ householdId: household.id, childId, file: avatarFile });
+  };
+
+  const handleSaveChild = async ({ child: form, avatarFile }: SaveChildForm) => {
     if (!household) return;
 
     if (editChild && editingChild) {
       await updateHouseholdChildMutation.mutateAsync({ householdId: household.id, childId: editingChild.id, form });
+      await uploadChildAvatar(editingChild.id, avatarFile);
       setEditChild(false);
       setEditingChild(null);
       return;
     }
 
     if (!addChild) return;
-    await addHouseholdChildMutation.mutateAsync({ householdId: household.id, form });
+    const updatedHousehold = await addHouseholdChildMutation.mutateAsync({ householdId: household.id, form });
+    const addedChild = getAddedChild(household, updatedHousehold);
+    if (addedChild) await uploadChildAvatar(addedChild.id, avatarFile);
     setAddChild(false);
   };
 
@@ -174,7 +189,7 @@ export const HouseholdsPage = () => {
         key={editChild && editingChild ? editingChild.id : addChild ? 'add-child-open' : 'add-child-closed'}
         child={editChild ? editingChild : null}
         household={household}
-        saving={addHouseholdChildMutation.isPending || updateHouseholdChildMutation.isPending}
+        saving={addHouseholdChildMutation.isPending || updateHouseholdChildMutation.isPending || uploadHouseholdChildAvatarMutation.isPending}
         visible={addChild || editChild}
         onHide={handleCloseChildDialog}
         onSave={(form) => {

@@ -1,4 +1,5 @@
 import { apiClient } from '../../../shared/api/apiClient';
+import { fileUploadService } from '../../../shared/services/fileUpload.service';
 import type { AddHouseholdChildRequest, HouseholdResponse, InviteHouseholdCarerRequest, UpdateHouseholdChildRequest, UpdateHouseholdRequest } from '../types/household.api.types';
 
 const HOUSEHOLDS_URL = '/households';
@@ -30,6 +31,10 @@ export const householdService = {
 
   async updateChild(householdId: string, childId: string, request: UpdateHouseholdChildRequest): Promise<HouseholdResponse> {
     return apiClient.put<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children/${childId}`, request);
+  },
+
+  async uploadChildAvatar(householdId: string, childId: string, file: File): Promise<HouseholdResponse> {
+    return fileUploadService.upload<HouseholdResponse>(`${HOUSEHOLDS_URL}/${householdId}/children/${childId}/avatar`, { file });
   },
 
   async removeChild(householdId: string, childId: string): Promise<HouseholdResponse> {

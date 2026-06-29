@@ -2,8 +2,9 @@ import { AppAvatar } from '../../../shared/ui/AppAvatar';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppDialog } from '../../../shared/ui/AppDialog';
 import { AppInputText } from '../../../shared/ui/AppInputText';
+import { useState } from 'react';
 import { useAddChildForm } from '../hooks/useChildForm';
-import type { AddChildForm, ChildModel, HouseholdModel } from '../types/household.types';
+import type { AddChildForm, ChildModel, HouseholdModel, SaveChildForm } from '../types/household.types';
 
 interface ChildFormProps {
   child: ChildModel | null;
@@ -11,7 +12,7 @@ interface ChildFormProps {
   saving: boolean;
   visible: boolean;
   onHide: () => void;
-  onSave: (form: AddChildForm) => void;
+  onSave: (form: SaveChildForm) => void;
 }
 
 const getChildForm = (child: ChildModel): AddChildForm => ({
@@ -22,6 +23,7 @@ const getChildForm = (child: ChildModel): AddChildForm => ({
 
 export const ChildForm = ({ child, household, saving, visible, onHide, onSave }: ChildFormProps) => {
   const form = useAddChildForm(child ? getChildForm(child) : undefined);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const { draft, errors } = form;
   const hasErrors = Object.keys(errors).length > 0;
   const title = child ? 'Edit child' : 'Add child';
@@ -32,18 +34,23 @@ export const ChildForm = ({ child, household, saving, visible, onHide, onSave }:
   const handleSave = () => {
     const validForm = form.getValidForm();
     if (!validForm) return;
-    onSave(validForm);
+    onSave({ child: validForm, avatarFile });
   };
 
   const handleCancel = () => {
     form.reset();
+    setAvatarFile(null);
     onHide();
+  };
+
+  const handleFileChanged = (file: File | null) => {
+    setAvatarFile(file);
   };
 
   return (
     <AppDialog header={household ? `${title} in ${household.name}` : title} visible={visible} onHide={onHide}>
       <div className="space-y-4 pt-4">
-        <AppAvatar key={`${child?.id ?? 'new'}-${visible ? 'visible' : 'hidden'}`} alt="Child avatar preview" initials={childInitials} size="lg" />
+        <AppAvatar key={`${child?.id ?? 'new'}-${visible ? 'visible' : 'hidden'}`} alt="Child avatar preview" disabled={saving} initials={childInitials} size="lg" onFileChange={handleFileChanged} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <AppInputText

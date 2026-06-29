@@ -105,6 +105,21 @@ export const useRemoveHouseholdChildMutation = () => {
   });
 };
 
+export const useUploadHouseholdChildAvatarMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ householdId, childId, file }: { householdId: string; childId: string; file: File }) => {
+      const household = await householdService.uploadChildAvatar(householdId, childId, file);
+      return mapHouseholdResponseToModel(household);
+    },
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      queryClient.setQueryData(householdKeys.detail(household.id), household);
+    }
+  });
+};
+
 export const useUpdateHouseholdChildMutation = () => {
   const queryClient = useQueryClient();
 
