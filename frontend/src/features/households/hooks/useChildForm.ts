@@ -8,7 +8,8 @@ const addChildSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth is required.')
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth is required.'),
+  avatarStoredFileId: z.string().nullable()
 });
 
 type AddChildFormErrors = Partial<Record<keyof AddChildForm, string>>;
@@ -17,7 +18,8 @@ type AddChildTouchedFields = Partial<Record<keyof AddChildForm, boolean>>;
 const createEmptyAddChildForm = (): AddChildForm => ({
   firstName: '',
   lastName: '',
-  dateOfBirth: ''
+  dateOfBirth: '',
+  avatarStoredFileId: null
 });
 
 const getAddChildFormErrors = (draft: AddChildForm): AddChildFormErrors => {

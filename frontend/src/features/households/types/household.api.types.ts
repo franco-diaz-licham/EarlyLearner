@@ -21,12 +21,14 @@ export interface AddHouseholdChildRequest {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface UpdateHouseholdChildRequest {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface CarerResponse {
@@ -44,6 +46,7 @@ export interface ChildResponse {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface HouseholdInvitationResponse {

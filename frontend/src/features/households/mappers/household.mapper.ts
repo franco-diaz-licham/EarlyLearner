@@ -23,11 +23,13 @@ export const mapInviteCarerFormToRequest = (form: InviteCarerForm): InviteHouseh
 export const mapAddChildFormToRequest = (form: AddChildForm): AddHouseholdChildRequest => ({
   firstName: form.firstName.trim(),
   lastName: form.lastName.trim(),
-  dateOfBirth: form.dateOfBirth
+  dateOfBirth: form.dateOfBirth,
+  avatarStoredFileId: form.avatarStoredFileId
 });
 
 export const mapUpdateChildFormToRequest = (form: AddChildForm): UpdateHouseholdChildRequest => ({
   firstName: form.firstName.trim(),
   lastName: form.lastName.trim(),
-  dateOfBirth: form.dateOfBirth
+  dateOfBirth: form.dateOfBirth,
+  avatarStoredFileId: form.avatarStoredFileId
 });

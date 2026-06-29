@@ -18,7 +18,8 @@ interface ChildFormProps {
 const getChildForm = (child: ChildModel): AddChildForm => ({
   firstName: child.firstName,
   lastName: child.lastName,
-  dateOfBirth: child.dateOfBirth
+  dateOfBirth: child.dateOfBirth,
+  avatarStoredFileId: child.avatarStoredFileId
 });
 
 export const ChildForm = ({ child, household, saving, visible, onHide, onSave }: ChildFormProps) => {

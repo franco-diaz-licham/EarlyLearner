@@ -21,6 +21,7 @@ export interface ChildModel {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface HouseholdInvitationModel {
@@ -47,6 +48,7 @@ export interface AddChildForm {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface SaveChildForm {

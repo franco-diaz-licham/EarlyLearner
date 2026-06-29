@@ -1,16 +1,17 @@
 import { useState } from 'react';
+import { useCreateStoredFileUploadMutation, useDeleteStoredFileUploadMutation } from '../../../shared/queries/fileUpload.queries';
 import { ChildForm } from '../components/ChildForm';
 import { HouseholdHeader } from '../components/HouseholdHeader';
 import { HouseholdMembers } from '../components/HouseholdMembers';
 import { HouseholdSummaryCard } from '../components/HouseholdSummaryCard';
 import { InviteCarerForm } from '../components/InviteCarerForm';
+import { StoredFileMediaType } from '../../stored-files/types/storedFile.types';
 import {
   useAddHouseholdChildMutation,
   useHouseholdsQuery,
   useInviteHouseholdCarerMutation,
   useRemoveHouseholdCarerMutation,
   useRemoveHouseholdChildMutation,
-  useUploadHouseholdChildAvatarMutation,
   useUpdateHouseholdChildMutation,
   useUpdateHouseholdMutation
 } from '../queries/household.queries';
@@ -31,7 +32,8 @@ export const HouseholdsPage = () => {
   const addHouseholdChildMutation = useAddHouseholdChildMutation();
   const updateHouseholdChildMutation = useUpdateHouseholdChildMutation();
   const removeHouseholdChildMutation = useRemoveHouseholdChildMutation();
-  const uploadHouseholdChildAvatarMutation = useUploadHouseholdChildAvatarMutation();
+  const createStoredFileUploadMutation = useCreateStoredFileUploadMutation();
+  const deleteStoredFileUploadMutation = useDeleteStoredFileUploadMutation();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -79,31 +81,32 @@ export const HouseholdsPage = () => {
     setAddChild(true);
   };
 
-  const getAddedChild = (previousHousehold: HouseholdModel, updatedHousehold: HouseholdModel): ChildModel | null => {
-    const previousChildIds = new Set(previousHousehold.children.map((child) => child.id));
-    return updatedHousehold.children.find((child) => !previousChildIds.has(child.id)) ?? null;
+  const getAvatarStoredFileId = async (avatarFile: File | null) => {
+    if (!avatarFile) return null;
+    const storedFile = await createStoredFileUploadMutation.mutateAsync({ file: avatarFile, mediaType: StoredFileMediaType.Photo });
+    return storedFile.storedFileId;
   };
 
-  const uploadChildAvatar = async (childId: string, avatarFile: File | null) => {
-    if (!avatarFile) return;
-    await uploadHouseholdChildAvatarMutation.mutateAsync({ childId, file: avatarFile });
+  const deleteReplacedAvatar = async (previousAvatarStoredFileId: string | null, nextAvatarStoredFileId: string | null) => {
+    if (!previousAvatarStoredFileId || previousAvatarStoredFileId === nextAvatarStoredFileId) return;
+    await deleteStoredFileUploadMutation.mutateAsync(previousAvatarStoredFileId);
   };
 
   const handleSaveChild = async ({ child: form, avatarFile }: SaveChildForm) => {
     if (!household) return;
+    const avatarStoredFileId = (await getAvatarStoredFileId(avatarFile)) ?? form.avatarStoredFileId;
+    const childForm = { ...form, avatarStoredFileId };
 
     if (editChild && editingChild) {
-      await updateHouseholdChildMutation.mutateAsync({ childId: editingChild.id, form });
-      await uploadChildAvatar(editingChild.id, avatarFile);
+      await updateHouseholdChildMutation.mutateAsync({ childId: editingChild.id, form: childForm });
+      await deleteReplacedAvatar(editingChild.avatarStoredFileId, avatarStoredFileId);
       setEditChild(false);
       setEditingChild(null);
       return;
     }
 
     if (!addChild) return;
-    const updatedHousehold = await addHouseholdChildMutation.mutateAsync(form);
-    const addedChild = getAddedChild(household, updatedHousehold);
-    if (addedChild) await uploadChildAvatar(addedChild.id, avatarFile);
+    await addHouseholdChildMutation.mutateAsync(childForm);
     setAddChild(false);
   };
 
@@ -189,7 +192,7 @@ export const HouseholdsPage = () => {
         key={editChild && editingChild ? editingChild.id : addChild ? 'add-child-open' : 'add-child-closed'}
         child={editChild ? editingChild : null}
         household={household}
-        saving={addHouseholdChildMutation.isPending || updateHouseholdChildMutation.isPending || uploadHouseholdChildAvatarMutation.isPending}
+        saving={addHouseholdChildMutation.isPending || updateHouseholdChildMutation.isPending || createStoredFileUploadMutation.isPending || deleteStoredFileUploadMutation.isPending}
         visible={addChild || editChild}
         onHide={handleCloseChildDialog}
         onSave={(form) => {
