@@ -5,16 +5,18 @@ using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
+using System.Net.Mime;
 
 namespace EarlyLearner.Application.Features.CoreContext;
 
 public sealed record CreateStoredFileCommand(
-    string StorageKey,
+    Stream Content,
     string FileName,
     string ContentType,
     long SizeInBytes,
     StoredFileMediaTypeEnum MediaType,
-    DateTimeOffset UploadedAt);
+    DateTimeOffset UploadedAt,
+    string? StorageKey = null);
 
 public sealed record UpdateStoredFileStatusCommand(StoredFileId StoredFileId, StoredFileStatusEnum Status);
 
@@ -32,13 +34,16 @@ public interface IStoredFileCommandRepository
     void Add(StoredFile storedFile);
 }
 
-public sealed class StoredFileCommandService(IStoredFileCommandRepository storedFileRepo, IUnitOfWork uow, ICurrentUser currentUser) : IStoredFileCommandService
+public sealed class StoredFileCommandService(IStoredFileCommandRepository storedFileRepo, IUnitOfWork uow, ICurrentUser currentUser, IFileStorageService fileStorageService) : IStoredFileCommandService
 {
     public async Task<Result<StoredFileResponse>> CreateAsync(CreateStoredFileCommand command, CancellationToken cancellationToken)
     {
+        var storageKey = string.IsNullOrWhiteSpace(command.StorageKey) ? CreateStorageKey(command.FileName) : command.StorageKey;
+        await fileStorageService.UploadAsync(storageKey, new ContentType(command.ContentType), command.Content, cancellationToken);
+
         var file = StoredFile.Create(
             currentUser.HouseholdId,
-            command.StorageKey,
+            storageKey,
             command.FileName,
             command.ContentType,
             command.SizeInBytes,
@@ -52,6 +57,12 @@ public sealed class StoredFileCommandService(IStoredFileCommandRepository stored
         var result = await storedFileRepo.GetResponseAsync(file.Id, cancellationToken);
         if (result is null) return Result<StoredFileResponse>.Fail("Stored file could not be retrieved after creation.", ResultTypeEnum.Invalid);
         return Result<StoredFileResponse>.Success(result, ResultTypeEnum.Created);
+    }
+
+    private static string CreateStorageKey(string fileName)
+    {
+        var extension = Path.GetExtension(fileName);
+        return $"uploads/{Guid.NewGuid():N}{extension}";
     }
 
     public async Task<Result<StoredFileResponse>> UpdateStatusAsync(UpdateStoredFileStatusCommand command, CancellationToken cancellationToken)
@@ -88,8 +99,6 @@ public sealed class StoredFileCommandService(IStoredFileCommandRepository stored
 
         file.Delete();
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
-        return saved
-            ? Result.Success(ResultTypeEnum.Success)
-            : Result.Fail("Stored file could not be deleted.", ResultTypeEnum.Invalid);
+        return saved ? Result.Success(ResultTypeEnum.Success) : Result.Fail("Stored file could not be deleted.", ResultTypeEnum.Invalid);
     }
 }

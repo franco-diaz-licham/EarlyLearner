@@ -40,6 +40,13 @@ export interface StoredFileModel {
   uploadedAt: string;
 }
 
+export interface StoredFileUploadRequest {
+  file: File;
+  mediaType: StoredFileMediaType;
+  storageKey?: string;
+  uploadedAt?: string;
+}
+
 export interface CreateStoredFileRequest {
   storageKey: string;
   fileName: string;

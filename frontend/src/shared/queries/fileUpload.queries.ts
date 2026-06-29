@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { StoredFileMediaType, StoredFileStatus } from '../../features/stored-files/types/storedFile.types';
+import type { StoredFileResponse, StoredFileUploadRequest } from '../../features/stored-files/types/storedFile.types';
 import { apiClient } from '../api/apiClient';
+import { fileUploadService } from '../services/fileUpload.service';
 
 const STORED_FILES_URL = '/stored-files';
 const storedFileKeys = {
@@ -8,43 +9,18 @@ const storedFileKeys = {
   detail: (storedFileId: string) => ['storedFiles', 'detail', storedFileId] as const
 };
 
-export interface StoredFileUploadRequest {
-  file: File;
-  mediaType: StoredFileMediaType;
-  storageKey?: string;
-  uploadedAt?: string;
-}
-
-export interface StoredFileUploadResponse {
-  storedFileId: string;
-  householdId: string;
-  storageKey: string;
-  fileName: string;
-  contentType: string;
-  sizeInBytes: number;
-  mediaType: StoredFileMediaType;
-  status: StoredFileStatus;
-  uploadedAt: string;
-}
-
-const createStorageKey = (file: File) => {
-  const extension = file.name.includes('.') ? file.name.split('.').pop() : undefined;
-  const suffix = extension ? `.${extension}` : '';
-  return `uploads/${crypto.randomUUID()}${suffix}`;
-};
-
 export const useCreateStoredFileUploadMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ file, mediaType, storageKey, uploadedAt }: StoredFileUploadRequest) =>
-      apiClient.post<StoredFileUploadResponse>(STORED_FILES_URL, {
-        storageKey: storageKey ?? createStorageKey(file),
-        fileName: file.name,
-        contentType: file.type || 'application/octet-stream',
-        sizeInBytes: file.size,
-        mediaType,
-        uploadedAt: uploadedAt ?? new Date().toISOString()
+      fileUploadService.upload<StoredFileResponse>(STORED_FILES_URL, {
+        file,
+        fields: {
+          mediaType,
+          storageKey,
+          uploadedAt: uploadedAt ?? new Date().toISOString()
+        }
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: storedFileKeys.lists() });

@@ -1,10 +1,7 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.CoreContext;
-using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
-using EarlyLearner.Shared.Utilities;
 using FluentValidation;
 
 namespace EarlyLearner.Api.Endpoints;
@@ -30,31 +27,33 @@ public static class StoredFileEndpoints
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> GetStoredFile(Guid storedFileId, IValidator<StoredFileRequest> validator, IStoredFileQueryService queryService, IFileStorageService fileStorageService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> GetStoredFile(Guid storedFileId, IValidator<StoredFileRequest> validator, IStoredFileQueryService queryService, CancellationToken cancellationToken = default)
     {
         var validation = validator.Validate(new StoredFileRequest(storedFileId)).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var result = await queryService.GetAsync(new StoredFileId(storedFileId), cancellationToken);
+        var result = await queryService.DownloadAsync(new StoredFileId(storedFileId), cancellationToken);
         if (!result.IsSuccess || result.Value is null) return result.ToApiResult();
 
         var storedFile = result.Value;
-        var stream = await fileStorageService.DownloadAsync(storedFile.StorageKey, cancellationToken);
-        return Results.File(stream, storedFile.ContentType, storedFile.FileName);
+        return Results.File(storedFile.Content, storedFile.ContentType, storedFile.FileName);
     }
 
-    public static async Task<IResult> CreateStoredFile(CreateStoredFileRequest request, IValidator<CreateStoredFileRequest> validator, IStoredFileCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> CreateStoredFile([AsParameters] CreateStoredFileRequest request, IValidator<CreateStoredFileRequest> validator, IStoredFileCommandService commandService, CancellationToken cancellationToken = default)
     {
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
+        var file = request.File!;
+        await using var stream = file.OpenReadStream();
         var command = new CreateStoredFileCommand(
-            StorageKey: request.StorageKey,
-            FileName: request.FileName,
-            ContentType: request.ContentType,
-            SizeInBytes: request.SizeInBytes,
+            Content: stream,
+            FileName: file.FileName,
+            ContentType: string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+            SizeInBytes: file.Length,
             MediaType: request.MediaType,
-            UploadedAt: request.UploadedAt);
+            UploadedAt: request.UploadedAt ?? DateTimeOffset.UtcNow,
+            StorageKey: request.StorageKey);
 
         var result = await commandService.CreateAsync(command, cancellationToken);
         var locationUrl = result.IsSuccess ? $"/stored-files/{result.Value.StoredFileId}" : null;
@@ -95,23 +94,19 @@ public sealed class StoredFileRequestValidator : AbstractValidator<StoredFileReq
 }
 
 public sealed record CreateStoredFileRequest(
-    string StorageKey,
-    string FileName,
-    string ContentType,
-    long SizeInBytes,
+    IFormFile File,
     StoredFileMediaTypeEnum MediaType,
-    DateTimeOffset UploadedAt);
+    DateTimeOffset? UploadedAt,
+    string? StorageKey = null);
 
 public sealed class CreateStoredFileRequestValidator : AbstractValidator<CreateStoredFileRequest>
 {
     public CreateStoredFileRequestValidator()
     {
-        RuleFor(request => request.StorageKey).NotEmpty();
-        RuleFor(request => request.FileName).NotEmpty();
-        RuleFor(request => request.ContentType).NotEmpty();
-        RuleFor(request => request.SizeInBytes).GreaterThan(0);
+        RuleFor(request => request.File).NotNull().WithMessage("File is required.");
+        RuleFor(request => request.File!.FileName).NotEmpty().When(request => request.File is not null);
+        RuleFor(request => request.File!.Length).GreaterThan(0).When(request => request.File is not null);
         RuleFor(request => request.MediaType).IsInEnum();
-        RuleFor(request => request.UploadedAt).NotEqual(default(DateTimeOffset));
     }
 }
 

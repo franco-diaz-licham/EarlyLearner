@@ -23,7 +23,7 @@ public sealed class AzureFileStorageService(BlobContainerClient containerClient)
         // Compute SHA256 hash while streaming upload to avoid buffering large files in memory.
         using var sha256 = SHA256.Create();
         using var hashingStream = new CryptoStream(stream, sha256, CryptoStreamMode.Read, leaveOpen: true);
-        var headers = new BlobHttpHeaders { ContentType = contentType.Name };
+        var headers = new BlobHttpHeaders { ContentType = contentType.MediaType };
         var uploadOptions = new BlobUploadOptions { HttpHeaders = headers };
 
         // Upload will read the hashingStream to completion and compute hash.
