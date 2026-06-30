@@ -3,6 +3,7 @@ using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -14,7 +15,7 @@ public static class StoredFileEndpoints
 
         files.MapGet("/", ListStoredFiles).WithName(nameof(ListStoredFiles));
         files.MapGet("/{storedFileId:guid}", GetStoredFile).WithName(nameof(GetStoredFile));
-        files.MapPost("/", CreateStoredFile).WithName(nameof(CreateStoredFile));
+        files.MapPost("/", CreateStoredFile).WithName(nameof(CreateStoredFile)).DisableAntiforgery();
         files.MapPut("/{storedFileId:guid}/status", UpdateStoredFileStatus).WithName(nameof(UpdateStoredFileStatus));
         files.MapDelete("/{storedFileId:guid}", DeleteStoredFile).WithName(nameof(DeleteStoredFile));
 
@@ -46,12 +47,14 @@ public static class StoredFileEndpoints
 
         var file = request.File!;
         await using var stream = file.OpenReadStream();
+        Enum.TryParse<StoredFileMediaTypeEnum>(request.MediaType, ignoreCase: true, out var mediaType);
+
         var command = new CreateStoredFileCommand(
             Content: stream,
             FileName: file.FileName,
             ContentType: string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
             SizeInBytes: file.Length,
-            MediaType: request.MediaType,
+            MediaType: mediaType,
             UploadedAt: request.UploadedAt ?? DateTimeOffset.UtcNow,
             StorageKey: request.StorageKey);
 
@@ -94,10 +97,10 @@ public sealed class StoredFileRequestValidator : AbstractValidator<StoredFileReq
 }
 
 public sealed record CreateStoredFileRequest(
-    IFormFile File,
-    StoredFileMediaTypeEnum MediaType,
-    DateTimeOffset? UploadedAt,
-    string? StorageKey = null);
+    [FromForm] IFormFile File,
+    [FromForm] string MediaType,
+    [FromForm] DateTimeOffset? UploadedAt,
+    [FromForm] string? StorageKey = null);
 
 public sealed class CreateStoredFileRequestValidator : AbstractValidator<CreateStoredFileRequest>
 {
@@ -106,7 +109,10 @@ public sealed class CreateStoredFileRequestValidator : AbstractValidator<CreateS
         RuleFor(request => request.File).NotNull().WithMessage("File is required.");
         RuleFor(request => request.File!.FileName).NotEmpty().When(request => request.File is not null);
         RuleFor(request => request.File!.Length).GreaterThan(0).When(request => request.File is not null);
-        RuleFor(request => request.MediaType).IsInEnum();
+        RuleFor(request => request.MediaType)
+            .NotEmpty()
+            .Must(value => Enum.TryParse<StoredFileMediaTypeEnum>(value, ignoreCase: true, out _))
+            .WithMessage("Media type must be one of: photo, video, document, artwork.");
     }
 }
 
