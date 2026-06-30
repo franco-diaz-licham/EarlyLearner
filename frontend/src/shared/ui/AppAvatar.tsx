@@ -1,7 +1,7 @@
 import { UilEditAlt, UilTrashAlt, UilUsersAlt } from '@iconscout/react-unicons';
 import { Button } from 'primereact/button';
 import type { ChangeEvent } from 'react';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import { useStoredFileContentQuery } from '../queries/fileUpload.queries';
 import { mergeClassNames } from './mergeClassNames';
 
