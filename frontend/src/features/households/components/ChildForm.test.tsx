@@ -1,7 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
+import { createTestQueryClient } from '../../../testUtils/testQueryClientHelpers';
 import type { ChildModel, HouseholdModel, SaveChildForm } from '../types/household.types';
 import { ChildForm } from './ChildForm';
 
@@ -20,15 +21,6 @@ const child: ChildModel = {
   dateOfBirth: '2021-04-15',
   avatarStoredFileId: null
 };
-
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false
-      }
-    }
-  });
 
 const renderWithProviders = (children: ReactNode) => {
   const queryClient = createTestQueryClient();
