@@ -16,8 +16,3 @@ public sealed record ReadinessStatusChanged(
     ReadinessOutcomeId ReadinessOutcomeId,
     ReadinessStatusEnum Status,
     DateTimeOffset OccurredAt) : IDomainEvent;
-
-public sealed record PortfolioItemAdded(
-    PortfolioItemId PortfolioItemId,
-    ChildId ChildId,
-    DateTimeOffset OccurredAt) : IDomainEvent;

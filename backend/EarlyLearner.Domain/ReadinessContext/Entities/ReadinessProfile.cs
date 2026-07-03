@@ -13,7 +13,6 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 public sealed class ReadinessProfile : Entity<ReadinessProfileId>
 {
     private readonly List<ReadinessOutcomeProgress> _outcomeProgress = [];
-    private readonly List<SuggestedNextStep> _suggestedNextSteps = [];
 
     private ReadinessProfile() { }
 
@@ -47,11 +46,6 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     /// </summary>
     public IReadOnlyCollection<ReadinessOutcomeProgress> OutcomeProgress => _outcomeProgress.AsReadOnly();
 
-    /// <summary>
-    /// Practical parent-facing recommendations derived from readiness evidence and gaps.
-    /// </summary>
-    public IReadOnlyCollection<SuggestedNextStep> SuggestedNextSteps => _suggestedNextSteps.AsReadOnly();
-
     #endregion
 
     public static ReadinessProfile Create(
@@ -82,14 +76,5 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
         RaiseDomainEvent(new ReadinessEvidenceAdded(Id, ChildId, evidenceReference.ReadinessOutcome.Id, DateTimeOffset.UtcNow));
         if (previousStatus != progress.Status) RaiseDomainEvent(new ReadinessStatusChanged(Id, ChildId, evidenceReference.ReadinessOutcome.Id, progress.Status, DateTimeOffset.UtcNow));
         SetUpdatedOn();
-    }
-
-    public SuggestedNextStep AddSuggestedNextStep(ReadinessOutcome readinessOutcome, string text)
-    {
-        if (_outcomeProgress.All(item => item.ReadinessOutcome.Id != readinessOutcome.Id)) throw new DomainException("Suggested next step must target a tracked readiness outcome.");
-        var nextStep = SuggestedNextStep.Create(Id, readinessOutcome, text);
-        _suggestedNextSteps.Add(nextStep);
-        SetUpdatedOn();
-        return nextStep;
     }
 }

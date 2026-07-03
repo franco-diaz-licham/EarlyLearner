@@ -20,8 +20,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<ReadinessProfile> ReadinessProfiles => Set<ReadinessProfile>();
     public DbSet<ReadinessOutcomeProgress> ReadinessOutcomeProgress => Set<ReadinessOutcomeProgress>();
     public DbSet<EvidenceReference> EvidenceReferences => Set<EvidenceReference>();
-    public DbSet<SuggestedNextStep> SuggestedNextSteps => Set<SuggestedNextStep>();
-    public DbSet<PortfolioItem> PortfolioItems => Set<PortfolioItem>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
     public DbSet<LearningMoment> LearningMoments => Set<LearningMoment>();
     public DbSet<AuditTrailReadModel> AuditTrailEntries => Set<AuditTrailReadModel>();

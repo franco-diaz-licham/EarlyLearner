@@ -43,13 +43,7 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
             .HasForeignKey(progress => progress.ReadinessProfileId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(profile => profile.SuggestedNextSteps)
-            .WithOne(step => step.ReadinessProfile)
-            .HasForeignKey(step => step.ReadinessProfileId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.Navigation(profile => profile.OutcomeProgress).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Navigation(profile => profile.SuggestedNextSteps).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(profile => new { profile.HouseholdId, profile.ChildId }).IsUnique();
         builder.Property(profile => profile.CreatedOn).IsRequired();
         builder.Property(profile => profile.UpdatedOn).IsRequired(false);
