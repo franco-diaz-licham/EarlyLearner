@@ -36,64 +36,47 @@ values
     ('55555555-5555-5555-5555-555555555553', 'motor-pencil-grip', 'Uses early mark making', 'Uses crayons, pencils, or brushes to make controlled marks.', 'Motor', 30, 'Active', now())
 on conflict (id) do nothing;
 
-insert into goals (id, household_id, child_id, title, type, status, timeframe_start_date, timeframe_end_date, created_on)
+insert into readiness_profiles (id, household_id, child_id, created_on)
 values
-    ('66666666-6666-6666-6666-666666666661', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444441', 'Practise turn taking during games', 'ShortTerm', 'Active', '2026-06-15', '2026-06-21', now()),
-    ('66666666-6666-6666-6666-666666666662', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444441', 'Build confidence with mark making', 'ShortTerm', 'Active', '2026-06-15', '2026-06-21', now())
+    ('66666666-6666-6666-6666-666666666661', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444441', now()),
+    ('66666666-6666-6666-6666-666666666662', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444442', now())
 on conflict (id) do nothing;
 
-insert into goal_readiness_outcomes (goal_id, readiness_outcome_id)
+insert into tracked_readiness_outcomes (readiness_profile_id, readiness_outcome_id, status)
 values
-    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555552'),
-    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555553')
-on conflict (goal_id, readiness_outcome_id) do nothing;
-
-insert into learning_plans (id, household_id, child_id, period_start_date, period_end_date, focus, created_on)
-values
-    ('77777777-7777-7777-7777-777777777771', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444441', '2026-06-15', '2026-06-21', 'Simple play-based readiness practice', now())
-on conflict (id) do nothing;
-
-insert into planned_learning_sessions (id, learning_plan_id, planned_date, title, status, created_on)
-values
-    ('88888888-8888-8888-8888-888888888881', '77777777-7777-7777-7777-777777777771', '2026-06-18', 'Board game turn taking', 'Planned', now()),
-    ('88888888-8888-8888-8888-888888888882', '77777777-7777-7777-7777-777777777771', '2026-06-20', 'Draw a picture about our walk', 'Planned', now())
-on conflict (id) do nothing;
-
-insert into planned_learning_session_goals (planned_learning_session_id, goal_id)
-values
-    ('88888888-8888-8888-8888-888888888881', '66666666-6666-6666-6666-666666666661'),
-    ('88888888-8888-8888-8888-888888888882', '66666666-6666-6666-6666-666666666662')
-on conflict (planned_learning_session_id, goal_id) do nothing;
-
-insert into planned_learning_session_readiness_outcomes (planned_learning_session_id, readiness_outcome_id)
-values
-    ('88888888-8888-8888-8888-888888888881', '55555555-5555-5555-5555-555555555552'),
-    ('88888888-8888-8888-8888-888888888882', '55555555-5555-5555-5555-555555555553')
-on conflict (planned_learning_session_id, readiness_outcome_id) do nothing;
+    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555551', 'Emerging'),
+    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555552', 'Growing'),
+    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555553', 'Emerging'),
+    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555551', 'NotYetObserved'),
+    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555552', 'NotYetObserved'),
+    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555553', 'NotYetObserved')
+on conflict (readiness_profile_id, readiness_outcome_id) do update set
+    status = excluded.status;
 
 insert into daily_logs (id, household_id, child_id, log_date, created_on)
 values
     ('99999999-9999-9999-9999-999999999991', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444441', '2026-06-17', now())
 on conflict (id) do nothing;
 
-insert into completed_activities (id, daily_log_id, title, created_on)
+insert into learning_moments (id, daily_log_id, kind, title, notes, created_on)
 values
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '99999999-9999-9999-9999-999999999991', 'Played a matching game and waited for turns', now())
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '99999999-9999-9999-9999-999999999991', 'Activity', 'Played a matching game and waited for turns', 'Mia waited for her turn twice and celebrated when Jordan had a turn.', now()),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '99999999-9999-9999-9999-999999999991', 'Reading', 'Read Brown Bear, Brown Bear, What Do You See?', 'Named animals and repeated some colour words.', now()),
+    ('cccccccc-cccc-cccc-cccc-ccccccccccc1', '99999999-9999-9999-9999-999999999991', 'Routine', 'Practised the morning routine', 'Put shoes near the door and followed two simple steps with one reminder.', now())
 on conflict (id) do nothing;
 
-insert into completed_activity_readiness_outcomes (completed_activity_id, readiness_outcome_id)
+insert into learning_moment_readiness_outcomes (learning_moment_id, readiness_outcome_id)
 values
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '55555555-5555-5555-5555-555555555552')
-on conflict (completed_activity_id, readiness_outcome_id) do nothing;
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '55555555-5555-5555-5555-555555555552'),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '55555555-5555-5555-5555-555555555551'),
+    ('cccccccc-cccc-cccc-cccc-ccccccccccc1', '55555555-5555-5555-5555-555555555553')
+on conflict (learning_moment_id, readiness_outcome_id) do nothing;
 
-insert into reading_entries (id, daily_log_id, title, author, child_response, created_on)
+insert into readiness_evidences (id, readiness_profile_id, readiness_outcome_id, source_type, evidence_record_id, observed_on, summary, created_on)
 values
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '99999999-9999-9999-9999-999999999991', 'Brown Bear, Brown Bear, What Do You See?', 'Bill Martin Jr.', 'Named animals and repeated some colour words.', now())
-on conflict (id) do nothing;
-
-insert into routine_entries (id, daily_log_id, routine_name, notes, created_on)
-values
-    ('cccccccc-cccc-cccc-cccc-ccccccccccc1', '99999999-9999-9999-9999-999999999991', 'Morning routine', 'Put shoes near the door and followed two simple steps with one reminder.', now())
+    ('dddddddd-dddd-dddd-dddd-ddddddddddd1', '66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555552', 'LearningMoment', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '2026-06-17', 'Waited for turns during a matching game.', now()),
+    ('dddddddd-dddd-dddd-dddd-ddddddddddd2', '66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555551', 'LearningMoment', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '2026-06-17', 'Named animals and repeated colour words during shared reading.', now()),
+    ('dddddddd-dddd-dddd-dddd-ddddddddddd3', '66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555553', 'LearningMoment', 'cccccccc-cccc-cccc-cccc-ccccccccccc1', '2026-06-17', 'Followed routine steps and managed shoes independently.', now())
 on conflict (id) do nothing;
 
 commit;
