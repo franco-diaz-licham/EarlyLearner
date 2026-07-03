@@ -4,8 +4,6 @@ import type {
   HomeMetricModel,
   HomeMetricResponse,
   HomeModel,
-  HomePlannedSessionModel,
-  HomePlannedSessionResponse,
   HomeRecentActivityModel,
   HomeRecentActivityResponse,
   HomeResponse
@@ -23,14 +21,6 @@ export const mapHomeMetricResponseToModel = (response: HomeMetricResponse): Home
   detail: response.detail
 });
 
-export const mapHomePlannedSessionResponseToModel = (response: HomePlannedSessionResponse): HomePlannedSessionModel => ({
-  sessionId: response.sessionId,
-  learningPlanId: response.learningPlanId,
-  plannedDate: response.plannedDate,
-  title: response.title,
-  status: response.status
-});
-
 export const mapHomeRecentActivityResponseToModel = (response: HomeRecentActivityResponse): HomeRecentActivityModel => ({
   dailyLogId: response.dailyLogId,
   childId: response.childId,
@@ -43,6 +33,5 @@ export const mapHomeRecentActivityResponseToModel = (response: HomeRecentActivit
 export const mapHomeResponseToModel = (response: HomeResponse): HomeModel => ({
   children: response.children.map(mapHomeChildResponseToModel),
   metrics: response.metrics.map(mapHomeMetricResponseToModel),
-  upcomingSessions: response.upcomingSessions.map(mapHomePlannedSessionResponseToModel),
   recentActivities: response.recentActivities.map(mapHomeRecentActivityResponseToModel)
 });

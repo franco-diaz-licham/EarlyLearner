@@ -20,8 +20,6 @@ public static class ApiEndpointMappings
         api.MapDashboardEndpoints();
         api.MapHouseholdEndpoints();
         api.MapDailyLogEndpoints();
-        api.MapGoalEndpoints();
-        api.MapLearningPlanEndpoints();
         api.MapReadinessOutcomeEndpoints();
         api.MapReadinessProfileEndpoints();
 

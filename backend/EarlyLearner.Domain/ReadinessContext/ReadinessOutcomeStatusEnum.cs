@@ -1,7 +1,7 @@
 namespace EarlyLearner.Domain.ReadinessContext;
 
 /// <summary>
-/// Describes whether a readiness outcome is available for new planning and evidence tagging.
+/// Describes whether a readiness outcome is available for new evidence tagging.
 /// </summary>
 public enum ReadinessOutcomeStatusEnum
 {

@@ -7,7 +7,6 @@ public sealed record GetHomeDashboardQuery(DateOnly Today);
 public sealed record GetHomeDashboardResponse(
     IReadOnlyList<HomeDashboardChildResponse> Children,
     IReadOnlyList<HomeDashboardMetricResponse> Metrics,
-    IReadOnlyList<HomeDashboardPlannedSessionResponse> UpcomingSessions,
     IReadOnlyList<HomeDashboardRecentActivityResponse> RecentActivities);
 
 public sealed record HomeDashboardChildResponse(
@@ -19,13 +18,6 @@ public sealed record HomeDashboardMetricResponse(
     string Label,
     int Value,
     string Detail);
-
-public sealed record HomeDashboardPlannedSessionResponse(
-    Guid SessionId,
-    Guid LearningPlanId,
-    DateOnly PlannedDate,
-    string Title,
-    string Status);
 
 public sealed record HomeDashboardRecentActivityResponse(
     Guid DailyLogId,

@@ -1,7 +1,6 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.LearningContext.Entities;
-using EarlyLearner.Domain.PlanningContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Infrastructure.Persistence.Entities;
 using MassTransit;
@@ -23,9 +22,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<EvidenceReference> EvidenceReferences => Set<EvidenceReference>();
     public DbSet<SuggestedNextStep> SuggestedNextSteps => Set<SuggestedNextStep>();
     public DbSet<PortfolioItem> PortfolioItems => Set<PortfolioItem>();
-    public DbSet<Goal> Goals => Set<Goal>();
-    public DbSet<LearningPlan> LearningPlans => Set<LearningPlan>();
-    public DbSet<PlannedLearningSession> PlannedLearningSessions => Set<PlannedLearningSession>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
     public DbSet<CompletedActivity> CompletedActivities => Set<CompletedActivity>();
     public DbSet<ReadingEntry> ReadingEntries => Set<ReadingEntry>();

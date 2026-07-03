@@ -30,7 +30,7 @@ public sealed class Child : Entity<ChildId>
     public HouseholdId HouseholdId { get; }
 
     /// <summary>
-    /// Name used by carers when planning and recording this child's learning.
+    /// Name used by carers when recording this child's learning.
     /// </summary>
     public string FirstName { get; private set; } = default!;
 
@@ -40,7 +40,7 @@ public sealed class Child : Entity<ChildId>
     public string LastName { get; private set; } = default!;
 
     /// <summary>
-    /// Birth date used for age-aware planning, readiness interpretation, and future activity suggestions.
+    /// Birth date used for age-aware readiness interpretation and future activity suggestions.
     /// </summary>
     public DateOnly DateOfBirth { get; private set; }
 

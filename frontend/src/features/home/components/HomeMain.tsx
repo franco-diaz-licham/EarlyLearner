@@ -108,7 +108,7 @@ export const HomeMain = () => {
         </div>
         <div>
           <h2 className="font-bold text-brand-heading">Quick Notes</h2>
-          <p className="text-sm text-brand-muted">Jot down a thought, a plan, or something Sophia said or did.</p>
+          <p className="text-sm text-brand-muted">Jot down a thought or something Sophia said or did.</p>
         </div>
       </section>
     </div>

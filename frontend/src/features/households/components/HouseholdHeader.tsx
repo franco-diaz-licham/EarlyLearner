@@ -49,7 +49,7 @@ export const HouseholdHeader = ({ household, isEditingName, isLoading, isError, 
             <UilEstate aria-hidden="true" className="h-6 w-6" />
           </div>
           <h2 className="mt-4 text-lg font-bold text-brand-heading">No household yet</h2>
-          <p className="mt-2 text-sm leading-6 text-brand-muted">Finish signup to create your household and unlock planning and learning records.</p>
+          <p className="mt-2 text-sm leading-6 text-brand-muted">Finish signup to create your household and unlock learning records.</p>
         </div>
       ) : null}
 

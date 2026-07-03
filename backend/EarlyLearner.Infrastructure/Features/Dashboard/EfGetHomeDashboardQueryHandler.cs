@@ -1,6 +1,5 @@
 using EarlyLearner.Application.Features.Dashboard;
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Domain.PlanningContext;
 using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
@@ -24,20 +23,9 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
                 DateOfBirth: child.DateOfBirth))
             .ToListAsync(cancellationToken);
 
-        var activeGoalCount = await db.Goals
+        var readinessProfileCount = await db.ReadinessProfiles
             .AsNoTracking()
-            .CountAsync(
-                goal => goal.HouseholdId == householdId && goal.Status == GoalStatusEnum.Active,
-                cancellationToken);
-
-        var plannedSessionCount = await db.PlannedLearningSessions
-            .AsNoTracking()
-            .CountAsync(
-                session =>
-                    session.LearningPlan.HouseholdId == householdId &&
-                    session.Status == SessionStatusEnum.Planned &&
-                    session.PlannedDate >= query.Today,
-                cancellationToken);
+            .CountAsync(profile => profile.HouseholdId == householdId, cancellationToken);
 
         var weeklyRecordCount = await db.DailyLogs
             .AsNoTracking()
@@ -45,22 +33,13 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
                 log => log.HouseholdId == householdId && log.LogDate >= query.Today.AddDays(-6),
                 cancellationToken);
 
-        var upcomingSessions = await db.PlannedLearningSessions
+        var weeklyCompletedActivityCount = await db.CompletedActivities
             .AsNoTracking()
-            .Where(session =>
-                session.LearningPlan.HouseholdId == householdId &&
-                session.Status == SessionStatusEnum.Planned &&
-                session.PlannedDate >= query.Today)
-            .OrderBy(session => session.PlannedDate)
-            .ThenBy(session => session.Title)
-            .Select(session => new HomeDashboardPlannedSessionResponse(
-                SessionId: session.Id.Value,
-                LearningPlanId: session.LearningPlanId.Value,
-                PlannedDate: session.PlannedDate,
-                Title: session.Title,
-                Status: session.Status.ToString()))
-            .Take(5)
-            .ToListAsync(cancellationToken);
+            .CountAsync(
+                activity =>
+                    activity.DailyLog.HouseholdId == householdId &&
+                    activity.DailyLog.LogDate >= query.Today.AddDays(-6),
+                cancellationToken);
 
         var recentActivities = await db.DailyLogs
             .AsNoTracking()
@@ -78,8 +57,8 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
 
         var metrics = new List<HomeDashboardMetricResponse> {
             new(Label: "Active children", Value: children.Count, Detail: "Children currently visible in this household"),
-            new(Label: "Active goals", Value: activeGoalCount, Detail: "Goals available for planning and evidence"),
-            new(Label: "Upcoming sessions", Value: plannedSessionCount, Detail: "Planned learning sessions from today onward"),
+            new(Label: "Readiness profiles", Value: readinessProfileCount, Detail: "Children with readiness progress tracking"),
+            new(Label: "Activities this week", Value: weeklyCompletedActivityCount, Detail: "Completed learning activities captured in the last seven days"),
             new(Label: "Records this week", Value: weeklyRecordCount, Detail: "Daily logs captured in the last seven days")
         };
 
@@ -87,7 +66,6 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
             new GetHomeDashboardResponse(
                 Children: children,
                 Metrics: metrics,
-                UpcomingSessions: upcomingSessions,
                 RecentActivities: recentActivities),
             ResultTypeEnum.Success);
     }
