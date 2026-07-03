@@ -11,9 +11,7 @@ public static class IdentityEndpoints
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var identity = endpoints.MapGroup("/identity").WithTags("Identity");
-
         identity.MapPost("/session", EnsureSession).WithName(nameof(EnsureSession));
-
         return endpoints;
     }
 

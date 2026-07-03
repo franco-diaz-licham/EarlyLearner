@@ -1,6 +1,7 @@
 import { Dropdown } from 'primereact/dropdown';
 import type { DropdownProps } from 'primereact/dropdown';
 import type { ReactNode } from 'react';
+import { useId } from 'react';
 import { mergeClassNames } from './mergeClassNames';
 
 export interface AppSelectOption<TValue extends string = string> {
@@ -8,7 +9,8 @@ export interface AppSelectOption<TValue extends string = string> {
   value: TValue;
 }
 
-interface AppSelectProps<TValue extends string = string> extends Omit<DropdownProps, 'onChange' | 'optionLabel' | 'optionValue' | 'options' | 'value'> {
+interface AppSelectProps<TValue extends string> extends Omit<DropdownProps, 'onChange' | 'optionLabel' | 'optionValue' | 'options' | 'value'> {
+  error?: ReactNode;
   label?: ReactNode;
   options: AppSelectOption<TValue>[];
   value: TValue;
@@ -42,12 +44,17 @@ const selectPassThrough = {
   }
 };
 
-export const AppSelect = <TValue extends string = string>({ className, id, label, options, required, value, onChange, ...selectProps }: AppSelectProps<TValue>) => {
+export const AppSelect = <TValue extends string = string>({ className, error, id, label, options, required, value, onChange, ...selectProps }: AppSelectProps<TValue>) => {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const errorId = `${inputId}-error`;
   const select = (
     <Dropdown
       {...selectProps}
+      aria-describedby={error ? errorId : selectProps['aria-describedby']}
+      aria-invalid={error ? true : selectProps['aria-invalid']}
       aria-required={required}
-      inputId={id}
+      inputId={inputId}
       unstyled
       className={mergeClassNames(selectClassName, className)}
       optionLabel="label"
@@ -61,22 +68,29 @@ export const AppSelect = <TValue extends string = string>({ className, id, label
     />
   );
 
-  if (!label) return select;
+  if (!label && !error) return select;
 
   return (
-    <label className="block" htmlFor={id}>
-      <span className="mb-2 block text-sm font-semibold text-brand-heading">
-        {label}
-        {required ? (
-          <>
-            <span aria-hidden="true" className="ml-1 text-red-600">
-              *
-            </span>
-            <span className="sr-only"> required</span>
-          </>
-        ) : null}
-      </span>
+    <div className="block">
+      {label ? (
+        <label className="mb-2 block text-sm font-semibold text-brand-heading" htmlFor={inputId}>
+          {label}
+          {required ? (
+            <>
+              <span aria-hidden="true" className="ml-1 text-red-600">
+                *
+              </span>
+              <span className="sr-only"> required</span>
+            </>
+          ) : null}
+        </label>
+      ) : null}
       {select}
-    </label>
+      {error ? (
+        <span className="mt-1 block text-sm font-semibold text-red-600" id={errorId}>
+          {error}
+        </span>
+      ) : null}
+    </div>
   );
 };

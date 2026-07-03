@@ -53,35 +53,29 @@ export const ChildForm = ({ child, household, saving, visible, onHide, onSave }:
       <div className="space-y-4 pt-4">
         <AppAvatar key={`${child?.id ?? 'new'}-${visible ? 'visible' : 'hidden'}`} alt="Child avatar preview" disabled={saving} initials={childInitials} size="lg" storedFileId={draft.avatarStoredFileId} onFileChange={handleFileChanged} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <AppInputText
-              autoFocus
-              label="First name"
-              placeholder="Sophia"
-              required
-              value={draft.firstName}
-              onChange={(event) => {
-                form.updateField('firstName', event.target.value);
-              }}
-            />
-            {errors.firstName ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.firstName}</span> : null}
-          </div>
-          <div>
-            <AppInputText
-              label="Last name"
-              placeholder="Rivera"
-              required
-              value={draft.lastName}
-              onChange={(event) => {
-                form.updateField('lastName', event.target.value);
-              }}
-            />
-            {errors.lastName ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.lastName}</span> : null}
-          </div>
-        </div>
-
-        <div>
           <AppInputText
+            autoFocus
+            error={errors.firstName}
+            label="First name"
+            placeholder="Sophia"
+            required
+            value={draft.firstName}
+            onChange={(event) => {
+              form.updateField('firstName', event.target.value);
+            }}
+          />
+          <AppInputText
+            error={errors.lastName}
+            label="Last name"
+            placeholder="Rivera"
+            required
+            value={draft.lastName}
+            onChange={(event) => {
+              form.updateField('lastName', event.target.value);
+            }}
+          />
+          <AppInputText
+            error={errors.dateOfBirth}
             label="Date of birth"
             required
             type="date"
@@ -90,9 +84,7 @@ export const ChildForm = ({ child, household, saving, visible, onHide, onSave }:
               form.updateField('dateOfBirth', event.target.value);
             }}
           />
-          {errors.dateOfBirth ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.dateOfBirth}</span> : null}
         </div>
-
         <div className="flex justify-end gap-3 pt-2">
           <AppButton label="Cancel" variant="secondary" onClick={handleCancel} />
           <AppButton disabled={!household || saving || !form.isValid || hasErrors} label={saving ? savingLabel : saveLabel} onClick={handleSave} />
