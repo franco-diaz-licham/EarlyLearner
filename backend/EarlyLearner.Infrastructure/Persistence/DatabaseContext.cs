@@ -22,7 +22,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<ReadinessEvidence> ReadinessEvidence => Set<ReadinessEvidence>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
     public DbSet<LearningMoment> LearningMoments => Set<LearningMoment>();
-    public DbSet<AuditTrailReadModel> AuditTrailEntries => Set<AuditTrailReadModel>();
+    public DbSet<AuditTrailEntry> AuditTrailEntries => Set<AuditTrailEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -16,7 +16,7 @@ public sealed class EntityTraceAuditTrailHandler(DatabaseContext db) : IDomainEv
             throw new InvalidOperationException($"{nameof(EntityTraceAuditTrailHandler)} cannot handle {domainEvent.GetType().Name}.");
         }
 
-        db.AuditTrailEntries.Add(new AuditTrailReadModel
+        db.AuditTrailEntries.Add(new AuditTrailEntry
         {
             Id = Guid.NewGuid(),
             HouseholdId = entityTrace.HouseholdId,

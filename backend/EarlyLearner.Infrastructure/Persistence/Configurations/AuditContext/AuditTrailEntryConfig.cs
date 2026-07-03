@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EarlyLearner.Infrastructure.Persistence.Configurations.AuditContext;
 
-public sealed class AuditTrailReadModelConfig : IEntityTypeConfiguration<AuditTrailReadModel>
+public sealed class AuditTrailEntryConfig : IEntityTypeConfiguration<AuditTrailEntry>
 {
-    public void Configure(EntityTypeBuilder<AuditTrailReadModel> builder)
+    public void Configure(EntityTypeBuilder<AuditTrailEntry> builder)
     {
         builder.ToTable("audit_trail_entries");
         builder.HasKey(entry => entry.Id);

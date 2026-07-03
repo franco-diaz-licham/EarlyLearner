@@ -31,7 +31,7 @@ export const ReadinessPage = () => {
             <h1 id="readiness-title" className="mt-1 text-3xl font-bold text-brand-heading">
               Notice growth without rushing it
             </h1>
-            <p className="mt-2 max-w-2xl text-brand-muted">Track the readiness outcomes that matter this season and choose one small thing to support next.</p>
+            <p className="mt-2 max-w-2xl text-brand-muted">Track the readiness outcomes that matter this season and connect growth back to real learning moments.</p>
           </div>
           <AppButton icon={<UilShieldCheck aria-hidden="true" className="h-5 w-5" />} label="Review profile" />
         </div>
@@ -72,13 +72,13 @@ export const ReadinessPage = () => {
               {selectedAreas.length}/{readinessAreas.length}
             </p>
             <ProgressBar className="mt-4" value={progress} />
-            <p className="mt-4 text-sm leading-6 text-brand-muted">School readiness is a journey, not a race. Pick one area, then support it through play.</p>
+            <p className="mt-4 text-sm leading-6 text-brand-muted">School readiness is a journey, not a race. Use captured moments to explain each status.</p>
           </AppCard>
 
-          <AppCard title="Suggested Next Step">
-            <h2 className="text-lg font-bold text-brand-heading">Invite Sophia to explain her drawing</h2>
-            <p className="mt-2 text-sm leading-6 text-brand-muted">Great for communication, confidence and early literacy.</p>
-            <AppButton className="mt-4" label="Use this idea" />
+          <AppCard title="Recent Evidence">
+            <h2 className="text-lg font-bold text-brand-heading">Drawing story linked to communication</h2>
+            <p className="mt-2 text-sm leading-6 text-brand-muted">A learning moment can support one or more readiness outcomes.</p>
+            <AppButton className="mt-4" label="Review evidence" />
           </AppCard>
         </aside>
       </div>

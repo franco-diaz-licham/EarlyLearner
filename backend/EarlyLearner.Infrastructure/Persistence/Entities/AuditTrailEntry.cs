@@ -1,6 +1,6 @@
 namespace EarlyLearner.Infrastructure.Persistence.Entities;
 
-public sealed class AuditTrailReadModel
+public sealed class AuditTrailEntry
 {
     public Guid Id { get; init; }
 
