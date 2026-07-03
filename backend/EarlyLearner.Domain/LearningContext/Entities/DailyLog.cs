@@ -3,7 +3,6 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.CoreContext;
-using EarlyLearner.Domain.CoreContext.Entities;
 
 namespace EarlyLearner.Domain.LearningContext.Entities;
 
@@ -13,10 +12,7 @@ namespace EarlyLearner.Domain.LearningContext.Entities;
 /// </summary>
 public sealed class DailyLog : Entity<DailyLogId>
 {
-    private readonly List<CompletedActivity> _completedActivities = [];
-    private readonly List<ReadingEntry> _readingEntries = [];
-    private readonly List<RoutineEntry> _routineEntries = [];
-    private readonly List<StoredFile> _storedFiles = [];
+    private readonly List<LearningMoment> _learningMoments = [];
 
     private DailyLog() { }
 
@@ -44,31 +40,16 @@ public sealed class DailyLog : Entity<DailyLogId>
     public Child Child { get; private set; } = null!;
 
     /// <summary>
-    /// Calendar date the recorded activities and routines happened.
+    /// Calendar date the recorded learning moments happened.
     /// </summary>
     public DateOnly LogDate { get; }
 
     #region Nav props
 
     /// <summary>
-    /// Learning activities completed on this day that may become readiness evidence.
+    /// Learning moments captured on this day that may become readiness evidence.
     /// </summary>
-    public IReadOnlyCollection<CompletedActivity> CompletedActivities => _completedActivities.AsReadOnly();
-
-    /// <summary>
-    /// Books read with the child and their responses on this day.
-    /// </summary>
-    public IReadOnlyCollection<ReadingEntry> ReadingEntries => _readingEntries.AsReadOnly();
-
-    /// <summary>
-    /// Routines or life skills practised on this day.
-    /// </summary>
-    public IReadOnlyCollection<RoutineEntry> RoutineEntries => _routineEntries.AsReadOnly();
-
-    /// <summary>
-    /// Stored files attached to the whole daily record, such as a photo summary or scanned worksheet.
-    /// </summary>
-    public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
+    public IReadOnlyCollection<LearningMoment> LearningMoments => _learningMoments.AsReadOnly();
 
     #endregion
 
@@ -77,36 +58,16 @@ public sealed class DailyLog : Entity<DailyLogId>
         return new DailyLog(new DailyLogId(Guid.NewGuid()), householdId, childId, logDate);
     }
 
-    public CompletedActivity LogCompletedActivity(string title, IEnumerable<ReadinessOutcome> readinessOutcomes)
+    public LearningMoment RecordLearningMoment(
+        LearningMomentKindEnum kind,
+        string title,
+        string notes,
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
-        var activity = new CompletedActivity(new CompletedActivityId(Guid.NewGuid()), Id, title, readinessOutcomes);
-        _completedActivities.Add(activity);
-        RaiseDomainEvent(new LearningActivityLogged(Id, activity.Id, DateTimeOffset.UtcNow));
+        var moment = new LearningMoment(new LearningMomentId(Guid.NewGuid()), Id, kind, title, notes, readinessOutcomes);
+        _learningMoments.Add(moment);
+        RaiseDomainEvent(new LearningMomentRecorded(Id, moment.Id, ChildId, DateTimeOffset.UtcNow));
         SetUpdatedOn();
-        return activity;
-    }
-
-    public ReadingEntry AddReadingEntry(string title, string author, string childResponse)
-    {
-        var readingEntry = new ReadingEntry(new ReadingEntryId(Guid.NewGuid()), Id, title, author, childResponse);
-        _readingEntries.Add(readingEntry);
-        SetUpdatedOn();
-        return readingEntry;
-    }
-
-    public RoutineEntry AddRoutineEntry(string routineName, string notes)
-    {
-        var routineEntry = new RoutineEntry(new RoutineEntryId(Guid.NewGuid()), Id, routineName, notes);
-        _routineEntries.Add(routineEntry);
-        SetUpdatedOn();
-        return routineEntry;
-    }
-
-    public void AttachStoredFile(StoredFile storedFile)
-    {
-        if (!_storedFiles.Any(file => file.Id == storedFile.Id)) {
-            _storedFiles.Add(storedFile);
-            SetUpdatedOn();
-        }
+        return moment;
     }
 }

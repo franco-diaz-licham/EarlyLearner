@@ -33,12 +33,12 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
                 log => log.HouseholdId == householdId && log.LogDate >= query.Today.AddDays(-6),
                 cancellationToken);
 
-        var weeklyCompletedActivityCount = await db.CompletedActivities
+        var weeklyLearningMomentCount = await db.LearningMoments
             .AsNoTracking()
             .CountAsync(
-                activity =>
-                    activity.DailyLog.HouseholdId == householdId &&
-                    activity.DailyLog.LogDate >= query.Today.AddDays(-6),
+                moment =>
+                    moment.DailyLog.HouseholdId == householdId &&
+                    moment.DailyLog.LogDate >= query.Today.AddDays(-6),
                 cancellationToken);
 
         var recentActivities = await db.DailyLogs
@@ -49,16 +49,14 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
                 DailyLogId: log.Id.Value,
                 ChildId: log.ChildId.Value,
                 LogDate: log.LogDate,
-                CompletedActivityCount: log.CompletedActivities.Count,
-                ReadingEntryCount: log.ReadingEntries.Count,
-                RoutineEntryCount: log.RoutineEntries.Count))
+                LearningMomentCount: log.LearningMoments.Count))
             .Take(5)
             .ToListAsync(cancellationToken);
 
         var metrics = new List<HomeDashboardMetricResponse> {
             new(Label: "Active children", Value: children.Count, Detail: "Children currently visible in this household"),
             new(Label: "Readiness profiles", Value: readinessProfileCount, Detail: "Children with readiness progress tracking"),
-            new(Label: "Activities this week", Value: weeklyCompletedActivityCount, Detail: "Completed learning activities captured in the last seven days"),
+            new(Label: "Moments this week", Value: weeklyLearningMomentCount, Detail: "Learning moments captured in the last seven days"),
             new(Label: "Records this week", Value: weeklyRecordCount, Detail: "Daily logs captured in the last seven days")
         };
 

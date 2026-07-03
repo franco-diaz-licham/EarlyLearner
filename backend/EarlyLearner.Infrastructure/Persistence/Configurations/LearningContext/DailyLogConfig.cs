@@ -1,5 +1,3 @@
-using EarlyLearner.Domain.CoreContext.Entities;
-using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
@@ -41,59 +39,16 @@ public sealed class DailyLogConfig : IEntityTypeConfiguration<DailyLog>
 
         builder.Property(log => log.LogDate).IsRequired();
 
-        builder.HasMany(log => log.CompletedActivities)
-            .WithOne(activity => activity.DailyLog)
-            .HasForeignKey(activity => activity.DailyLogId)
+        builder.HasMany(log => log.LearningMoments)
+            .WithOne(moment => moment.DailyLog)
+            .HasForeignKey(moment => moment.DailyLogId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(log => log.ReadingEntries)
-            .WithOne(entry => entry.DailyLog)
-            .HasForeignKey(entry => entry.DailyLogId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(log => log.RoutineEntries)
-            .WithOne(entry => entry.DailyLog)
-            .HasForeignKey(entry => entry.DailyLogId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(log => log.StoredFiles)
-            .WithMany()
-            .UsingEntity<DailyLogStoredFile>(
-                right => right
-                    .HasOne(join => join.StoredFile)
-                    .WithMany()
-                    .HasForeignKey(join => join.StoredFileId)
-                    .OnDelete(DeleteBehavior.Restrict),
-                left => left
-                    .HasOne(join => join.DailyLog)
-                    .WithMany()
-                    .HasForeignKey(join => join.DailyLogId)
-                    .OnDelete(DeleteBehavior.Cascade),
-                join => {
-                    join.HasKey(item => new { item.DailyLogId, item.StoredFileId });
-                    join.HasIndex(item => item.StoredFileId);
-                    join.ToTable(StringHelpers.Pluralise(nameof(DailyLogStoredFile)));
-                    join.Property(item => item.DailyLogId)
-                        .HasConversion(id => id.Value, value => new DailyLogId(value));
-                    join.Property(item => item.StoredFileId)
-                        .HasConversion(id => id.Value, value => new StoredFileId(value));
-                });
-
-        builder.Navigation(log => log.CompletedActivities).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Navigation(log => log.ReadingEntries).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Navigation(log => log.RoutineEntries).UsePropertyAccessMode(PropertyAccessMode.Field);
-        builder.Navigation(log => log.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(log => log.LearningMoments).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(log => new { log.HouseholdId, log.ChildId, log.LogDate }).IsUnique();
         builder.Property(log => log.CreatedOn).IsRequired();
         builder.Property(log => log.UpdatedOn).IsRequired(false);
         builder.Ignore(log => log.DomainEvents);
     }
 
-    private sealed class DailyLogStoredFile
-    {
-        public DailyLogId DailyLogId { get; set; }
-        public DailyLog DailyLog { get; set; } = null!;
-        public StoredFileId StoredFileId { get; set; }
-        public StoredFile StoredFile { get; set; } = null!;
-    }
 }

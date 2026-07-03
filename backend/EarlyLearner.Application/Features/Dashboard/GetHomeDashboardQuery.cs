@@ -23,9 +23,7 @@ public sealed record HomeDashboardRecentActivityResponse(
     Guid DailyLogId,
     Guid ChildId,
     DateOnly LogDate,
-    int CompletedActivityCount,
-    int ReadingEntryCount,
-    int RoutineEntryCount);
+    int LearningMomentCount);
 
 public interface IGetHomeDashboardQueryHandler
 {

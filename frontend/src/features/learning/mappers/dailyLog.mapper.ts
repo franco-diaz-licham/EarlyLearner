@@ -5,9 +5,7 @@ export const mapDailyLogResponseToModel = (response: DailyLogResponse): DailyLog
   householdId: response.householdId,
   childId: response.childId,
   logDate: response.logDate,
-  completedActivityCount: response.completedActivityCount,
-  readingEntryCount: response.readingEntryCount,
-  routineEntryCount: response.routineEntryCount
+  learningMomentCount: response.learningMomentCount
 });
 
 export const mapDailyLogResponsesToModels = (responses: DailyLogResponse[]): DailyLogModel[] => responses.map(mapDailyLogResponseToModel);

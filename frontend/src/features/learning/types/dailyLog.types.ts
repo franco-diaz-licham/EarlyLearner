@@ -3,9 +3,7 @@ export interface DailyLogResponse {
   householdId: string;
   childId: string;
   logDate: string;
-  completedActivityCount: number;
-  readingEntryCount: number;
-  routineEntryCount: number;
+  learningMomentCount: number;
 }
 
 export interface DailyLogModel {
@@ -13,9 +11,7 @@ export interface DailyLogModel {
   householdId: string;
   childId: string;
   logDate: string;
-  completedActivityCount: number;
-  readingEntryCount: number;
-  routineEntryCount: number;
+  learningMomentCount: number;
 }
 
 export interface CreateDailyLogRequest {

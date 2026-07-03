@@ -6,7 +6,7 @@ namespace EarlyLearner.Domain.ReadinessContext.ValueObjects;
 /// <summary>
 /// References the captured evidence a carer selected for the portfolio. It lets
 /// portfolio items remain curated highlights without duplicating the original
-/// activity, observation, reading entry, routine, or future assessment record.
+/// learning moment or future assessment record.
 /// </summary>
 public sealed record PortfolioEvidenceSource
 {
@@ -23,7 +23,7 @@ public sealed record PortfolioEvidenceSource
     public EvidenceSourceTypeEnum SourceType { get; }
 
     /// <summary>
-    /// Identifier of the captured record selected into the portfolio.  E.g. ObservationId, ReadingEntryId
+    /// Identifier of the captured record selected into the portfolio.
     /// </summary>
     public Guid EvidenceRecordId { get; }
 

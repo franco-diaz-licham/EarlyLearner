@@ -20,9 +20,7 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
                 HouseholdId: log.HouseholdId.Value,
                 ChildId: log.ChildId.Value,
                 LogDate: log.LogDate,
-                CompletedActivityCount: log.CompletedActivities.Count,
-                ReadingEntryCount: log.ReadingEntries.Count,
-                RoutineEntryCount: log.RoutineEntries.Count))
+                LearningMomentCount: log.LearningMoments.Count))
             .ToListAsync(cancellationToken);
     }
 
@@ -46,9 +44,7 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
                 HouseholdId: item.HouseholdId.Value,
                 ChildId: item.ChildId.Value,
                 LogDate: item.LogDate,
-                CompletedActivityCount: item.CompletedActivities.Count,
-                ReadingEntryCount: item.ReadingEntries.Count,
-                RoutineEntryCount: item.RoutineEntries.Count))
+                LearningMomentCount: item.LearningMoments.Count))
             .SingleOrDefaultAsync(cancellationToken);
     }
 

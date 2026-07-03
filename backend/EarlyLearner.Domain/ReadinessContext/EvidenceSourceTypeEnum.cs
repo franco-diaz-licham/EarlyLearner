@@ -5,10 +5,7 @@ namespace EarlyLearner.Domain.ReadinessContext;
 /// </summary>
 public enum EvidenceSourceTypeEnum
 {
-    CompletedActivity = 1,
-    ReadingEntry = 2,
-    RoutineEntry = 3,
-    Observation = 4,
+    LearningMoment = 1,
     PortfolioItem = 5,
     Assessment = 6,
     ExtracurricularActivity = 7,

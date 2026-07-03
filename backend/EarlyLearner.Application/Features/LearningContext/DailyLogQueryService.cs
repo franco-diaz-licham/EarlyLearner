@@ -11,9 +11,7 @@ public sealed record DailyLogResponse(
     Guid HouseholdId,
     Guid ChildId,
     DateOnly LogDate,
-    int CompletedActivityCount,
-    int ReadingEntryCount,
-    int RoutineEntryCount);
+    int LearningMomentCount);
 
 public interface IDailyLogQueryService
 {

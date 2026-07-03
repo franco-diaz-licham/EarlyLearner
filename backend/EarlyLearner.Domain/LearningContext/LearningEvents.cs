@@ -4,6 +4,4 @@ using EarlyLearner.Domain.CoreContext;
 
 namespace EarlyLearner.Domain.LearningContext;
 
-public sealed record LearningActivityLogged(DailyLogId DailyLogId, CompletedActivityId ActivityId, DateTimeOffset OccurredAt) : IDomainEvent;
-
-public sealed record ObservationRecorded(ObservationId ObservationId, ChildId ChildId, DateTimeOffset OccurredAt) : IDomainEvent;
+public sealed record LearningMomentRecorded(DailyLogId DailyLogId, LearningMomentId LearningMomentId, ChildId ChildId, DateTimeOffset OccurredAt) : IDomainEvent;

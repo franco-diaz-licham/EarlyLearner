@@ -23,10 +23,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<SuggestedNextStep> SuggestedNextSteps => Set<SuggestedNextStep>();
     public DbSet<PortfolioItem> PortfolioItems => Set<PortfolioItem>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
-    public DbSet<CompletedActivity> CompletedActivities => Set<CompletedActivity>();
-    public DbSet<ReadingEntry> ReadingEntries => Set<ReadingEntry>();
-    public DbSet<RoutineEntry> RoutineEntries => Set<RoutineEntry>();
-    public DbSet<Observation> Observations => Set<Observation>();
+    public DbSet<LearningMoment> LearningMoments => Set<LearningMoment>();
     public DbSet<AuditTrailReadModel> AuditTrailEntries => Set<AuditTrailReadModel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

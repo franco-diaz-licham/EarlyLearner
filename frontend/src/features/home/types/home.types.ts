@@ -20,9 +20,7 @@ export interface HomeRecentActivityResponse {
   dailyLogId: string;
   childId: string;
   logDate: string;
-  completedActivityCount: number;
-  readingEntryCount: number;
-  routineEntryCount: number;
+  learningMomentCount: number;
 }
 
 export interface HomeModel {
@@ -47,9 +45,7 @@ export interface HomeRecentActivityModel {
   dailyLogId: string;
   childId: string;
   logDate: string;
-  completedActivityCount: number;
-  readingEntryCount: number;
-  routineEntryCount: number;
+  learningMomentCount: number;
 }
 
 export interface GetHomeParams {

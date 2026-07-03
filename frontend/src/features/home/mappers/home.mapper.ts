@@ -25,9 +25,7 @@ export const mapHomeRecentActivityResponseToModel = (response: HomeRecentActivit
   dailyLogId: response.dailyLogId,
   childId: response.childId,
   logDate: response.logDate,
-  completedActivityCount: response.completedActivityCount,
-  readingEntryCount: response.readingEntryCount,
-  routineEntryCount: response.routineEntryCount
+  learningMomentCount: response.learningMomentCount
 });
 
 export const mapHomeResponseToModel = (response: HomeResponse): HomeModel => ({

@@ -6,23 +6,31 @@ using EarlyLearner.Domain.ReadinessContext.Entities;
 namespace EarlyLearner.Domain.LearningContext.Entities;
 
 /// <summary>
-/// A parent-recorded activity completed by the child. It is owned by a daily log
-/// and may provide evidence for one or more readiness outcomes.
+/// A parent-recorded learning moment owned by a daily log. It captures the
+/// concrete evidence that may support one or more readiness outcomes.
 /// </summary>
-public sealed class CompletedActivity : Entity<CompletedActivityId>
+public sealed class LearningMoment : Entity<LearningMomentId>
 {
     private readonly List<ReadinessOutcome> _readinessOutcomes = [];
     private readonly List<StoredFile> _storedFiles = [];
 
-    private CompletedActivity() { }
+    private LearningMoment() { }
 
-    internal CompletedActivity(CompletedActivityId id, DailyLogId dailyLogId, string title, IEnumerable<ReadinessOutcome> readinessOutcomes)
+    internal LearningMoment(
+        LearningMomentId id,
+        DailyLogId dailyLogId,
+        LearningMomentKindEnum kind,
+        string title,
+        string notes,
+        IEnumerable<ReadinessOutcome> readinessOutcomes)
     {
         Id = id;
         DailyLogId = dailyLogId;
+        Kind = kind;
         Title = Required(title, nameof(title));
+        Notes = Required(notes, nameof(notes));
         var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
-        if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Completed activity must target at least one readiness outcome.");
+        if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Learning moment must target at least one readiness outcome.");
         _readinessOutcomes.AddRange(requiredReadinessOutcomes);
         SetCreatedOn();
     }
@@ -32,19 +40,30 @@ public sealed class CompletedActivity : Entity<CompletedActivityId>
     public DailyLog DailyLog { get; private set; } = null!;
 
     /// <summary>
-    /// Parent-facing name of the completed activity.
+    /// Broad category for the moment, such as an activity, observation, reading,
+    /// or routine.
+    /// </summary>
+    public LearningMomentKindEnum Kind { get; }
+
+    /// <summary>
+    /// Parent-facing name of the captured learning moment.
     /// </summary>
     public string Title { get; } = default!;
 
     /// <summary>
-    /// Readiness areas this activity practised or demonstrated.
+    /// Parent notes explaining what happened and why the moment matters.
+    /// </summary>
+    public string Notes { get; } = default!;
+
+    /// <summary>
+    /// Readiness areas this moment practised or demonstrated.
     /// </summary>
     public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
 
     #region Nav props
 
     /// <summary>
-    /// Stored files attached to this completed activity, such as photos, videos, or scanned work.
+    /// Stored files attached to this learning moment, such as photos, videos, or scanned work.
     /// </summary>
     public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
 
