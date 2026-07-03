@@ -4,15 +4,15 @@ using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
 
 /// <summary>
-/// Links a readiness outcome to the concrete evidence that supports progress.
-/// Evidence references keep readiness conclusions explainable to parents.
+/// Interprets a captured learning record as evidence for a readiness outcome.
 /// </summary>
-public sealed class EvidenceReference : Entity<EvidenceReferenceId>
+public sealed class ReadinessEvidence : Entity<ReadinessEvidenceId>
 {
-    private EvidenceReference() { }
+    private ReadinessEvidence() { }
 
-    private EvidenceReference(
-        EvidenceReferenceId id,
+    private ReadinessEvidence(
+        ReadinessEvidenceId id,
+        ReadinessProfileId readinessProfileId,
         ReadinessOutcome readinessOutcome,
         EvidenceSourceTypeEnum sourceType,
         Guid evidenceRecordId,
@@ -20,6 +20,7 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
         string summary)
     {
         Id = id;
+        ReadinessProfileId = readinessProfileId;
         ReadinessOutcomeId = readinessOutcome.Id;
         ReadinessOutcome = readinessOutcome;
         SourceType = sourceType;
@@ -29,9 +30,9 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
         SetCreatedOn();
     }
 
-    public int ReadinessOutcomeProgressId { get; private set; }
+    public ReadinessProfileId ReadinessProfileId { get; }
 
-    public ReadinessOutcomeProgress ReadinessOutcomeProgress { get; private set; } = null!;
+    public ReadinessProfile ReadinessProfile { get; private set; } = null!;
 
     public ReadinessOutcomeId ReadinessOutcomeId { get; }
 
@@ -60,7 +61,8 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     /// </summary>
     public string Summary { get; } = default!;
 
-    public static EvidenceReference Create(
+    public static ReadinessEvidence Create(
+        ReadinessProfileId readinessProfileId,
         ReadinessOutcome readinessOutcome,
         EvidenceSourceTypeEnum sourceType,
         Guid evidenceRecordId,
@@ -69,8 +71,9 @@ public sealed class EvidenceReference : Entity<EvidenceReferenceId>
     {
         if (evidenceRecordId == Guid.Empty) throw new DomainException("Evidence record id is required.");
 
-        return new EvidenceReference(
-            new EvidenceReferenceId(Guid.NewGuid()),
+        return new ReadinessEvidence(
+            new ReadinessEvidenceId(Guid.NewGuid()),
+            readinessProfileId,
             readinessOutcome,
             sourceType,
             evidenceRecordId,

@@ -19,7 +19,7 @@ public sealed class ReadinessProfileRepository(DatabaseContext db) : IReadinessP
                 ReadinessProfileId: profile.Id.Value,
                 HouseholdId: profile.HouseholdId.Value,
                 ChildId: profile.ChildId.Value,
-                ReadinessOutcomeIds: profile.OutcomeProgress.Select(progress => progress.ReadinessOutcome.Id.Value).ToList()))
+                ReadinessOutcomeIds: profile.TrackedOutcomes.Select(trackedOutcome => trackedOutcome.ReadinessOutcome.Id.Value).ToList()))
             .ToListAsync(cancellationToken);
     }
 
@@ -50,7 +50,7 @@ public sealed class ReadinessProfileRepository(DatabaseContext db) : IReadinessP
                 ReadinessProfileId: item.Id.Value,
                 HouseholdId: item.HouseholdId.Value,
                 ChildId: item.ChildId.Value,
-                ReadinessOutcomeIds: item.OutcomeProgress.Select(progress => progress.ReadinessOutcome.Id.Value).ToList()))
+                ReadinessOutcomeIds: item.TrackedOutcomes.Select(trackedOutcome => trackedOutcome.ReadinessOutcome.Id.Value).ToList()))
             .SingleOrDefaultAsync(cancellationToken);
     }
 

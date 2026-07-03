@@ -1,18 +1,16 @@
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
+
 namespace EarlyLearner.Domain.ReadinessContext.Entities;
 
 /// <summary>
-/// Tracks one readiness outcome within a child's readiness profile. It is owned
-/// by the readiness profile aggregate and changes only through the aggregate root.
+/// Tracks one readiness outcome within a child's readiness profile.
 /// </summary>
-public sealed class ReadinessOutcomeProgress
+public sealed class TrackedReadinessOutcome
 {
-    private readonly List<EvidenceReference> _evidence = [];
+    private TrackedReadinessOutcome() { }
 
-    private ReadinessOutcomeProgress() { }
-
-    internal ReadinessOutcomeProgress(ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome)
+    internal TrackedReadinessOutcome(ReadinessProfileId readinessProfileId, ReadinessOutcome readinessOutcome)
     {
         ReadinessProfileId = readinessProfileId;
         ReadinessOutcomeId = readinessOutcome.Id;
@@ -38,26 +36,11 @@ public sealed class ReadinessOutcomeProgress
     /// </summary>
     public ReadinessStatusEnum Status { get; private set; }
 
-    #region Nav props
-
-    /// <summary>
-    /// Evidence references that explain why this readiness status was reached.
-    /// </summary>
-    public IReadOnlyCollection<EvidenceReference> Evidence => _evidence.AsReadOnly();
-
-    #endregion
-
-    internal void AddEvidence(EvidenceReference evidenceReference)
+    internal void UpdateStatusFromEvidenceCount(int evidenceCount)
     {
-        if (evidenceReference.ReadinessOutcome.Id != ReadinessOutcome.Id) throw new DomainException("Evidence domain must match progress outcome.");
+        if (evidenceCount < 0) throw new DomainException("Evidence count cannot be negative.");
 
-        _evidence.Add(evidenceReference);
-        Status = CalculateStatus();
-    }
-
-    private ReadinessStatusEnum CalculateStatus()
-    {
-        return _evidence.Count switch {
+        Status = evidenceCount switch {
             0 => ReadinessStatusEnum.NotYetObserved,
             1 => ReadinessStatusEnum.Emerging,
             <= 3 => ReadinessStatusEnum.Growing,

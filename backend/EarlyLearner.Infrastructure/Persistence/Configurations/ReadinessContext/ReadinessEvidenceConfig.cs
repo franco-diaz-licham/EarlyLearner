@@ -7,25 +7,26 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EarlyLearner.Infrastructure.Persistence.Configurations.ReadinessContext;
 
-public sealed class EvidenceReferenceConfig : IEntityTypeConfiguration<EvidenceReference>
+public sealed class ReadinessEvidenceConfig : IEntityTypeConfiguration<ReadinessEvidence>
 {
-    public void Configure(EntityTypeBuilder<EvidenceReference> builder)
+    public void Configure(EntityTypeBuilder<ReadinessEvidence> builder)
     {
-        builder.ToTable(StringHelpers.Pluralise(nameof(EvidenceReference)));
+        builder.ToTable(StringHelpers.Pluralise(nameof(ReadinessEvidence)));
 
         builder.HasKey(evidence => evidence.Id);
 
         builder.Property(evidence => evidence.Id)
-            .HasConversion(id => id.Value, value => new EvidenceReferenceId(value))
+            .HasConversion(id => id.Value, value => new ReadinessEvidenceId(value))
             .ValueGeneratedNever();
 
-        builder.Property(evidence => evidence.ReadinessOutcomeProgressId)
+        builder.Property(evidence => evidence.ReadinessProfileId)
+            .HasConversion(id => id.Value, value => new ReadinessProfileId(value))
             .IsRequired();
 
-        builder.HasOne(evidence => evidence.ReadinessOutcomeProgress)
-            .WithMany(progress => progress.Evidence)
-            .HasForeignKey(evidence => evidence.ReadinessOutcomeProgressId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(evidence => evidence.ReadinessProfile)
+            .WithMany(profile => profile.Evidence)
+            .HasForeignKey(evidence => evidence.ReadinessProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(evidence => evidence.ReadinessOutcome)
             .WithMany()

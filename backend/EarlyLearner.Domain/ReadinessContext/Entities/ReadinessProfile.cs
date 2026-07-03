@@ -12,7 +12,8 @@ namespace EarlyLearner.Domain.ReadinessContext.Entities;
 /// </summary>
 public sealed class ReadinessProfile : Entity<ReadinessProfileId>
 {
-    private readonly List<ReadinessOutcomeProgress> _outcomeProgress = [];
+    private readonly List<TrackedReadinessOutcome> _trackedOutcomes = [];
+    private readonly List<ReadinessEvidence> _evidence = [];
 
     private ReadinessProfile() { }
 
@@ -21,7 +22,7 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
         Id = id;
         HouseholdId = householdId;
         ChildId = childId;
-        _outcomeProgress.AddRange(readinessOutcomes.Select(readinessOutcome => new ReadinessOutcomeProgress(Id, readinessOutcome)));
+        _trackedOutcomes.AddRange(readinessOutcomes.Select(readinessOutcome => new TrackedReadinessOutcome(Id, readinessOutcome)));
         SetCreatedOn();
     }
 
@@ -42,9 +43,14 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
     #region Nav props
 
     /// <summary>
-    /// Progress summaries for each tracked readiness outcome.
+    /// Readiness outcomes tracked for this child.
     /// </summary>
-    public IReadOnlyCollection<ReadinessOutcomeProgress> OutcomeProgress => _outcomeProgress.AsReadOnly();
+    public IReadOnlyCollection<TrackedReadinessOutcome> TrackedOutcomes => _trackedOutcomes.AsReadOnly();
+
+    /// <summary>
+    /// Evidence that explains why readiness statuses changed.
+    /// </summary>
+    public IReadOnlyCollection<ReadinessEvidence> Evidence => _evidence.AsReadOnly();
 
     #endregion
 
@@ -63,18 +69,24 @@ public sealed class ReadinessProfile : Entity<ReadinessProfileId>
             requiredReadinessOutcomes);
     }
 
-    public void AddEvidence(EvidenceReference evidenceReference)
+    public void AddEvidence(ReadinessEvidence evidence)
     {
-        var progress = _outcomeProgress.SingleOrDefault(item => item.ReadinessOutcome.Id == evidenceReference.ReadinessOutcome.Id);
-        if (progress is null) {
+        if (evidence.ReadinessProfileId != Id) {
+            throw new DomainException("Evidence must belong to this readiness profile.");
+        }
+
+        var trackedOutcome = _trackedOutcomes.SingleOrDefault(item => item.ReadinessOutcome.Id == evidence.ReadinessOutcome.Id);
+        if (trackedOutcome is null) {
             throw new DomainException("readiness outcome is not tracked by this profile.");
         }
 
-        var previousStatus = progress.Status;
-        progress.AddEvidence(evidenceReference);
+        var previousStatus = trackedOutcome.Status;
+        _evidence.Add(evidence);
+        var evidenceCount = _evidence.Count(item => item.ReadinessOutcome.Id == trackedOutcome.ReadinessOutcome.Id);
+        trackedOutcome.UpdateStatusFromEvidenceCount(evidenceCount);
 
-        RaiseDomainEvent(new ReadinessEvidenceAdded(Id, ChildId, evidenceReference.ReadinessOutcome.Id, DateTimeOffset.UtcNow));
-        if (previousStatus != progress.Status) RaiseDomainEvent(new ReadinessStatusChanged(Id, ChildId, evidenceReference.ReadinessOutcome.Id, progress.Status, DateTimeOffset.UtcNow));
+        RaiseDomainEvent(new ReadinessEvidenceAdded(Id, ChildId, evidence.ReadinessOutcome.Id, DateTimeOffset.UtcNow));
+        if (previousStatus != trackedOutcome.Status) RaiseDomainEvent(new ReadinessStatusChanged(Id, ChildId, evidence.ReadinessOutcome.Id, trackedOutcome.Status, DateTimeOffset.UtcNow));
         SetUpdatedOn();
     }
 }

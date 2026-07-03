@@ -38,12 +38,18 @@ public sealed class ReadinessProfileConfig : IEntityTypeConfiguration<ReadinessP
             .HasForeignKey(profile => profile.ChildId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(profile => profile.OutcomeProgress)
-            .WithOne(progress => progress.ReadinessProfile)
-            .HasForeignKey(progress => progress.ReadinessProfileId)
+        builder.HasMany(profile => profile.TrackedOutcomes)
+            .WithOne(trackedOutcome => trackedOutcome.ReadinessProfile)
+            .HasForeignKey(trackedOutcome => trackedOutcome.ReadinessProfileId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Navigation(profile => profile.OutcomeProgress).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.HasMany(profile => profile.Evidence)
+            .WithOne(evidence => evidence.ReadinessProfile)
+            .HasForeignKey(evidence => evidence.ReadinessProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(profile => profile.TrackedOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(profile => profile.Evidence).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.HasIndex(profile => new { profile.HouseholdId, profile.ChildId }).IsUnique();
         builder.Property(profile => profile.CreatedOn).IsRequired();
         builder.Property(profile => profile.UpdatedOn).IsRequired(false);
