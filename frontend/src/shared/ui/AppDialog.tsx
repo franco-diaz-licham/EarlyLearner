@@ -28,13 +28,13 @@ const appDialogPt: DialogPassThroughOptions = {
   }
 };
 
-export const AppDialog = ({ children, className, pt, ...dialogProps }: DialogProps) => {
+export const AppDialog = ({ children, className, dismissableMask = false, pt, ...dialogProps }: DialogProps) => {
   return (
     <Dialog
       {...dialogProps}
       blockScroll
       className={mergeClassNames('w-[min(92vw,560px)] overflow-hidden rounded-2xl! border! border-brand-border! bg-white! shadow-[0_24px_64px_rgba(23,25,35,0.18)]!', className)}
-      dismissableMask
+      dismissableMask={dismissableMask}
       modal
       pt={{ ...appDialogPt, ...pt }}
     >

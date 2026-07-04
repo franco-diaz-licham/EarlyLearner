@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/EarlyLearner.Api.Tests/EarlyLearner.Api.Tests.csproj" Id="7ec5fcbc-99d0-428d-aaa7-ab317a9c9f47" />
+    <Project Path="Tests/EarlyLearner.Application.Tests/EarlyLearner.Application.Tests.csproj" Id="7398ffb6-422f-4b9e-ae4f-c198a8bc4fe4" />
+    <Project Path="Tests/EarlyLearner.Domain.Tests/EarlyLearner.Domain.Tests.csproj" Id="54fdbe12-dc39-4bec-99c2-c6dcb80da0f8" />
+    <Project Path="Tests/EarlyLearner.Infrastructure.Tests/EarlyLearner.Infrastructure.Tests.csproj" Id="503b5709-53cf-4ea4-b366-d1d343eceb4e" />
+  </Folder>
   <Project Path="EarlyLearner.Api/EarlyLearner.Api.csproj" />
   <Project Path="EarlyLearner.Application/EarlyLearner.Application.csproj" Id="b6ea0fe3-e5d7-4268-9561-e61bca006b62" />
   <Project Path="EarlyLearner.Domain/EarlyLearner.Domain.csproj" Id="27959372-e602-4781-b65e-96623167b4d6" />
