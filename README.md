@@ -7,9 +7,9 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 
-EarlyLearner is a full-stack early childhood learning record and school-readiness planning application. It helps carers track children, readiness outcomes, goals, weekly learning plans, daily logs, reading moments, routines, observations, files, and portfolio evidence.
+EarlyLearner is a full-stack early childhood learning record and school-readiness application. It helps carers manage households and children, capture daily learning moments, attach evidence, and track school-readiness outcomes.
 
-The project is built as a technical showcase for a production-style modular monolith: a .NET API with Clean Architecture boundaries, EF Core persistence, Docker-based local infrastructure, and a modern React frontend.
+The project is built as a technical showcase for a production-style modular monolith: a .NET API with Clean Architecture boundaries, EF Core persistence, Azure-native messaging, Docker-based local infrastructure, and a modern React frontend.
 
 ---
 
@@ -18,11 +18,11 @@ The project is built as a technical showcase for a production-style modular mono
 - Household and child profiles
 - Readiness outcome catalogue
 - Child readiness profiles and progress tracking
-- Learning goals and planned learning sessions
-- Daily logs with completed activities, reading entries, and routine entries
-- Observation and portfolio evidence modelling
+- Daily logs with learning moments and file evidence
+- Readiness evidence modelling
+- Azure Service Bus integration messaging with EF outbox
 - Dashboard query slice for household summary data
-- Dockerized local infrastructure for PostgreSQL, Azurite, RabbitMQ, API, and database seeding
+- Dockerized local infrastructure for PostgreSQL, Azurite, Azure Service Bus emulator, API, worker, and database seeding
 
 ---
 
@@ -60,7 +60,7 @@ The project is built as a technical showcase for a production-style modular mono
 - Docker Compose
 - PostgreSQL 17
 - Azurite for Azure Blob Storage emulation
-- RabbitMQ
+- Azure Service Bus emulator
 - PowerShell helper scripts
 
 ---
@@ -101,6 +101,8 @@ docker/
 └── db-seeder.dockerfile
 ```
 
+Azure Service Bus cloud setup is documented in `docs/azure-service-bus.md`.
+
 ---
 
 ## 🚀 Getting Started
@@ -136,7 +138,7 @@ API:         http://localhost:5136
 Worker:      early-learner-worker container
 PostgreSQL:  localhost:55432
 Azurite:     localhost:10000
-RabbitMQ:    http://localhost:15672
+Service Bus: localhost:5672
 ```
 
 Docker database credentials:
@@ -208,10 +210,10 @@ The seed script inserts a small predictable demo dataset with fixed UUIDs for:
 - carers
 - children
 - readiness outcomes
-- goals
-- learning plan
-- planned sessions
-- daily log entries
+- readiness profiles
+- daily logs
+- learning moments
+- readiness evidence
 
 ---
 
