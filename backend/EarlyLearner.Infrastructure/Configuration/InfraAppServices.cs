@@ -1,3 +1,5 @@
+using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
 using Azure.Storage.Blobs;
 using EarlyLearner.Application.Common;
 using EarlyLearner.Application.Features.AuditContext;
@@ -164,6 +166,7 @@ public static class InfraAppServices
 
             configurator.UsingAzureServiceBus((context, busFactoryConfigurator) => {
                 var options = context.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value;
+                busFactoryConfigurator.DeployPublishTopology = false;
 
                 busFactoryConfigurator.Message<HouseholdInvitationEmailRequested>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailRequestedTopic));
@@ -171,7 +174,21 @@ public static class InfraAppServices
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
                 busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
-                busFactoryConfigurator.Host(options.ConnectionString);
+                busFactoryConfigurator.Publish<IIntegrationEvent>(publishConfigurator => {
+                    publishConfigurator.Exclude = true;
+                });
+
+                var administrationConnectionString = string.IsNullOrWhiteSpace(options.AdministrationConnectionString)
+                    ? options.ConnectionString
+                    : options.AdministrationConnectionString;
+
+                var serviceBusClient = new ServiceBusClient(options.ConnectionString);
+                var administrationClient = new ServiceBusAdministrationClient(administrationConnectionString);
+
+                busFactoryConfigurator.Host(
+                    ServiceBusConnectionStringProperties.Parse(options.ConnectionString).Endpoint,
+                    serviceBusClient,
+                    administrationClient);
                 busFactoryConfigurator.PrefetchCount = options.PrefetchCount ?? 1;
                 busFactoryConfigurator.ConcurrentMessageLimit = options.ConcurrentMessageLimit ?? 1;
                 busFactoryConfigurator.UseMessageRetry(retryConfigurator => retryConfigurator.None());

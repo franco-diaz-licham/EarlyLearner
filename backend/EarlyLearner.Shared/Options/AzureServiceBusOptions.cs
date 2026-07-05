@@ -16,6 +16,12 @@ public sealed class AzureServiceBusOptions
     [Required]
     public string ConnectionString { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the Service Bus administration connection string used for topology operations.
+    /// The local emulator exposes administration operations on port 5300.
+    /// </summary>
+    public string? AdministrationConnectionString { get; init; }
+
     public int? PrefetchCount { get; init; } = 1;
 
     public int? ConcurrentMessageLimit { get; init; } = 1;
