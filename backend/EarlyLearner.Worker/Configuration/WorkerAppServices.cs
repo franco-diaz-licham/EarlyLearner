@@ -1,3 +1,4 @@
+using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
@@ -51,29 +52,39 @@ public static class WorkerAppServices
     private static IServiceCollection MessagingServices(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddOptions<RabbitMqOptions>()
-            .Bind(configuration.GetSection(RabbitMqOptions.SECTION_NAME))
+            .AddOptions<AzureServiceBusOptions>()
+            .Bind(configuration.GetSection(AzureServiceBusOptions.SECTION_NAME))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
         services.AddMassTransit(configurator => {
-            configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor));
+            configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor)); // register consumers in DI
 
-            configurator.UsingRabbitMq((context, busFactoryConfigurator) => {
-                var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+            configurator.UsingAzureServiceBus((context, busFactoryConfigurator) => {
+                var options = context.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value;
 
-                busFactoryConfigurator.Host(new Uri(options.HostUri), hostConfigurator => {
-                    hostConfigurator.Username(options.Username);
-                    hostConfigurator.Password(options.Password);
-                });
+                // Register topic names per event
+                busFactoryConfigurator.Message<HouseholdInvitationEmailRequested>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailRequestedTopic));
+                busFactoryConfigurator.Message<HouseholdInvitationEmailSent>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
+                busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
 
+                busFactoryConfigurator.Host(options.ConnectionString);
                 busFactoryConfigurator.PrefetchCount = options.PrefetchCount ?? 1;
                 busFactoryConfigurator.ConcurrentMessageLimit = options.ConcurrentMessageLimit ?? 1;
                 busFactoryConfigurator.UseMessageRetry(retryConfigurator => retryConfigurator.None());
                 busFactoryConfigurator.UseTimeout(timeoutConfigurator => {
                     timeoutConfigurator.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds ?? 60);
                 });
-                busFactoryConfigurator.ConfigureEndpoints(context);
+
+                // Register consumers
+                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailRequested>(
+                    IdentityMessagingTopology.EmailWorkerSubscription,
+                    endpointConfigurator => {
+                        endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailRequestedConsumer>(context);
+                    });
             });
         });
 

@@ -6,11 +6,6 @@ using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Messaging;
 
-public sealed class HouseholdInvitationEmailRequestedConsumerDefinition : ConsumerDefinition<HouseholdInvitationEmailRequestedConsumer>
-{
-    public HouseholdInvitationEmailRequestedConsumerDefinition() => EndpointName = MessagingConstants.HouseholdInvitationEmailRequestedEndpoint;
-}
-
 public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender emailSender, IOptions<EarlyLearnerOptions> options) : IConsumer<HouseholdInvitationEmailRequested>
 {
     private readonly EarlyLearnerOptions options = options.Value;
