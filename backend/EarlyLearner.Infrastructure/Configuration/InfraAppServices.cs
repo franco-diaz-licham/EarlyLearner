@@ -15,6 +15,7 @@ using EarlyLearner.Infrastructure.Features.ReadinessContext;
 using EarlyLearner.Infrastructure.Messaging;
 using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Infrastructure.Ports;
+using EarlyLearner.Shared.Options;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -140,8 +141,8 @@ public static class InfraAppServices
     {
         services.AddSingleton<BusObserver>();
         services
-            .AddOptions<RabbitMqOptions>()
-            .Bind(configuration.GetSection(RabbitMqOptions.SECTION_NAME))
+            .AddOptions<AzureServiceBusOptions>()
+            .Bind(configuration.GetSection(AzureServiceBusOptions.SECTION_NAME))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
@@ -161,13 +162,16 @@ public static class InfraAppServices
                 endpointConfigurator.UseEntityFrameworkOutbox<DatabaseContext>(context);
             });
 
-            configurator.UsingRabbitMq((context, busFactoryConfigurator) => {
-                var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+            configurator.UsingAzureServiceBus((context, busFactoryConfigurator) => {
+                var options = context.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value;
 
-                busFactoryConfigurator.Host(new Uri(options.HostUri), hostConfigurator => {
-                    hostConfigurator.Username(options.Username);
-                    hostConfigurator.Password(options.Password);
-                });
+                busFactoryConfigurator.Message<HouseholdInvitationEmailRequested>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailRequestedTopic));
+                busFactoryConfigurator.Message<HouseholdInvitationEmailSent>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
+                busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
+                busFactoryConfigurator.Host(options.ConnectionString);
                 busFactoryConfigurator.PrefetchCount = options.PrefetchCount ?? 1;
                 busFactoryConfigurator.ConcurrentMessageLimit = options.ConcurrentMessageLimit ?? 1;
                 busFactoryConfigurator.UseMessageRetry(retryConfigurator => retryConfigurator.None());
