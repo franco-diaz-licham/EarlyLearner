@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for EarlyLearner.Worker (builds in the SDK image, runs on .NET runtime)
+# Multi-stage Dockerfile for EarlyLearner.Worker (builds in the SDK image, runs on ASP.NET runtime)
 
 # ---------- Build stage ----------
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -20,7 +20,7 @@ RUN dotnet publish backend/EarlyLearner.Worker/EarlyLearner.Worker.csproj \
     --no-restore
 
 # ---------- Runtime stage ----------
-FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Keep memory usage modest for local Docker development
