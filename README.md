@@ -97,7 +97,8 @@ frontend/
 ```text
 docker/
 ├── docker-compose.yml
-├── early-learner-api.dockerfile
+├── api.dockerfile
+├── worker.dockerfile
 └── db-seeder.dockerfile
 ```
 

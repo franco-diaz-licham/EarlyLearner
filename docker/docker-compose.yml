@@ -92,7 +92,7 @@ services:
   early-learner-api:
     build:
       context: ..
-      dockerfile: docker/early-learner-api.dockerfile
+      dockerfile: docker/api.dockerfile
     image: early-learner-api:local
     container_name: early-learner-api
     ports:
@@ -121,7 +121,7 @@ services:
   early-learner-worker:
     build:
       context: ..
-      dockerfile: docker/early-learner-worker.dockerfile
+      dockerfile: docker/worker.dockerfile
     image: early-learner-worker:local
     container_name: early-learner-worker
     depends_on:
