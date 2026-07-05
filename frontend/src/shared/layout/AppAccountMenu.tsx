@@ -41,7 +41,7 @@ export const AppAccountMenu = ({ onLogout }: AppAccountMenuProps) => {
         <UilAngleDown aria-hidden="true" className="h-4 w-4" />
       </Button>
 
-      <OverlayPanel ref={overlayPanelRef} className="rounded-md! border! border-brand-border! bg-white shadow-app-card!" dismissable>
+      <OverlayPanel ref={overlayPanelRef} className="app-account-menu-panel rounded-md! border! border-brand-border! bg-white shadow-app-card!" dismissable>
         <div className="w-64 p-2 flex flex-col gap-2">
           <div className="border-b border-brand-border px-2 pb-4">
             <p className="text-sm font-bold text-brand-heading">{currentUser.displayName}</p>
