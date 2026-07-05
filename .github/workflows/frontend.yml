@@ -1,0 +1,99 @@
+name: Frontend
+
+env:
+  BUILD_DIR: frontend
+  OUTPUT_DIR: dist
+  NODE_VERSION: 22.x
+  SWA_NAME: ${{ vars.SWA_NAME }}
+  SWA_RESOURCE_GROUP: ${{ vars.SWA_RESOURCE_GROUP }}
+  VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # Checkout, install Node.js, and restore frontend dependencies from package-lock.json.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.BUILD_DIR }}/package-lock.json
+
+      # npm optional dependency handling is kept explicit because Rollup uses native packages on Linux.
+      - name: Install dependencies
+        working-directory: ${{ env.BUILD_DIR }}
+        run: |
+          npm ci --include=optional
+
+          $rollupVersion = node -p "require('./package-lock.json').packages['node_modules/rollup'].version"
+          npm install --no-save --package-lock=false --include=optional "@rollup/rollup-linux-x64-gnu@$rollupVersion"
+          node -e "require.resolve('@rollup/rollup-linux-x64-gnu')"
+
+      # Vite reads this value at build time, so CI writes the production API base URL before building.
+      - name: Create production environment file
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:VITE_API_BASE_URL)) {
+            throw "Missing VITE_API_BASE_URL repository variable."
+          }
+
+          "VITE_API_BASE_URL=$env:VITE_API_BASE_URL" | Set-Content -Path "$env:BUILD_DIR/.env.production"
+
+      # Run the frontend test suite before producing a deployable artifact.
+      - name: Run frontend tests
+        working-directory: ${{ env.BUILD_DIR }}
+        run: npm run test
+
+      # Produce the Static Web Apps artifact in frontend/dist.
+      - name: Build frontend
+        working-directory: ${{ env.BUILD_DIR }}
+        run: npm run build
+
+      # Fail early if the expected build output is missing.
+      - name: Check build artifacts
+        run: |
+          $artifactPath = Join-Path $env:GITHUB_WORKSPACE "$env:BUILD_DIR/$env:OUTPUT_DIR"
+
+          if (-not (Test-Path $artifactPath)) {
+            throw "Missing build folder: $artifactPath"
+          }
+
+          Get-ChildItem $artifactPath
+
+      # Log in with the repository service principal so the workflow can retrieve the SWA deployment token.
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy the pre-built static artifact to Azure Static Web Apps production.
+      - name: Deploy to Azure Static Web Apps
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SWA_NAME)) {
+            throw "Missing SWA_NAME repository variable."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:SWA_RESOURCE_GROUP)) {
+            throw "Missing SWA_RESOURCE_GROUP repository variable."
+          }
+
+          $artifactPath = Join-Path $env:GITHUB_WORKSPACE "$env:BUILD_DIR/$env:OUTPUT_DIR"
+          $deploymentToken = az staticwebapp secrets list `
+            --name $env:SWA_NAME `
+            --resource-group $env:SWA_RESOURCE_GROUP `
+            --query "properties.apiKey" `
+            -o tsv
+
+          if ([string]::IsNullOrWhiteSpace($deploymentToken)) {
+            throw "Could not retrieve Azure Static Web Apps deployment token."
+          }
+
+          npx @azure/static-web-apps-cli@2 deploy $artifactPath --env production --deployment-token $deploymentToken
