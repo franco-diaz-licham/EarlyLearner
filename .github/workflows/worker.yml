@@ -1,5 +1,8 @@
 name: Worker
 
+on:
+  workflow_dispatch:
+
 env:
   BACKEND_DIR: backend
   SOLUTION_FILE: backend/EarlyLearner.slnx
