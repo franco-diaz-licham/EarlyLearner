@@ -10,6 +10,9 @@ env:
   SWA_NAME: ${{ secrets.SWA_NAME }}
   SWA_RESOURCE_GROUP: ${{ secrets.SWA_RESOURCE_GROUP }}
   EARLY_LEARNER_API_URL: ${{ secrets.EARLY_LEARNER_API_URL }}
+  VITE_ENTRA_CLIENT_ID: ${{ secrets.ENTRA_CLIENT_ID }}
+  VITE_ENTRA_AUTHORITY: ${{ secrets.ENTRA_AUTHORITY }}
+  VITE_ENTRA_API_SCOPE: ${{ secrets.ENTRA_API_SCOPE }}
 
 jobs:
   build-and-deploy:
@@ -45,10 +48,25 @@ jobs:
       - name: Create production environment file
         run: |
           if ([string]::IsNullOrWhiteSpace($env:EARLY_LEARNER_API_URL)) {
-            throw "Missing VITE_API_BASE_URL repository secret."
+            throw "Missing EARLY_LEARNER_API_URL repository secret."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:VITE_ENTRA_CLIENT_ID)) {
+            throw "Missing VITE_ENTRA_CLIENT_ID repository secret."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:VITE_ENTRA_AUTHORITY)) {
+            throw "Missing VITE_ENTRA_AUTHORITY repository secret."
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:VITE_ENTRA_API_SCOPE)) {
+            throw "Missing VITE_ENTRA_API_SCOPE repository secret."
           }
 
           echo "VITE_API_BASE_URL=https://${{ env.EARLY_LEARNER_API_URL }}" > ${{ env.BUILD_DIR }}/.env.production
+          echo "VITE_ENTRA_CLIENT_ID=${{ env.VITE_ENTRA_CLIENT_ID }}" >> ${{ env.BUILD_DIR }}/.env.production
+          echo "VITE_ENTRA_AUTHORITY=${{ env.VITE_ENTRA_AUTHORITY }}" >> ${{ env.BUILD_DIR }}/.env.production
+          echo "VITE_ENTRA_API_SCOPE=${{ env.VITE_ENTRA_API_SCOPE }}" >> ${{ env.BUILD_DIR }}/.env.production
 
       # Run the frontend test suite before producing a deployable artifact.
       - name: Run frontend tests
