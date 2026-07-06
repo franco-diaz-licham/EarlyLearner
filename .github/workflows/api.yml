@@ -11,8 +11,8 @@ env:
   API_IMAGE: early-learner-api
   IMAGE_TAG: ${{ github.sha }}
   ACR_NAME: ${{ secrets.ACR_NAME }}
-  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-  API_CONTAINER_APP: ${{ vars.API_CONTAINER_APP_NAME }}
+  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  API_CONTAINER_APP: ${{ secrets.API_CONTAINER_APP_NAME }}
 
 jobs:
   build:
@@ -108,11 +108,11 @@ jobs:
       - name: Update API Container App
         run: |
           if ([string]::IsNullOrWhiteSpace($env:RESOURCE_GROUP)) {
-            throw "Missing AZURE_RESOURCE_GROUP repository variable."
+            throw "Missing AZURE_RESOURCE_GROUP repository secret."
           }
 
           if ([string]::IsNullOrWhiteSpace($env:API_CONTAINER_APP)) {
-            throw "Missing API_CONTAINER_APP_NAME repository variable."
+            throw "Missing API_CONTAINER_APP_NAME repository secret."
           }
 
           $image = "$($env:ACR_NAME).azurecr.io/$($env:API_IMAGE):$($env:IMAGE_TAG)"

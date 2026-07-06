@@ -7,9 +7,9 @@ env:
   BUILD_DIR: frontend
   OUTPUT_DIR: dist
   NODE_VERSION: 22.x
-  SWA_NAME: ${{ vars.SWA_NAME }}
-  SWA_RESOURCE_GROUP: ${{ vars.SWA_RESOURCE_GROUP }}
-  VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+  SWA_NAME: ${{ secrets.SWA_NAME }}
+  SWA_RESOURCE_GROUP: ${{ secrets.SWA_RESOURCE_GROUP }}
+  VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
 jobs:
   build-and-deploy:
@@ -45,7 +45,7 @@ jobs:
       - name: Create production environment file
         run: |
           if ([string]::IsNullOrWhiteSpace($env:VITE_API_BASE_URL)) {
-            throw "Missing VITE_API_BASE_URL repository variable."
+            throw "Missing VITE_API_BASE_URL repository secret."
           }
 
           "VITE_API_BASE_URL=$env:VITE_API_BASE_URL" | Set-Content -Path "$env:BUILD_DIR/.env.production"
@@ -81,11 +81,11 @@ jobs:
       - name: Deploy to Azure Static Web Apps
         run: |
           if ([string]::IsNullOrWhiteSpace($env:SWA_NAME)) {
-            throw "Missing SWA_NAME repository variable."
+            throw "Missing SWA_NAME repository secret."
           }
 
           if ([string]::IsNullOrWhiteSpace($env:SWA_RESOURCE_GROUP)) {
-            throw "Missing SWA_RESOURCE_GROUP repository variable."
+            throw "Missing SWA_RESOURCE_GROUP repository secret."
           }
 
           $artifactPath = Join-Path $env:GITHUB_WORKSPACE "$env:BUILD_DIR/$env:OUTPUT_DIR"

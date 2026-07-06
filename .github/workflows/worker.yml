@@ -11,8 +11,8 @@ env:
   WORKER_IMAGE: early-learner-worker
   IMAGE_TAG: ${{ github.sha }}
   ACR_NAME: ${{ secrets.ACR_NAME }}
-  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-  WORKER_CONTAINER_APP: ${{ vars.WORKER_CONTAINER_APP_NAME }}
+  RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  WORKER_CONTAINER_APP: ${{ secrets.WORKER_CONTAINER_APP_NAME }}
 
 jobs:
   build:
@@ -108,11 +108,11 @@ jobs:
       - name: Update Worker Container App
         run: |
           if ([string]::IsNullOrWhiteSpace($env:RESOURCE_GROUP)) {
-            throw "Missing AZURE_RESOURCE_GROUP repository variable."
+            throw "Missing AZURE_RESOURCE_GROUP repository secret."
           }
 
           if ([string]::IsNullOrWhiteSpace($env:WORKER_CONTAINER_APP)) {
-            throw "Missing WORKER_CONTAINER_APP_NAME repository variable."
+            throw "Missing WORKER_CONTAINER_APP_NAME repository secret."
           }
 
           $image = "$($env:ACR_NAME).azurecr.io/$($env:WORKER_IMAGE):$($env:IMAGE_TAG)"
