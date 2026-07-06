@@ -105,9 +105,10 @@ services:
     environment:
       ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
       AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;"
+      AzureBlob__ContainerName: "earlylearner-files"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
-      OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
+      Observability__OtlpEndpoint: "http://otel-collector:4317"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost/health/ready"]
       interval: 30s
@@ -134,7 +135,7 @@ services:
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       EarlyLearner__Url: "http://localhost:5173"
       DOTNET_ENVIRONMENT: "Development"
-      OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
+      Observability__OtlpEndpoint: "http://otel-collector:4317"
 
 volumes:
   azurite-data:

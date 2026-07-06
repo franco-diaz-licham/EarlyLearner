@@ -1,3 +1,5 @@
+using Azure.Monitor.OpenTelemetry.Exporter;
+using EarlyLearner.Shared.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,9 +11,22 @@ namespace EarlyLearner.Shared.Observability;
 
 public static class ObservabilityExtensions
 {
-    public static IHostApplicationBuilder AddEarlyLearnerObservability(this IHostApplicationBuilder builder, string serviceName, bool includeAspNetCoreInstrumentation = false)
+    public static IHostApplicationBuilder AddEarlyLearnerObservability(
+        this IHostApplicationBuilder builder,
+        IHostEnvironment environment,
+        string serviceName,
+        bool includeAspNetCoreInstrumentation = false)
     {
-        var otlpEndpoint = builder.Configuration.GetValue<string>("OpenTelemetry:OtlpEndpoint");
+        builder.Services
+            .AddOptions<ObservabilityOptions>()
+            .Bind(builder.Configuration.GetSection(ObservabilityOptions.SECTION_NAME))
+            .ValidateOnStart();
+
+        var observabilityOptions = new ObservabilityOptions();
+        builder.Configuration.GetSection(ObservabilityOptions.SECTION_NAME).Bind(observabilityOptions);
+
+        var useOtlpExporter = environment.IsDevelopment() && !string.IsNullOrWhiteSpace(observabilityOptions.OtlpEndpoint);
+        var useAzureMonitorExporter = !environment.IsDevelopment() && !string.IsNullOrWhiteSpace(observabilityOptions.AppInsightConnectionString);
 
         builder.Services
             .AddOpenTelemetry()
@@ -23,14 +38,16 @@ public static class ObservabilityExtensions
                     .AddHttpClientInstrumentation()
                     .AddSource("MassTransit");
 
-                if (!string.IsNullOrWhiteSpace(otlpEndpoint)) tracing.AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint));
+                if (useOtlpExporter) tracing.AddOtlpExporter(options => options.Endpoint = new Uri(observabilityOptions.OtlpEndpoint));
+                if (useAzureMonitorExporter) tracing.AddAzureMonitorTraceExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
             })
             .WithMetrics(metrics => {
                 if (includeAspNetCoreInstrumentation) metrics.AddAspNetCoreInstrumentation();
                 metrics
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
-                if (!string.IsNullOrWhiteSpace(otlpEndpoint)) metrics.AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint));
+                if (useOtlpExporter) metrics.AddOtlpExporter(options => options.Endpoint = new Uri(observabilityOptions.OtlpEndpoint));
+                if (useAzureMonitorExporter) metrics.AddAzureMonitorMetricExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
             });
 
         return builder;

@@ -8,7 +8,7 @@ using Serilog;
 try {
     var builder = WebApplication.CreateBuilder(args);
     builder.AddSerilog();
-    builder.AddEarlyLearnerObservability("earlylearner-api", includeAspNetCoreInstrumentation: true);
+    builder.AddEarlyLearnerObservability(builder.Environment, "earlylearner-api", includeAspNetCoreInstrumentation: true);
 
     try {
         ApiAppServices.AddAppServices(builder);
