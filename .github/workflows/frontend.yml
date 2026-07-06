@@ -52,15 +52,15 @@ jobs:
           }
 
           if ([string]::IsNullOrWhiteSpace($env:VITE_ENTRA_CLIENT_ID)) {
-            throw "Missing VITE_ENTRA_CLIENT_ID repository secret."
+            throw "Missing ENTRA_CLIENT_ID repository secret."
           }
 
           if ([string]::IsNullOrWhiteSpace($env:VITE_ENTRA_AUTHORITY)) {
-            throw "Missing VITE_ENTRA_AUTHORITY repository secret."
+            throw "Missing ENTRA_AUTHORITY repository secret."
           }
 
           if ([string]::IsNullOrWhiteSpace($env:VITE_ENTRA_API_SCOPE)) {
-            throw "Missing VITE_ENTRA_API_SCOPE repository secret."
+            throw "Missing ENTRA_API_SCOPE repository secret."
           }
 
           echo "VITE_API_BASE_URL=https://${{ env.EARLY_LEARNER_API_URL }}" > ${{ env.BUILD_DIR }}/.env.production
