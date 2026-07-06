@@ -16,7 +16,7 @@ public static class WorkerAppServices
     {
         builder.Services
             .EarlyLearnerServices(builder.Configuration)
-            .EmailServices(builder.Configuration)
+            .EmailServices(builder.Configuration, builder.Environment)
             .MessagingServices(builder.Configuration);
     }
 
@@ -31,23 +31,21 @@ public static class WorkerAppServices
         return services;
     }
 
-    private static IServiceCollection EmailServices(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection EmailServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services
-            .AddOptions<EmailOptions>()
-            .Bind(configuration.GetSection(EmailOptions.SECTION_NAME))
+            .AddOptions<AzureCommunicationServiceOptions>()
+            .Bind(configuration.GetSection(AzureCommunicationServiceOptions.SECTION_NAME))
             .ValidateDataAnnotations()
-            .Validate(HasRequiredProviderConfiguration, "Azure Communication Services email requires a connection string and sender address.")
+            .Validate(options => environment.IsDevelopment() || options.HasRequiredConfiguration(), "Azure Communication Services email requires a connection string and sender address outside development.")
             .ValidateOnStart();
 
-        var emailProvider = configuration.GetValue<string>($"{EmailOptions.SECTION_NAME}:{nameof(EmailOptions.Provider)}");
-
-        if (string.Equals(emailProvider, EmailProvider.AzureCommunicationServices, StringComparison.OrdinalIgnoreCase)) {
-            services.AddScoped<IEmailSender, AzureCommunicationEmailSender>();
+        if (environment.IsDevelopment()) {
+            services.AddScoped<IEmailSender, ConsoleEmailSender>();
             return services;
         }
 
-        services.AddScoped<IEmailSender, ConsoleEmailSender>();
+        services.AddScoped<IEmailSender, AzureCommunicationEmailSender>();
         return services;
     }
 
@@ -106,13 +104,5 @@ public static class WorkerAppServices
         });
 
         return services;
-    }
-
-    private static bool HasRequiredProviderConfiguration(EmailOptions options)
-    {
-        if (!options.UsesAzureCommunicationServices()) return true;
-
-        return !string.IsNullOrWhiteSpace(options.AzureCommunicationConnectionString)
-            && !string.IsNullOrWhiteSpace(options.SenderAddress);
     }
 }

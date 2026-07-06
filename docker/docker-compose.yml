@@ -133,7 +133,7 @@ services:
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       EarlyLearner__Url: "http://localhost:5173"
-      Email__Provider: "Console"
+      DOTNET_ENVIRONMENT: "Development"
       OpenTelemetry__OtlpEndpoint: "http://otel-collector:4317"
 
 volumes:

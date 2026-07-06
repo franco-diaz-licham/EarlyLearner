@@ -6,13 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Messaging;
 
-public sealed class AzureCommunicationEmailSender(IOptions<EmailOptions> options, ILogger<AzureCommunicationEmailSender> logger) : IEmailSender
+public sealed class AzureCommunicationEmailSender(IOptions<AzureCommunicationServiceOptions> options, ILogger<AzureCommunicationEmailSender> logger) : IEmailSender
 {
-    private readonly EmailOptions options = options.Value;
+    private readonly AzureCommunicationServiceOptions options = options.Value;
 
     public async Task SendAsync(EmailMessageModel message, CancellationToken cancellationToken)
     {
-        var emailClient = new EmailClient(options.AzureCommunicationConnectionString);
+        var emailClient = new EmailClient(options.ConnectionString);
         var emailMessage = new EmailMessage(
             options.SenderAddress,
             message.To,
