@@ -145,7 +145,7 @@ Service Bus: localhost:5672
 Docker database credentials:
 
 ```text
-Database: early_learner
+Database: early_learner_main
 Username: local-dev
 Password: local-dev
 ```
@@ -159,7 +159,7 @@ For running the API locally against the Docker PostgreSQL container, use this co
 ```json
 {
     "ConnectionStrings": {
-        "Db": "Host=127.0.0.1;Port=55432;Database=early_learner;Username=local-dev;Password=local-dev"
+        "Db": "Host=127.0.0.1;Port=55432;Database=early_learner_main;Username=local-dev;Password=local-dev"
     }
 }
 ```
