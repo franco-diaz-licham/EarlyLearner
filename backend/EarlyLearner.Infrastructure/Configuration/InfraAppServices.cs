@@ -2,6 +2,7 @@ using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using Azure.Storage.Blobs;
 using EarlyLearner.Application.Common;
+using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Features.LearningContext;
@@ -173,6 +174,8 @@ public static class InfraAppServices
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
                 busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
+                busFactoryConfigurator.Message<AuditTrailEntryRecorded>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(AuditMessagingTopology.AuditTrailEntryRecordedTopic));
                 busFactoryConfigurator.Publish<IIntegrationEvent>(publishConfigurator => {
                     publishConfigurator.Exclude = true;
                 });

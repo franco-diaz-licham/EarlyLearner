@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EarlyLearner.Application\EarlyLearner.Application.csproj" />
+    <ProjectReference Include="..\EarlyLearner.Infrastructure\EarlyLearner.Infrastructure.csproj" />
     <ProjectReference Include="..\EarlyLearner.Shared\EarlyLearner.Shared.csproj" />
   </ItemGroup>
 </Project>

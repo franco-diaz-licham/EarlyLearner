@@ -1,5 +1,7 @@
+using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Infrastructure.Configuration;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;
@@ -15,6 +17,7 @@ public static class WorkerAppServices
     public static void AddAppServices(HostApplicationBuilder builder)
     {
         builder.Services
+            .AddDbServices(builder.Configuration)
             .EarlyLearnerServices(builder.Configuration)
             .EmailServices(builder.Configuration, builder.Environment)
             .MessagingServices(builder.Configuration);
@@ -71,6 +74,8 @@ public static class WorkerAppServices
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
                 busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
+                busFactoryConfigurator.Message<AuditTrailEntryRecorded>(messageConfigurator =>
+                    messageConfigurator.SetEntityName(AuditMessagingTopology.AuditTrailEntryRecordedTopic));
                 busFactoryConfigurator.Publish<IIntegrationEvent>(publishConfigurator => {
                     publishConfigurator.Exclude = true;
                 });
@@ -99,6 +104,13 @@ public static class WorkerAppServices
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;
                         endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailRequestedConsumer>(context);
+                    });
+
+                busFactoryConfigurator.SubscriptionEndpoint<AuditTrailEntryRecorded>(
+                    AuditMessagingTopology.AuditWorkerSubscription,
+                    endpointConfigurator => {
+                        endpointConfigurator.ConfigureConsumeTopology = false;
+                        endpointConfigurator.ConfigureConsumer<AuditTrailEntryRecordedConsumer>(context);
                     });
             });
         });
