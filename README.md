@@ -9,7 +9,7 @@
 
 EarlyLearner is a full-stack early childhood learning record and school-readiness application. It helps carers manage households and children, capture daily learning moments, attach evidence, and track school-readiness outcomes.
 
-The project is built as a technical showcase for event-driven and microservice based system: a .NET API, a background worker, Azure-native, and a modern React frontend.
+The project is built as a cloud-native, event-driven .NET system using a modular API, background worker, Azure-managed services, and a React frontend.
 
 ---
 
