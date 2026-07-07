@@ -1,23 +1,20 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
-using EarlyLearner.Shared.Options;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using EarlyLearner.Api.Configuration.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace EarlyLearner.Shared.Observability;
+namespace EarlyLearner.Api.Configuration;
 
-public static class ObservabilityExtensions
+/// <summary>
+/// Extension methods for host-level infrastructure registrations (observability, API host configuration, middleware).
+/// Kept separate from <see cref="ApiAppServices"/> so that infrastructure concerns
+/// do not bleed into the application service graph.
+/// </summary>
+public static class HostServiceExtensions
 {
-    public static IHostApplicationBuilder AddEarlyLearnerObservability(
-        this IHostApplicationBuilder builder,
-        IHostEnvironment environment,
-        string serviceName,
-        bool includeAspNetCoreInstrumentation = false)
+    public static IHostApplicationBuilder AddEarlyLearnerObservability(this IHostApplicationBuilder builder, string serviceName)
     {
         builder.Services
             .AddOptions<ObservabilityOptions>()
@@ -27,8 +24,8 @@ public static class ObservabilityExtensions
         var observabilityOptions = new ObservabilityOptions();
         builder.Configuration.GetSection(ObservabilityOptions.SECTION_NAME).Bind(observabilityOptions);
 
-        var useOtlpExporter = environment.IsDevelopment() && !string.IsNullOrWhiteSpace(observabilityOptions.OtlpEndpoint);
-        var useAzureMonitorExporter = !environment.IsDevelopment() && !string.IsNullOrWhiteSpace(observabilityOptions.AppInsightConnectionString);
+        var useOtlpExporter = builder.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(observabilityOptions.OtlpEndpoint);
+        var useAzureMonitorExporter = !builder.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(observabilityOptions.AppInsightConnectionString);
 
         builder.Logging.AddOpenTelemetry(logging => {
             logging.IncludeFormattedMessage = true;
@@ -43,8 +40,8 @@ public static class ObservabilityExtensions
             .AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(serviceName))
             .WithTracing(tracing => {
-                if (includeAspNetCoreInstrumentation) tracing.AddAspNetCoreInstrumentation();
                 tracing
+                    .AddAspNetCoreInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSource("MassTransit");
@@ -53,10 +50,11 @@ public static class ObservabilityExtensions
                 if (useAzureMonitorExporter) tracing.AddAzureMonitorTraceExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
             })
             .WithMetrics(metrics => {
-                if (includeAspNetCoreInstrumentation) metrics.AddAspNetCoreInstrumentation();
                 metrics
+                    .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
+
                 if (useOtlpExporter) metrics.AddOtlpExporter(options => options.Endpoint = new Uri(observabilityOptions.OtlpEndpoint));
                 if (useAzureMonitorExporter) metrics.AddAzureMonitorMetricExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
             });
