@@ -11,6 +11,7 @@ using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Features.Dashboard;
 using EarlyLearner.Infrastructure.Configuration.Options;
+using EarlyLearner.Shared.Documents;
 using FluentValidation;
 using Microsoft.OpenApi;
 using Serilog;
@@ -31,6 +32,7 @@ public static class ApiAppServices
         });
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddRequestValidators();
+        builder.Services.AddCosmosDb(builder.Configuration);
         builder.Services.AddNotifications();
 
         builder.Services
@@ -72,9 +74,9 @@ public static class ApiAppServices
 
     private static IServiceCollection AddNotifications(this IServiceCollection services)
     {
-        services.AddSingleton<InMemoryNotificationService>();
-        services.AddSingleton<INotificationPublisher>(sp => sp.GetRequiredService<InMemoryNotificationService>());
-        services.AddSingleton<INotificationStream>(sp => sp.GetRequiredService<InMemoryNotificationService>());
+        services.AddSingleton<NotificationService>();
+        services.AddSingleton<INotificationPublisher>(sp => sp.GetRequiredService<NotificationService>());
+        services.AddSingleton<INotificationStream>(sp => sp.GetRequiredService<NotificationService>());
 
         return services;
     }

@@ -23,6 +23,20 @@ services:
       interval: 5s
       retries: 5
 
+  cosmos-db:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+    container_name: cosmos-db
+    hostname: cosmos-db
+    environment:
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: "3"
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
+      AZURE_COSMOS_EMULATOR_KEY: "local-dev"
+    ports:
+      - "8081:8081"
+      - "10250-10255:10250-10255"
+    volumes:
+      - cosmos-data:/data/db
+
   servicebus-mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: servicebus-mssql
@@ -117,6 +131,7 @@ services:
       - "5136:80"
     depends_on:
       - azurite
+      - cosmos-db
       - db
       - otel-collector
       - servicebus-emulator
@@ -124,6 +139,10 @@ services:
       ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner_main;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
       AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;"
       AzureBlob__ContainerName: "earlylearner-files"
+      CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
+      CosmosDb__DatabaseName: "earlylearner"
+      CosmosDb__DefaultTimeToLiveSeconds: "86400"
+      CosmosDb__AllowInsecureEmulatorCertificate: "true"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
@@ -145,18 +164,26 @@ services:
     container_name: early-learner-worker
     depends_on:
       - audit-db
+      - cosmos-db
       - otel-collector
       - servicebus-emulator
     environment:
       ConnectionStrings__AuditDb: "Host=audit-db;Port=5432;Database=early_learner_audit;Username=local-dev;Password=local-dev;Maximum Pool Size=50;Timeout=60"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+      CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
+      CosmosDb__DatabaseName: "earlylearner"
+      CosmosDb__DefaultTimeToLiveSeconds: "86400"
+      CosmosDb__AllowInsecureEmulatorCertificate: "true"
       EarlyLearner__Url: "http://localhost:5173"
       DOTNET_ENVIRONMENT: "Development"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
 
 volumes:
   azurite-data:
+    driver: local
+  cosmos-data:
+    name: early_learner_cosmos-data
     driver: local
   audit-postgres-data:
     name: early_learner_audit-postgres-data

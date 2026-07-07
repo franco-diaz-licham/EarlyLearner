@@ -1,6 +1,7 @@
 using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.Documents;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;
@@ -20,6 +21,7 @@ public static class WorkerAppServices
         builder.Services
             .AuditDatabaseServices(builder.Configuration)
             .EarlyLearnerServices(builder.Configuration)
+            .AddCosmosDb(builder.Configuration)
             .EmailServices(builder.Configuration, builder.Environment)
             .MessagingServices(builder.Configuration);
     }
