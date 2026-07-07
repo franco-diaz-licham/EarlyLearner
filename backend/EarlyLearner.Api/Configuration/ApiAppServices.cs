@@ -51,10 +51,7 @@ public static class ApiAppServices
 
         services.AddCors(options => {
             options.AddPolicy(name: corsOptions.PolicyName, configurePolicy: policy => {
-                policy.WithOrigins(
-                    origins: [
-                        corsOptions.Origin,
-                    ])
+                policy.WithOrigins(corsOptions.Origins)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

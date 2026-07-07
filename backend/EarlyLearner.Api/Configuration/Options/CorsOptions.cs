@@ -12,7 +12,7 @@ public class CorsOptions
     [Required] public string PolicyName { get; set; } = null!;
 
     /// <summary>
-    /// Frontend origin allowed to call the API.
+    /// Frontend origins allowed to call the API.
     /// </summary>
-    [Required] public string Origin { get; set; } = null!;
+    [Required, MinLength(1)] public string[] Origins { get; set; } = [];
 }
