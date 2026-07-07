@@ -1,10 +1,12 @@
 using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Api.Endpoints;
+using EarlyLearner.Api.Notifications;
 using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Application.Features.Dashboard;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Features.LearningContext;
+using EarlyLearner.Application.Features.Notifications;
 using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Features.Dashboard;
@@ -29,6 +31,7 @@ public static class ApiAppServices
         });
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddRequestValidators();
+        builder.Services.AddNotifications();
 
         builder.Services
             .AddUseCaseServices()
@@ -63,6 +66,15 @@ public static class ApiAppServices
 
     private static IServiceCollection AddApiMessagingServices(this IServiceCollection services, IConfiguration configuration)
     {
+
+        return services;
+    }
+
+    private static IServiceCollection AddNotifications(this IServiceCollection services)
+    {
+        services.AddSingleton<InMemoryNotificationService>();
+        services.AddSingleton<INotificationPublisher>(sp => sp.GetRequiredService<InMemoryNotificationService>());
+        services.AddSingleton<INotificationStream>(sp => sp.GetRequiredService<InMemoryNotificationService>());
 
         return services;
     }

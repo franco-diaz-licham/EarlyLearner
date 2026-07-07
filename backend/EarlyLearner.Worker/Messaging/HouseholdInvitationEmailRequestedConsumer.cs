@@ -18,6 +18,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender email
             await emailSender.SendAsync(EmailBuilder.BuildHouseholdInvitationEmail(message, options.Url), context.CancellationToken);
             await context.Publish(new HouseholdInvitationEmailSent(
                 Id: Guid.NewGuid(),
+                HouseholdId: message.HouseholdId,
                 InvitationId: message.InvitationId,
                 Email: message.Email,
                 SentAt: DateTimeOffset.UtcNow,
@@ -25,6 +26,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender email
         } catch (Exception exception) {
             await context.Publish(new HouseholdInvitationEmailFailed(
                 Id: Guid.NewGuid(),
+                HouseholdId: message.HouseholdId,
                 InvitationId: message.InvitationId,
                 Email: message.Email,
                 Reason: exception.Message,

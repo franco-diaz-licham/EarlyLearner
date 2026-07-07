@@ -15,6 +15,7 @@ public sealed record HouseholdInvitationEmailRequested(
 
 public sealed record HouseholdInvitationEmailSent(
     Guid Id,
+    Guid HouseholdId,
     Guid InvitationId,
     string Email,
     DateTimeOffset SentAt,
@@ -22,6 +23,7 @@ public sealed record HouseholdInvitationEmailSent(
 
 public sealed record HouseholdInvitationEmailFailed(
     Guid Id,
+    Guid HouseholdId,
     Guid InvitationId,
     string Email,
     string Reason,

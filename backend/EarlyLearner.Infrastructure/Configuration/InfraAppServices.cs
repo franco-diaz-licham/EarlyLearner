@@ -141,7 +141,6 @@ public static class InfraAppServices
 
     private static IServiceCollection AddApiMessagingServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<BusObserver>();
         services
             .AddOptions<AzureServiceBusOptions>()
             .Bind(configuration.GetSection(AzureServiceBusOptions.SECTION_NAME))
@@ -155,6 +154,8 @@ public static class InfraAppServices
 
         services.AddMassTransit(configurator => {
             configurator.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(MessagingConstants.EndpointPrefix, includeNamespace: false));
+            configurator.AddConsumer<HouseholdInvitationEmailSentConsumer>();
+            configurator.AddConsumer<HouseholdInvitationEmailFailedConsumer>();
             configurator.AddEntityFrameworkOutbox<DatabaseContext>(outboxConfigurator => {
                 outboxConfigurator.UsePostgres();
                 outboxConfigurator.UseBusOutbox();
@@ -168,6 +169,7 @@ public static class InfraAppServices
                 var options = context.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value;
                 busFactoryConfigurator.DeployPublishTopology = false;
 
+                // Register topic names per event
                 busFactoryConfigurator.Message<HouseholdInvitationEmailRequested>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailRequestedTopic));
                 busFactoryConfigurator.Message<HouseholdInvitationEmailSent>(messageConfigurator =>
@@ -197,8 +199,19 @@ public static class InfraAppServices
                 busFactoryConfigurator.UseTimeout(timeoutConfigurator => {
                     timeoutConfigurator.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds ?? 60);
                 });
-                busFactoryConfigurator.ConnectBusObserver(context.GetRequiredService<BusObserver>());
-                busFactoryConfigurator.ConfigureEndpoints(context);
+
+                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailSent>(
+                    IdentityMessagingTopology.ApiNotificationSubscription,
+                    endpointConfigurator => {
+                        endpointConfigurator.ConfigureConsumeTopology = false;
+                        endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailSentConsumer>(context);
+                    });
+                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailFailed>(
+                    IdentityMessagingTopology.ApiNotificationSubscription,
+                    endpointConfigurator => {
+                        endpointConfigurator.ConfigureConsumeTopology = false;
+                        endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailFailedConsumer>(context);
+                    });
             });
         });
 

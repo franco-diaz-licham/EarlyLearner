@@ -7,4 +7,5 @@ public static class IdentityMessagingTopology
     public const string HouseholdInvitationEmailFailedTopic = "household-invitation-email-failed";
 
     public const string EmailWorkerSubscription = "earlylearner.email-worker";
+    public const string ApiNotificationSubscription = "earlylearner.api-notifications";
 }

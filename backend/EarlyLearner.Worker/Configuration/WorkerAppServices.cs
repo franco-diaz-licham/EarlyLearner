@@ -95,6 +95,8 @@ public static class WorkerAppServices
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
                 busFactoryConfigurator.Message<AuditTrailEntryRecorded>(messageConfigurator =>
                     messageConfigurator.SetEntityName(AuditMessagingTopology.AuditTrailEntryRecordedTopic));
+
+                // Exclude the interface for integrations
                 busFactoryConfigurator.Publish<IIntegrationEvent>(publishConfigurator => {
                     publishConfigurator.Exclude = true;
                 });
