@@ -9,7 +9,7 @@
 
 EarlyLearner is a full-stack early childhood learning record and school-readiness application. It helps carers manage households and children, capture daily learning moments, attach evidence, and track school-readiness outcomes.
 
-The project is built as a technical showcase for a production-style modular monolith: a .NET API with Clean Architecture boundaries, EF Core persistence, Azure-native messaging, Docker-based local infrastructure, and a modern React frontend.
+The project is built as a technical showcase for event-driven and microservice based system: a .NET API, a background worker, Azure-native, and a modern React frontend.
 
 ---
 
@@ -20,13 +20,28 @@ The project is built as a technical showcase for a production-style modular mono
 - Child readiness profiles and progress tracking
 - Daily logs with learning moments and file evidence
 - Readiness evidence modelling
-- Azure Service Bus integration messaging with EF outbox
+- Household invitation email workflow
+- Realtime invitation delivery status notifications
 - Dashboard query slice for household summary data
-- Dockerized local infrastructure for PostgreSQL, Azurite, Azure Service Bus emulator, API, worker, and database seeding
 
 ---
 
 ## 🧰 Technology Stack
+
+### ☁️ Azure-Native Services
+
+- **Azure Container Apps** for the API and worker services
+- **Azure Static Web Apps** for the React frontend
+- **Azure Container Registry** for application images
+- **Azure Service Bus Namespace** for topic-based integration events
+- **Azure Cosmos DB** for short-lived document storage
+- **Azure Database for PostgreSQL** for relational application data
+- **Azure Communication Services** for email delivery
+- **Azure Storage Account** for file/blob storage
+- **Azure Key Vault** for secrets and protected configuration
+- **Microsoft Entra External ID** tenant for customer identity
+- **Application Insights** for application telemetry
+- **Log Analytics workspace** for centralized logs
 
 ### ⚙️ Backend
 
@@ -34,9 +49,12 @@ The project is built as a technical showcase for a production-style modular mono
 - ASP.NET Core Minimal APIs
 - Entity Framework Core
 - PostgreSQL with Npgsql
+- Azure Service Bus with MassTransit
+- Azure Cosmos DB document store
 - Clean Architecture project split
 - Domain-driven design style entities and value objects
 - CQRS-style application commands and queries
+- Event-driven integration between API and worker processes
 - Serilog
 - Swagger / OpenAPI
 
@@ -59,8 +77,10 @@ The project is built as a technical showcase for a production-style modular mono
 
 - Docker Compose
 - PostgreSQL 17
+- Azure Cosmos DB emulator
 - Azurite for Azure Blob Storage emulation
 - Azure Service Bus emulator
+- OpenTelemetry collector
 - PowerShell helper scripts
 
 ---
@@ -76,7 +96,7 @@ backend/
 ├── EarlyLearner.Domain/          # Entities, value objects, enums, domain events, business rules
 ├── EarlyLearner.Infrastructure/  # EF Core DbContext, configurations, migrations, external adapters
 ├── EarlyLearner.Worker/          # Message consumers, email delivery, worker-owned audit persistence
-└── EarlyLearner.Shared/          # Shared helpers and cross-cutting utility code
+└── EarlyLearner.Shared/          # Shared helpers, document-store abstractions, cross-process options
 ```
 
 ### Frontend
@@ -138,8 +158,11 @@ Main local services:
 API:         http://localhost:5136
 Worker:      early-learner-worker container
 PostgreSQL:  localhost:55432
+Audit DB:    localhost:55433
+Cosmos DB:   https://localhost:8081
 Azurite:     localhost:10000
 Service Bus: localhost:5672
+OTLP:        localhost:4317
 ```
 
 Docker database credentials:
@@ -192,6 +215,23 @@ Build the worker:
 
 ```powershell
 dotnet build backend/EarlyLearner.Worker/EarlyLearner.Worker.csproj
+```
+
+When running API or worker outside Docker, keep the emulator-backed settings aligned with `appsettings.json`:
+
+```json
+{
+    "CosmosDb": {
+        "ConnectionString": "AccountEndpoint=https://localhost:8081/;AccountKey=local-dev;",
+        "DatabaseName": "earlylearner",
+        "DefaultTimeToLiveSeconds": 86400,
+        "AllowInsecureEmulatorCertificate": true
+    },
+    "AzureServiceBus": {
+        "ConnectionString": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
+        "AdministrationConnectionString": "Endpoint=sb://localhost:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+    }
+}
 ```
 
 ---
