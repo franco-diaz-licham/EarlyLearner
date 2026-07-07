@@ -1,12 +1,11 @@
 using EarlyLearner.Application.Features.AuditContext;
-using EarlyLearner.Infrastructure.Persistence;
-using EarlyLearner.Infrastructure.Persistence.Entities;
+using EarlyLearner.Worker.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Worker.Messaging;
 
-public sealed class AuditTrailEntryRecordedConsumer(DatabaseContext db) : IConsumer<AuditTrailEntryRecorded>
+public sealed class AuditTrailEntryRecordedConsumer(AuditDbContext db) : IConsumer<AuditTrailEntryRecorded>
 {
     public async Task Consume(ConsumeContext<AuditTrailEntryRecorded> context)
     {

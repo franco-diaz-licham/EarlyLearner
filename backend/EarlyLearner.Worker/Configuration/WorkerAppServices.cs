@@ -1,13 +1,14 @@
 using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Infrastructure.Configuration;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;
+using EarlyLearner.Worker.Persistence;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Configuration;
@@ -17,10 +18,28 @@ public static class WorkerAppServices
     public static void AddAppServices(HostApplicationBuilder builder)
     {
         builder.Services
-            .AddDbServices(builder.Configuration)
+            .AuditDatabaseServices(builder.Configuration)
             .EarlyLearnerServices(builder.Configuration)
             .EmailServices(builder.Configuration, builder.Environment)
             .MessagingServices(builder.Configuration);
+    }
+
+    private static IServiceCollection AuditDatabaseServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<AuditDatabaseOptions>()
+            .Bind(configuration.GetSection(AuditDatabaseOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddDbContext<AuditDbContext>((sp, options) => {
+            var dbOpts = sp.GetRequiredService<IOptions<AuditDatabaseOptions>>().Value;
+            options.UseNpgsql(dbOpts.AuditDb).UseSnakeCaseNamingConvention();
+        });
+
+        services.AddHostedService<AuditDbInitializer>();
+
+        return services;
     }
 
     private static IServiceCollection EarlyLearnerServices(this IServiceCollection services, IConfiguration configuration)
