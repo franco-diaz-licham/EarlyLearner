@@ -15,5 +15,5 @@ public interface INotificationPublisher
 
 public interface INotificationStream
 {
-    IAsyncEnumerable<NotificationDto> SubscribeAsync(Guid householdId, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<NotificationDto> SubscribeAsync(Guid householdId, Guid invitationId, CancellationToken cancellationToken = default);
 }

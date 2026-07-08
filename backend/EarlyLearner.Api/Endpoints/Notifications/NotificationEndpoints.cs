@@ -20,14 +20,21 @@ public static class NotificationEndpoints
         HttpContext httpContext,
         ICurrentUser currentUser,
         INotificationStream notificationStream,
+        Guid? invitationId,
         CancellationToken cancellationToken)
     {
+        if (invitationId is null) {
+            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await httpContext.Response.WriteAsync("Query parameter 'invitationId' is required.", cancellationToken);
+            return;
+        }
+
         httpContext.Response.Headers.CacheControl = "no-cache";
         httpContext.Response.Headers.Connection = "keep-alive";
         httpContext.Response.ContentType = "text/event-stream";
 
         try {
-            await foreach (var notification in notificationStream.SubscribeAsync(currentUser.HouseholdId.Value, cancellationToken)) {
+            await foreach (var notification in notificationStream.SubscribeAsync(currentUser.HouseholdId.Value, invitationId.Value, cancellationToken)) {
                 var data = JsonSerializer.Serialize(notification, JsonSerializerOptions.Web);
                 await httpContext.Response.WriteAsync($"event: notification\ndata: {data}\n\n", cancellationToken);
                 await httpContext.Response.Body.FlushAsync(cancellationToken);

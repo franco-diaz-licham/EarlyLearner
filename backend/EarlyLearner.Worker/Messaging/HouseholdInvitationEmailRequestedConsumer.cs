@@ -1,12 +1,16 @@
-using EarlyLearner.Application.Features.IdentityContext;
-using EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.Documents;
+using EarlyLearner.Shared.IdentityContext;
+using EarlyLearner.Shared.Notifications;
 using EarlyLearner.Worker.Options;
 using MassTransit;
 using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Messaging;
 
-public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender emailSender, IOptions<EarlyLearnerOptions> options) : IConsumer<HouseholdInvitationEmailRequested>
+public sealed class HouseholdInvitationEmailRequestedConsumer(
+    IEmailSender emailSender,
+    IDocumentStore documentStore,
+    IOptions<EarlyLearnerOptions> options) : IConsumer<HouseholdInvitationEmailRequested>
 {
     private readonly EarlyLearnerOptions options = options.Value;
 
@@ -16,22 +20,57 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(IEmailSender email
 
         try {
             await emailSender.SendAsync(EmailBuilder.BuildHouseholdInvitationEmail(message, options.Url), context.CancellationToken);
-            await context.Publish(new HouseholdInvitationEmailSent(
+            var emailSent = new HouseholdInvitationEmailSent(
                 Id: Guid.NewGuid(),
                 HouseholdId: message.HouseholdId,
                 InvitationId: message.InvitationId,
                 Email: message.Email,
                 SentAt: DateTimeOffset.UtcNow,
-                OccurredAt: DateTimeOffset.UtcNow), context.CancellationToken);
+                OccurredAt: DateTimeOffset.UtcNow);
+
+            await UpsertNotificationAsync(ToNotificationDocument(emailSent), context.CancellationToken);
+            await context.Publish(emailSent, context.CancellationToken);
         } catch (Exception exception) {
-            await context.Publish(new HouseholdInvitationEmailFailed(
+            var emailFailed = new HouseholdInvitationEmailFailed(
                 Id: Guid.NewGuid(),
                 HouseholdId: message.HouseholdId,
                 InvitationId: message.InvitationId,
                 Email: message.Email,
                 Reason: exception.Message,
                 FailedAt: DateTimeOffset.UtcNow,
-                OccurredAt: DateTimeOffset.UtcNow), context.CancellationToken);
+                OccurredAt: DateTimeOffset.UtcNow);
+
+            await UpsertNotificationAsync(ToNotificationDocument(emailFailed), context.CancellationToken);
+            await context.Publish(emailFailed, context.CancellationToken);
         }
+    }
+
+    private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailSent message) => new(
+        Id: NotificationDocument.BuildId(message.InvitationId),
+        HouseholdId: message.HouseholdId,
+        InvitationId: message.InvitationId,
+        Type: "householdInvitationEmailSent",
+        Title: "Invitation email sent",
+        Message: $"Invitation email was sent to {message.Email}.",
+        Status: NotificationDeliveryStatus.Succeeded,
+        OccurredAt: message.SentAt);
+
+    private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailFailed message) => new(
+        Id: NotificationDocument.BuildId(message.InvitationId),
+        HouseholdId: message.HouseholdId,
+        InvitationId: message.InvitationId,
+        Type: "householdInvitationEmailFailed",
+        Title: "Invitation email failed",
+        Message: $"Invitation email to {message.Email} failed: {message.Reason}",
+        Status: NotificationDeliveryStatus.Failed,
+        OccurredAt: message.FailedAt);
+
+    private async Task UpsertNotificationAsync(NotificationDocument notification, CancellationToken cancellationToken)
+    {
+        await documentStore.UpsertAsync(
+            NotificationDocument.ContainerName,
+            notification,
+            NotificationDocument.BuildPartitionKey(notification.HouseholdId),
+            cancellationToken);
     }
 }
