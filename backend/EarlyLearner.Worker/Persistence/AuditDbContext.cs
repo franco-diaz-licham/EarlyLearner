@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MassTransit;
 
 namespace EarlyLearner.Worker.Persistence;
 
@@ -19,6 +20,10 @@ public sealed class AuditDbContext(DbContextOptions<AuditDbContext> options) : D
             builder.Property(entry => entry.ActionedAt).IsRequired();
             builder.Property(entry => entry.RecordedAt).IsRequired();
         });
+
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
 
         base.OnModelCreating(modelBuilder);
     }

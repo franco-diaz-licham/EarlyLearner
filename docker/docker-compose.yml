@@ -68,12 +68,12 @@ services:
       timeout: 5s
       retries: 12
 
-  db:
+  early_learner_local_db:
     image: postgres:17-alpine
-    container_name: db
-    hostname: db
+    container_name: early_learner_local_db
+    hostname: early_learner_local_db
     environment:
-      POSTGRES_DB: "early_learner_main"
+      POSTGRES_DB: "main"
       POSTGRES_USER: "local-dev"
       POSTGRES_PASSWORD: "local-dev"
     ports:
@@ -81,25 +81,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U local-dev -d early_learner_main"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  audit-db:
-    image: postgres:17-alpine
-    container_name: audit-db
-    hostname: audit-db
-    environment:
-      POSTGRES_DB: "early_learner_audit"
-      POSTGRES_USER: "local-dev"
-      POSTGRES_PASSWORD: "local-dev"
-    ports:
-      - "55433:5432"
-    volumes:
-      - audit-postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U local-dev -d early_learner_audit"]
+      test: ["CMD-SHELL", "pg_isready -U local-dev -d main"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -111,12 +93,12 @@ services:
       context: ..
       dockerfile: docker/db-seeder.dockerfile
     depends_on:
-      - db
+      - early_learner_local_db
       - early-learner-api
     environment:
-      POSTGRES_HOST: "db"
+      POSTGRES_HOST: "early_learner_local_db"
       POSTGRES_PORT: "5432"
-      POSTGRES_DB: "early_learner_main"
+      POSTGRES_DB: "main"
       POSTGRES_USER: "local-dev"
       POSTGRES_PASSWORD: "local-dev"
       SEED_FILE: "/scripts/seed.sql"
@@ -132,11 +114,11 @@ services:
     depends_on:
       - azurite
       - cosmos-db
-      - db
+      - early_learner_local_db
       - otel-collector
       - servicebus-emulator
     environment:
-      ConnectionStrings__Db: "Host=db;Port=5432;Database=early_learner_main;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
+      ConnectionStrings__Db: "Host=early_learner_local_db;Port=5432;Database=main;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
       AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;"
       AzureBlob__ContainerName: "earlylearner-files"
       CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
@@ -163,12 +145,12 @@ services:
     image: early-learner-worker:local
     container_name: early-learner-worker
     depends_on:
-      - audit-db
+      - early_learner_local_db
       - cosmos-db
       - otel-collector
       - servicebus-emulator
     environment:
-      ConnectionStrings__AuditDb: "Host=audit-db;Port=5432;Database=early_learner_audit;Username=local-dev;Password=local-dev;Maximum Pool Size=50;Timeout=60"
+      ConnectionStrings__AuditDb: "Host=early_learner_local_db;Port=5432;Database=audit;Username=local-dev;Password=local-dev;Maximum Pool Size=50;Timeout=60"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
@@ -185,9 +167,6 @@ volumes:
   cosmos-data:
     name: early_learner_cosmos-data
     driver: local
-  audit-postgres-data:
-    name: early_learner_audit-postgres-data
-    driver: local
   postgres-data:
-    name: early_learner_main-postgres-data
+    name: early_learner_postgres-data
     driver: local
