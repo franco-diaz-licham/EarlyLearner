@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-
 namespace EarlyLearner.Shared.Notifications;
 
 public sealed record NotificationDocument(

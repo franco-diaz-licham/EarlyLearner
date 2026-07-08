@@ -1,4 +1,4 @@
-using EarlyLearner.Application.Features.AuditContext;
+using EarlyLearner.Shared.AuditContext;
 using EarlyLearner.Worker.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;

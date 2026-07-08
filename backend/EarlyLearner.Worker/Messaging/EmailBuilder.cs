@@ -1,6 +1,5 @@
 using System.Net;
-using EarlyLearner.Application.Features.IdentityContext;
-using EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.IdentityContext;
 
 namespace EarlyLearner.Worker.Messaging;
 

@@ -1,5 +1,3 @@
-using EarlyLearner.Application.Ports;
-
 namespace EarlyLearner.Worker.Messaging;
 
 /// <summary>

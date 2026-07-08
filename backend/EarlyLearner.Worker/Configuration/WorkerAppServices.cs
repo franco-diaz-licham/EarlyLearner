@@ -1,7 +1,7 @@
-using EarlyLearner.Application.Features.AuditContext;
-using EarlyLearner.Application.Features.IdentityContext;
-using EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.AuditContext;
 using EarlyLearner.Shared.Documents;
+using EarlyLearner.Shared.IdentityContext;
+using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.Notifications;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;

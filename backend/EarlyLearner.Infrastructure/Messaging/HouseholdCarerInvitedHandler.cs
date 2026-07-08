@@ -1,7 +1,7 @@
-using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.IdentityContext;
+using EarlyLearner.Shared.IdentityContext;
 
 namespace EarlyLearner.Infrastructure.Messaging;
 

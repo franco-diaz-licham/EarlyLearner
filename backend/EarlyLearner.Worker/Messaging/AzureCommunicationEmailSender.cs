@@ -1,6 +1,5 @@
 using Azure;
 using Azure.Communication.Email;
-using EarlyLearner.Application.Ports;
 using EarlyLearner.Worker.Options;
 using Microsoft.Extensions.Options;
 

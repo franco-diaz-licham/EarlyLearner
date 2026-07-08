@@ -1,13 +1,6 @@
-namespace EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.Messaging;
 
-/// <summary>
-/// Contract for messages published outside this bounded context.
-/// </summary>
-public interface IIntegrationEvent
-{
-    Guid Id { get; }
-    DateTimeOffset OccurredAt { get; }
-}
+namespace EarlyLearner.Application.Ports;
 
 /// <summary>
 /// Publishes integration events through the configured messaging boundary.

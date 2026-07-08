@@ -1,6 +1,6 @@
-using EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.Messaging;
 
-namespace EarlyLearner.Application.Features.AuditContext;
+namespace EarlyLearner.Shared.AuditContext;
 
 public sealed record AuditTrailEntryRecorded(
     Guid Id,

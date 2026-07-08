@@ -1,4 +1,5 @@
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Shared.Messaging;
 using MassTransit;
 
 namespace EarlyLearner.Infrastructure.Messaging;
