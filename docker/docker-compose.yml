@@ -14,7 +14,7 @@ services:
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: blob-mock
-    command: ["azurite", "--skipApiVersionCheck", "--blobHost", "0.0.0.0"]
+    command: ["azurite", "--skipApiVersionCheck", "--blobHost", "0.0.0.0", "--queueHost", "0.0.0.0"]
     ports:
       - 10000:10000
       - 10001:10001
@@ -119,12 +119,8 @@ services:
       - servicebus-emulator
     environment:
       ConnectionStrings__Db: "Host=early_learner_local_db;Port=5432;Database=main;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
-      AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://host.docker.internal:10000/devstoreaccount1;QueueEndpoint=http://host.docker.internal:10001/devstoreaccount1;"
-      AzureBlob__ContainerName: "earlylearner-files"
+      AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;"
       CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
-      CosmosDb__DatabaseName: "earlylearner"
-      CosmosDb__DefaultTimeToLiveSeconds: "86400"
-      CosmosDb__AllowInsecureEmulatorCertificate: "true"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
@@ -134,9 +130,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-      - "blobmock.localhost.me:host-gateway"
 
   early-learner-worker:
     build:
@@ -154,10 +147,6 @@ services:
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
-      CosmosDb__DatabaseName: "earlylearner"
-      CosmosDb__DefaultTimeToLiveSeconds: "86400"
-      CosmosDb__AllowInsecureEmulatorCertificate: "true"
-      EarlyLearner__Url: "http://localhost:5173"
       DOTNET_ENVIRONMENT: "Development"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
 
