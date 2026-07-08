@@ -35,6 +35,7 @@ public static class CosmosDbServiceCollectionExtensions
         });
 
         services.AddSingleton<IDocumentStore, CosmosDocumentStore>();
+        services.AddHostedService<DocumentContainerInitializer>();
 
         return services;
     }

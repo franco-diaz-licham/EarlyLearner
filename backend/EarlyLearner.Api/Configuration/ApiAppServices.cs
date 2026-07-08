@@ -11,7 +11,6 @@ using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Features.Dashboard;
 using EarlyLearner.Infrastructure.Configuration.Options;
-using EarlyLearner.Shared.Documents;
 using FluentValidation;
 using Microsoft.OpenApi;
 using Serilog;
@@ -30,18 +29,14 @@ public static class ApiAppServices
         builder.Services.ConfigureHttpJsonOptions(options => {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
         });
-        builder.Services.AddHttpContextAccessor();
-        builder.Services.AddRequestValidators();
-        builder.Services.AddCosmosDb(builder.Configuration);
-        builder.Services.AddNotifications();
-
         builder.Services
+            .AddHttpContextAccessor()
+            .AddRequestValidators()
             .AddUseCaseServices()
             .AddPortServices()
             .AddCorsPolicy(builder.Configuration)
-            .AddApiMessagingServices(builder.Configuration);
-
-        builder.Services.AddMemoryCache();
+            .AddMemoryCache()
+            .AddNotifications();
     }
 
     private static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
@@ -62,12 +57,6 @@ public static class ApiAppServices
                     .AllowCredentials();
             });
         });
-
-        return services;
-    }
-
-    private static IServiceCollection AddApiMessagingServices(this IServiceCollection services, IConfiguration configuration)
-    {
 
         return services;
     }

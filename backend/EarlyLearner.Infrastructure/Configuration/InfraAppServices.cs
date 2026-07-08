@@ -17,6 +17,8 @@ using EarlyLearner.Infrastructure.Features.ReadinessContext;
 using EarlyLearner.Infrastructure.Messaging;
 using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Infrastructure.Ports;
+using EarlyLearner.Shared.Documents;
+using EarlyLearner.Shared.Notifications;
 using EarlyLearner.Shared.Options;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,9 +39,19 @@ public static class InfraAppServices
         services
             .AddAzureAdAuthentication(config)
             .AddDbServices(config)
+            .AddCosmosServices(config)
             .AddFileStorageServices(config)
             .AddApiMessagingServices(config)
             .AddRepositoryServices();
+    }
+
+    private static IServiceCollection AddCosmosServices(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddCosmosDb(config);
+        services.AddSingleton(new DocumentContainerDefinition(
+            NotificationDocument.ContainerName,
+            NotificationDocument.PartitionKeyPath));
+        return services;
     }
 
     public static IServiceCollection AddAzureAdAuthentication(this IServiceCollection services, IConfiguration configuration)
@@ -200,6 +212,7 @@ public static class InfraAppServices
                     timeoutConfigurator.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds ?? 60);
                 });
 
+                // Register consumers
                 busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailSent>(
                     IdentityMessagingTopology.ApiNotificationSubscription,
                     endpointConfigurator => {

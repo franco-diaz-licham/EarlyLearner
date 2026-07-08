@@ -2,6 +2,7 @@ using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Documents;
+using EarlyLearner.Shared.Notifications;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;
@@ -21,9 +22,19 @@ public static class WorkerAppServices
         builder.Services
             .AuditDatabaseServices(builder.Configuration)
             .EarlyLearnerServices(builder.Configuration)
-            .AddCosmosDb(builder.Configuration)
+            .AddCosmosServices(builder.Configuration)
             .EmailServices(builder.Configuration, builder.Environment)
             .MessagingServices(builder.Configuration);
+    }
+
+
+    private static IServiceCollection AddCosmosServices(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddCosmosDb(config);
+        services.AddSingleton(new DocumentContainerDefinition(
+            NotificationDocument.ContainerName,
+            NotificationDocument.PartitionKeyPath));
+        return services;
     }
 
     private static IServiceCollection AuditDatabaseServices(this IServiceCollection services, IConfiguration configuration)
@@ -83,6 +94,10 @@ public static class WorkerAppServices
 
         services.AddMassTransit(configurator => {
             configurator.AddConsumersFromNamespaceContaining(typeof(ConsumerAnchor)); // register consumers in DI
+            configurator.AddEntityFrameworkOutbox<AuditDbContext>(outboxConfigurator => {
+                outboxConfigurator.UsePostgres();
+                outboxConfigurator.UseBusOutbox();
+            });
 
             configurator.UsingAzureServiceBus((context, busFactoryConfigurator) => {
                 var options = context.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value;
@@ -126,6 +141,7 @@ public static class WorkerAppServices
                     IdentityMessagingTopology.EmailWorkerSubscription,
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;
+                        endpointConfigurator.UseEntityFrameworkOutbox<AuditDbContext>(context);
                         endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailRequestedConsumer>(context);
                     });
 
@@ -133,6 +149,7 @@ public static class WorkerAppServices
                     AuditMessagingTopology.AuditWorkerSubscription,
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;
+                        endpointConfigurator.UseEntityFrameworkOutbox<AuditDbContext>(context);
                         endpointConfigurator.ConfigureConsumer<AuditTrailEntryRecordedConsumer>(context);
                     });
             });
