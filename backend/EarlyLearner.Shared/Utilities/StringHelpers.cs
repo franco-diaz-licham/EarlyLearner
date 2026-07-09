@@ -1,8 +1,7 @@
 using System.Globalization;
 using System.Text;
-using System.Text.Json;
 
-namespace EarlyLearner.Shared;
+namespace EarlyLearner.Shared.Utilities;
 
 public static class StringHelpers
 {
@@ -22,8 +21,7 @@ public static class StringHelpers
             name.EndsWith("x", true, CultureInfo.InvariantCulture) ||
             name.EndsWith("z", true, CultureInfo.InvariantCulture) ||
             name.EndsWith("ch", true, CultureInfo.InvariantCulture) ||
-            name.EndsWith("sh", true, CultureInfo.InvariantCulture))
-        {
+            name.EndsWith("sh", true, CultureInfo.InvariantCulture)) {
             return name + "es";
         }
 
@@ -35,18 +33,15 @@ public static class StringHelpers
     {
         if (string.IsNullOrWhiteSpace(name)) return name;
         var builder = new StringBuilder(name.Length + 4);
-        for (var index = 0; index < name.Length; index++)
-        {
+        for (var index = 0; index < name.Length; index++) {
             var character = name[index];
 
-            if (character == '-')
-            {
+            if (character == '-') {
                 builder.Append('_');
                 continue;
             }
 
-            if (char.IsUpper(character))
-            {
+            if (char.IsUpper(character)) {
                 if (index > 0) builder.Append('_');
                 builder.Append(char.ToLowerInvariant(character));
                 continue;

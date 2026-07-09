@@ -1,7 +1,7 @@
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Shared;
+using EarlyLearner.Shared.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
