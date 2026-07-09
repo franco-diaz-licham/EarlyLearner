@@ -1,7 +1,7 @@
 using EarlyLearner.Application.Features.Notifications;
-using EarlyLearner.Shared.Documents;
+using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
-using EarlyLearner.Shared.Notifications;
+using EarlyLearner.Shared.NotificationService;
 using MassTransit;
 
 namespace EarlyLearner.Infrastructure.Messaging;

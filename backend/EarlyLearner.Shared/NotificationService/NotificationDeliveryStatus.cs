@@ -1,4 +1,4 @@
-namespace EarlyLearner.Shared.Notifications;
+namespace EarlyLearner.Shared.NotificationService;
 
 public enum NotificationDeliveryStatus
 {

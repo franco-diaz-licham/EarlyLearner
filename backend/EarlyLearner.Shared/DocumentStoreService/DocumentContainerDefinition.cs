@@ -1,4 +1,4 @@
-namespace EarlyLearner.Shared.Documents;
+namespace EarlyLearner.Shared.DocumentStoreService;
 
 /// <summary>
 /// Describes a Cosmos DB container that should be ensured during application startup.

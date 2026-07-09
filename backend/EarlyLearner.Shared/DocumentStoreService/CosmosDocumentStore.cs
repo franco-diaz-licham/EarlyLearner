@@ -2,7 +2,7 @@ using EarlyLearner.Shared.Options;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
-namespace EarlyLearner.Shared.Documents;
+namespace EarlyLearner.Shared.DocumentStoreService;
 
 public sealed class CosmosDocumentStore(CosmosClient client, IOptions<CosmosDbOptions> options) : IDocumentStore
 {

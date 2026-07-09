@@ -2,8 +2,8 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using EarlyLearner.Application.Features.Notifications;
-using EarlyLearner.Shared.Documents;
-using EarlyLearner.Shared.Notifications;
+using EarlyLearner.Shared.DocumentStoreService;
+using EarlyLearner.Shared.NotificationService;
 
 namespace EarlyLearner.Api.Notifications;
 

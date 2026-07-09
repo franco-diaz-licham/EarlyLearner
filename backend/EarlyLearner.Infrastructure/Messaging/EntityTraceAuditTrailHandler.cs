@@ -1,6 +1,6 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
-using EarlyLearner.Shared.AuditContext;
+using EarlyLearner.Shared.Messaging;
 
 namespace EarlyLearner.Infrastructure.Messaging;
 

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace EarlyLearner.Shared.Documents;
+namespace EarlyLearner.Shared.DocumentStoreService;
 
 public static class CosmosDbServiceCollectionExtensions
 {

@@ -1,6 +1,6 @@
-using EarlyLearner.Shared.Documents;
+using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
-using EarlyLearner.Shared.Notifications;
+using EarlyLearner.Shared.NotificationService;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;

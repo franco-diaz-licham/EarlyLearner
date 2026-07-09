@@ -1,4 +1,4 @@
-namespace EarlyLearner.Shared.Documents;
+namespace EarlyLearner.Shared.DocumentStoreService;
 
 public interface IDocumentStore
 {

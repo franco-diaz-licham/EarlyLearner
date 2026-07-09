@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-namespace EarlyLearner.Shared.Notifications;
+namespace EarlyLearner.Shared.NotificationService;
 
 public sealed record NotificationDocument(
     [property: JsonPropertyName("id")] string Id,

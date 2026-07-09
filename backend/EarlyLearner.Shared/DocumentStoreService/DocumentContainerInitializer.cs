@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
 
-namespace EarlyLearner.Shared.Documents;
+namespace EarlyLearner.Shared.DocumentStoreService;
 
 /// <summary>
 /// Ensures all registered Cosmos DB document containers exist when the host starts.
