@@ -1,5 +1,4 @@
 using EarlyLearner.Api.Helpers;
-using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext;
@@ -17,7 +16,6 @@ public static class HouseholdEndpoints
 
         households.MapGet("/", ListHouseholds).WithName(nameof(ListHouseholds));
         households.MapGet("/current", GetHousehold).WithName(nameof(GetHousehold));
-        households.MapGet("/audit-trail", ListAuditTrail).WithName(nameof(ListAuditTrail));
         households.MapPut("/", UpdateHousehold).WithName(nameof(UpdateHousehold));
         households.MapPost("/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
         households.MapDelete("/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
@@ -37,12 +35,6 @@ public static class HouseholdEndpoints
     public static async Task<IResult> GetHousehold(IHouseholdQueryService queryService, CancellationToken cancellationToken = default)
     {
         var result = await queryService.GetAsync(cancellationToken);
-        return result.ToApiResult();
-    }
-
-    public static async Task<IResult> ListAuditTrail(string? search, IAuditTrailQueryService queryService, CancellationToken cancellationToken = default)
-    {
-        var result = await queryService.ListAsync(search, cancellationToken);
         return result.ToApiResult();
     }
 

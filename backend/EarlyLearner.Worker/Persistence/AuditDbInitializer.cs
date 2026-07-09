@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace EarlyLearner.Worker.Persistence;
 
 public sealed class AuditDbInitializer(IServiceScopeFactory scopeFactory) : IHostedService

@@ -2,7 +2,6 @@ using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.Entities;
-using EarlyLearner.Infrastructure.Persistence.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +21,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<ReadinessEvidence> ReadinessEvidence => Set<ReadinessEvidence>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
     public DbSet<LearningMoment> LearningMoments => Set<LearningMoment>();
-    public DbSet<AuditTrailEntry> AuditTrailEntries => Set<AuditTrailEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

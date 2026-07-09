@@ -657,47 +657,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.ToTable("learning_moment_stored_files", (string)null);
                 });
 
-            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Entities.AuditTrailEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)")
-                        .HasColumnName("action");
-
-                    b.Property<DateTimeOffset>("ActionedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("actioned_at");
-
-                    b.Property<string>("Details")
-                        .HasMaxLength(1200)
-                        .HasColumnType("character varying(1200)")
-                        .HasColumnName("details");
-
-                    b.Property<Guid>("HouseholdId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("household_id");
-
-                    b.Property<DateTimeOffset>("RecordedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("recorded_at");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("summary");
-
-                    b.HasKey("Id")
-                        .HasName("pk_audit_trail_entries");
-
-                    b.ToTable("audit_trail_entries", (string)null);
-                });
-
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
                 {
                     b.Property<long>("Id")

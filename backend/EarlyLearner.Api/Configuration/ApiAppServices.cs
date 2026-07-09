@@ -1,7 +1,6 @@
 using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Api.Endpoints;
 using EarlyLearner.Api.Notifications;
-using EarlyLearner.Application.Features.AuditContext;
 using EarlyLearner.Application.Features.CoreContext;
 using EarlyLearner.Application.Features.Dashboard;
 using EarlyLearner.Application.Features.IdentityContext;
@@ -130,7 +129,6 @@ public static class ApiAppServices
         services.AddScoped<IReadinessOutcomeCommandService, ReadinessOutcomeCommandService>();
         services.AddScoped<IReadinessProfileQueryService, ReadinessProfileQueryService>();
         services.AddScoped<IReadinessProfileCommandService, ReadinessProfileCommandService>();
-        services.AddScoped<IAuditTrailQueryService, AuditTrailQueryService>();
 
         return services;
     }
