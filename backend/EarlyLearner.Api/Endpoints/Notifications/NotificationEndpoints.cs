@@ -10,7 +10,7 @@ public static class NotificationEndpoints
     {
         var notifications = endpoints.MapGroup("/notifications").WithTags("Notifications");
 
-        notifications.MapGet("/stream", StreamNotifications)
+        notifications.MapGet("/stream/{invitationId:guid}", StreamNotifications)
             .WithName(nameof(StreamNotifications));
 
         return endpoints;
@@ -20,21 +20,15 @@ public static class NotificationEndpoints
         HttpContext httpContext,
         ICurrentUser currentUser,
         INotificationStream notificationStream,
-        Guid? invitationId,
+        Guid invitationId,
         CancellationToken cancellationToken)
     {
-        if (invitationId is null) {
-            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await httpContext.Response.WriteAsync("Query parameter 'invitationId' is required.", cancellationToken);
-            return;
-        }
-
         httpContext.Response.Headers.CacheControl = "no-cache";
         httpContext.Response.Headers.Connection = "keep-alive";
         httpContext.Response.ContentType = "text/event-stream";
 
         try {
-            await foreach (var notification in notificationStream.SubscribeAsync(currentUser.HouseholdId.Value, invitationId.Value, cancellationToken)) {
+            await foreach (var notification in notificationStream.SubscribeAsync(currentUser.HouseholdId.Value, invitationId, cancellationToken)) {
                 var data = JsonSerializer.Serialize(notification, JsonSerializerOptions.Web);
                 await httpContext.Response.WriteAsync($"event: notification\ndata: {data}\n\n", cancellationToken);
                 await httpContext.Response.Body.FlushAsync(cancellationToken);
