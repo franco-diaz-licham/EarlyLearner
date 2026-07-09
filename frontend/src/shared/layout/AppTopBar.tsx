@@ -1,5 +1,6 @@
-import { UilBell, UilSearch } from '@iconscout/react-unicons';
+import { UilSearch } from '@iconscout/react-unicons';
 import { NavLink } from 'react-router-dom';
+import { NotificationsButton } from '../../features/notifications/components/NotificationsButton';
 import LightLogo from '../../assets/logo.png';
 import { AppIconButton } from '../ui/AppIconButton';
 import { AppAccountMenu } from './AppAccountMenu';
@@ -36,7 +37,7 @@ export const AppTopBar = ({ onLogout }: AppTopBarProps) => (
 
     <div className="flex items-center gap-3">
       <AppIconButton aria-label="Search" icon={<UilSearch aria-hidden="true" className="h-5 w-5" />} />
-      <AppIconButton aria-label="Notifications" icon={<UilBell aria-hidden="true" className="h-6 w-6" />} />
+      <NotificationsButton />
       <AppAccountMenu onLogout={onLogout} />
     </div>
   </header>
