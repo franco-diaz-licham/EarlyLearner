@@ -156,7 +156,7 @@ Main local services:
 
 ```text
 API:         http://localhost:5136
-Worker:      early-learner-worker container
+Worker:      worker container
 PostgreSQL:  localhost:55432
 Audit DB:    localhost:55433
 Cosmos DB:   https://localhost:8081
@@ -176,16 +176,6 @@ Password: local-dev
 ---
 
 ## ⚙️ Backend Setup
-
-For running the API locally against the Docker PostgreSQL container, use this connection string:
-
-```json
-{
-    "ConnectionStrings": {
-        "Db": "Host=127.0.0.1;Port=55432;Database=early_learner_main;Username=local-dev;Password=local-dev"
-    }
-}
-```
 
 Apply migrations:
 
@@ -215,23 +205,6 @@ Build the worker:
 
 ```powershell
 dotnet build backend/EarlyLearner.Worker/EarlyLearner.Worker.csproj
-```
-
-When running API or worker outside Docker, keep the emulator-backed settings aligned with `appsettings.json`:
-
-```json
-{
-    "CosmosDb": {
-        "ConnectionString": "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;",
-        "DatabaseName": "earlylearner",
-        "DefaultTimeToLiveSeconds": 86400,
-        "AllowInsecureEmulatorCertificate": true
-    },
-    "AzureServiceBus": {
-        "ConnectionString": "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;",
-        "AdministrationConnectionString": "Endpoint=sb://localhost:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
-    }
-}
 ```
 
 ---

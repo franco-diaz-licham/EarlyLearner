@@ -14,6 +14,12 @@ public static class ApiEndpointMappings
             .AllowAnonymous()
             .Produces<ApiResponse>(StatusCodes.Status200OK);
 
+        endpoints.MapGet(pattern: "/health/ready", handler: () => Results.Ok(new ApiResponse(StatusCodes.Status200OK, "Ready")))
+            .WithName(endpointName: "ReadinessCheck")
+            .WithTags(tags: "Health")
+            .AllowAnonymous()
+            .Produces<ApiResponse>(StatusCodes.Status200OK);
+
         var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");
 
         api.MapIdentityEndpoints();

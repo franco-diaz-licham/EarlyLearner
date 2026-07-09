@@ -99,7 +99,7 @@ services:
       dockerfile: docker/db-seeder.dockerfile
     depends_on:
       - early_learner_local_db
-      - early-learner-api
+      - api
     environment:
       POSTGRES_HOST: "early_learner_local_db"
       POSTGRES_PORT: "5432"
@@ -108,12 +108,12 @@ services:
       POSTGRES_PASSWORD: "local-dev"
       SEED_FILE: "/scripts/seed.sql"
 
-  early-learner-api:
+  api:
     build:
       context: ..
       dockerfile: docker/api.dockerfile
-    image: early-learner-api:local
-    container_name: early-learner-api
+    image: api:local
+    container_name: api
     ports:
       - "5136:80"
     depends_on:
@@ -141,12 +141,31 @@ services:
       retries: 3
       start_period: 30s
 
-  early-learner-worker:
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.dockerfile
+    image: frontend:local
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      VITE_API_BASE_URL: "http://localhost:5136"
+      VITE_API_VERSION: "v1"
+      VITE_APP_NAME: "EarlyLearner"
+      VITE_ENTRA_CLIENT_ID: "a08163b9-bc2e-4783-bda2-a04287d216ec"
+      VITE_ENTRA_AUTHORITY: "https://earlylearnerapp.ciamlogin.com/3a8a1443-0b3e-4de5-9e59-03bf8c3bd514"
+      VITE_ENTRA_API_SCOPE: "api://1953e0fa-dafc-480c-b2bf-faa4fb5aa694/access_as_user"
+
+  worker:
     build:
       context: ..
       dockerfile: docker/worker.dockerfile
-    image: early-learner-worker:local
-    container_name: early-learner-worker
+    image: worker:local
+    container_name: worker
     depends_on:
       azurite:
         condition: service_healthy

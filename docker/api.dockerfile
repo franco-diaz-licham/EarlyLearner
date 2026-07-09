@@ -23,6 +23,10 @@ RUN dotnet publish backend/EarlyLearner.Api/EarlyLearner.Api.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set URL for ASP.NET Core
 ENV ASPNETCORE_URLS=http://+:80
 ENV DOTNET_GCServer=0
