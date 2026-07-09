@@ -22,9 +22,21 @@ public sealed class AzureServiceBusOptions
     /// </summary>
     public string? AdministrationConnectionString { get; init; }
 
+    /// <summary>
+    /// Gets the number of messages MassTransit should prefetch from Service Bus for each receive endpoint.
+    /// Lower values keep local and ordered processing predictable; higher values can improve throughput.
+    /// </summary>
     public int? PrefetchCount { get; init; } = 1;
 
+    /// <summary>
+    /// Gets the maximum number of messages a receive endpoint may process concurrently.
+    /// A value of one keeps message handling serialized for the configured endpoint.
+    /// </summary>
     public int? ConcurrentMessageLimit { get; init; } = 1;
 
+    /// <summary>
+    /// Gets the MassTransit consume timeout, in seconds, applied to message processing.
+    /// Messages that exceed this limit are treated as timed out by the receive pipeline.
+    /// </summary>
     public int? TimeoutSeconds { get; init; } = 60;
 }

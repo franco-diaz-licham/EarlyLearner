@@ -5,13 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Worker.Messaging;
 
-public sealed class AuditTrailEntryRecordedConsumer(AuditDbContext db) : IConsumer<AuditTrailEntryRecorded>
+public sealed class AuditTrailEntryRecordedConsumer(AuditDbContext db) : IConsumer<AuditTrailEntryRecordedEvent>
 {
-    public async Task Consume(ConsumeContext<AuditTrailEntryRecorded> context)
+    public async Task Consume(ConsumeContext<AuditTrailEntryRecordedEvent> context)
     {
         var message = context.Message;
 
-        if (await db.AuditTrailEntries.AnyAsync(entry => entry.Id == message.Id, context.CancellationToken)) return;
+        var hasEntry = await db.AuditTrailEntries.AnyAsync(entry => entry.Id == message.Id, context.CancellationToken);
+        if (hasEntry) return;
+
         db.AuditTrailEntries.Add(new AuditTrailEntry {
             Id = message.Id,
             HouseholdId = message.HouseholdId,

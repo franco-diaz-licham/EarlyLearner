@@ -13,18 +13,14 @@ public sealed class AzureCommunicationEmailSender(IOptions<AzureCommunicationSer
     {
         var emailClient = new EmailClient(options.ConnectionString);
         var emailMessage = new EmailMessage(
-            options.SenderAddress,
-            message.To,
-            new EmailContent(message.Subject) {
+            senderAddress: options.SenderAddress,
+            recipientAddress: message.To,
+            content: new EmailContent(message.Subject) {
                 PlainText = message.Body,
                 Html = message.HtmlBody
             });
 
-        var operation = await emailClient.SendAsync(
-            WaitUntil.Completed,
-            emailMessage,
-            cancellationToken: cancellationToken);
-
+        var operation = await emailClient.SendAsync(WaitUntil.Completed, emailMessage, cancellationToken: cancellationToken);
         logger.LogInformation(
             "Azure Communication Services email sent to {EmailTo}. OperationId: {OperationId}. Status: {EmailStatus}",
             message.To,

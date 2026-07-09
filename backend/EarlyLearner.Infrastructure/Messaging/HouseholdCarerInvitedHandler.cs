@@ -15,7 +15,7 @@ public sealed class HouseholdCarerInvitedHandler(IIntegrationEventPublisher inte
             throw new InvalidOperationException($"{nameof(HouseholdCarerInvitedHandler)} cannot handle {domainEvent.GetType().Name}.");
         }
 
-        await integrationEventPublisher.PublishAsync(new HouseholdInvitationEmailRequested(
+        await integrationEventPublisher.PublishAsync(new HouseholdInvitationEmailRequestedEvent(
             Id: Guid.NewGuid(),
             HouseholdId: carerInvited.HouseholdId.Value,
             InvitationId: carerInvited.InvitationId.Value,

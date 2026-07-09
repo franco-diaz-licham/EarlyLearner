@@ -5,7 +5,7 @@ namespace EarlyLearner.Worker.Messaging;
 
 public static class EmailBuilder
 {
-    public static EmailMessageModel BuildHouseholdInvitationEmail(HouseholdInvitationEmailRequested invitation, Uri appUrl)
+    public static EmailMessageModel BuildHouseholdInvitationEmail(HouseholdInvitationEmailRequestedEvent invitation, Uri appUrl)
     {
         var greetingName = string.IsNullOrWhiteSpace(invitation.FirstName) ? "there" : invitation.FirstName.Trim();
         var subject = $"You're invited to join {invitation.HouseholdName}";

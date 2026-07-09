@@ -185,14 +185,16 @@ public static class InfraAppServices
                 busFactoryConfigurator.DeployPublishTopology = false;
 
                 // Register topic names per event
-                busFactoryConfigurator.Message<HouseholdInvitationEmailRequested>(messageConfigurator =>
+                busFactoryConfigurator.Message<HouseholdInvitationEmailRequestedEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailRequestedTopic));
-                busFactoryConfigurator.Message<HouseholdInvitationEmailSent>(messageConfigurator =>
+                busFactoryConfigurator.Message<HouseholdInvitationEmailSentEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
-                busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
+                busFactoryConfigurator.Message<HouseholdInvitationEmailFailedEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
-                busFactoryConfigurator.Message<AuditTrailEntryRecorded>(messageConfigurator =>
+                busFactoryConfigurator.Message<AuditTrailEntryRecordedEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(AuditMessagingTopology.AuditTrailEntryRecordedTopic));
+
+                // Exclude the interface for integrations
                 busFactoryConfigurator.Publish<IIntegrationEvent>(publishConfigurator => {
                     publishConfigurator.Exclude = true;
                 });
@@ -216,13 +218,13 @@ public static class InfraAppServices
                 });
 
                 // Register consumers
-                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailSent>(
+                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailSentEvent>(
                     IdentityMessagingTopology.ApiNotificationSubscription,
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;
                         endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailSentConsumer>(context);
                     });
-                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailFailed>(
+                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailFailedEvent>(
                     IdentityMessagingTopology.ApiNotificationSubscription,
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;

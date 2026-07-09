@@ -14,7 +14,7 @@ namespace EarlyLearner.Shared.IdentityContext;
 /// <param name="LastName">The recipient last name, when provided.</param>
 /// <param name="ExpiresAt">The date and time when the invitation expires.</param>
 /// <param name="OccurredAt">The date and time when the event occurred.</param>
-public sealed record HouseholdInvitationEmailRequested(
+public sealed record HouseholdInvitationEmailRequestedEvent(
     Guid Id,
     Guid HouseholdId,
     Guid InvitationId,
@@ -34,7 +34,7 @@ public sealed record HouseholdInvitationEmailRequested(
 /// <param name="Email">The recipient email address.</param>
 /// <param name="SentAt">The date and time when the email was sent.</param>
 /// <param name="OccurredAt">The date and time when the event occurred.</param>
-public sealed record HouseholdInvitationEmailSent(
+public sealed record HouseholdInvitationEmailSentEvent(
     Guid Id,
     Guid HouseholdId,
     Guid InvitationId,
@@ -52,7 +52,7 @@ public sealed record HouseholdInvitationEmailSent(
 /// <param name="Reason">The failure reason reported by the email sender.</param>
 /// <param name="FailedAt">The date and time when the send failure was recorded.</param>
 /// <param name="OccurredAt">The date and time when the event occurred.</param>
-public sealed record HouseholdInvitationEmailFailed(
+public sealed record HouseholdInvitationEmailFailedEvent(
     Guid Id,
     Guid HouseholdId,
     Guid InvitationId,

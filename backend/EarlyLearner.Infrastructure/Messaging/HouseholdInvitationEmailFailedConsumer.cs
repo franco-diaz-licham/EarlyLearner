@@ -6,9 +6,9 @@ using MassTransit;
 
 namespace EarlyLearner.Infrastructure.Messaging;
 
-public sealed class HouseholdInvitationEmailFailedConsumer(IDocumentStore documentStore, INotificationPublisher notificationPublisher) : IConsumer<HouseholdInvitationEmailFailed>
+public sealed class HouseholdInvitationEmailFailedConsumer(IDocumentStore documentStore, INotificationPublisher notificationPublisher) : IConsumer<HouseholdInvitationEmailFailedEvent>
 {
-    public async Task Consume(ConsumeContext<HouseholdInvitationEmailFailed> context)
+    public async Task Consume(ConsumeContext<HouseholdInvitationEmailFailedEvent> context)
     {
         var message = context.Message;
         var notification = await GetNotificationAsync(message.HouseholdId, message.InvitationId, context.CancellationToken);

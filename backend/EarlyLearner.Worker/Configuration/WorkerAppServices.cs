@@ -104,13 +104,13 @@ public static class WorkerAppServices
                 busFactoryConfigurator.DeployPublishTopology = false;
 
                 // Register topic names per event
-                busFactoryConfigurator.Message<HouseholdInvitationEmailRequested>(messageConfigurator =>
+                busFactoryConfigurator.Message<HouseholdInvitationEmailRequestedEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailRequestedTopic));
-                busFactoryConfigurator.Message<HouseholdInvitationEmailSent>(messageConfigurator =>
+                busFactoryConfigurator.Message<HouseholdInvitationEmailSentEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailSentTopic));
-                busFactoryConfigurator.Message<HouseholdInvitationEmailFailed>(messageConfigurator =>
+                busFactoryConfigurator.Message<HouseholdInvitationEmailFailedEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(IdentityMessagingTopology.HouseholdInvitationEmailFailedTopic));
-                busFactoryConfigurator.Message<AuditTrailEntryRecorded>(messageConfigurator =>
+                busFactoryConfigurator.Message<AuditTrailEntryRecordedEvent>(messageConfigurator =>
                     messageConfigurator.SetEntityName(AuditMessagingTopology.AuditTrailEntryRecordedTopic));
 
                 // Exclude the interface for integrations
@@ -137,15 +137,14 @@ public static class WorkerAppServices
                 });
 
                 // Register consumers
-                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailRequested>(
+                busFactoryConfigurator.SubscriptionEndpoint<HouseholdInvitationEmailRequestedEvent>(
                     IdentityMessagingTopology.EmailWorkerSubscription,
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;
                         endpointConfigurator.UseEntityFrameworkOutbox<AuditDbContext>(context);
                         endpointConfigurator.ConfigureConsumer<HouseholdInvitationEmailRequestedConsumer>(context);
                     });
-
-                busFactoryConfigurator.SubscriptionEndpoint<AuditTrailEntryRecorded>(
+                busFactoryConfigurator.SubscriptionEndpoint<AuditTrailEntryRecordedEvent>(
                     AuditMessagingTopology.AuditWorkerSubscription,
                     endpointConfigurator => {
                         endpointConfigurator.ConfigureConsumeTopology = false;

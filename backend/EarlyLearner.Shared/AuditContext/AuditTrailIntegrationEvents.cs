@@ -2,7 +2,7 @@ using EarlyLearner.Shared.Messaging;
 
 namespace EarlyLearner.Shared.AuditContext;
 
-public sealed record AuditTrailEntryRecorded(
+public sealed record AuditTrailEntryRecordedEvent(
     Guid Id,
     Guid HouseholdId,
     string Action,

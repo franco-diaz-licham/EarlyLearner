@@ -10,17 +10,17 @@ namespace EarlyLearner.Worker.Messaging;
 public sealed class HouseholdInvitationEmailRequestedConsumer(
     IEmailSender emailSender,
     IDocumentStore documentStore,
-    IOptions<EarlyLearnerOptions> options) : IConsumer<HouseholdInvitationEmailRequested>
+    IOptions<EarlyLearnerOptions> options) : IConsumer<HouseholdInvitationEmailRequestedEvent>
 {
     private readonly EarlyLearnerOptions options = options.Value;
 
-    public async Task Consume(ConsumeContext<HouseholdInvitationEmailRequested> context)
+    public async Task Consume(ConsumeContext<HouseholdInvitationEmailRequestedEvent> context)
     {
         var message = context.Message;
 
         try {
             await emailSender.SendAsync(EmailBuilder.BuildHouseholdInvitationEmail(message, options.Url), context.CancellationToken);
-            var emailSent = new HouseholdInvitationEmailSent(
+            var emailSent = new HouseholdInvitationEmailSentEvent(
                 Id: Guid.NewGuid(),
                 HouseholdId: message.HouseholdId,
                 InvitationId: message.InvitationId,
@@ -31,7 +31,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(
             await UpsertNotificationAsync(ToNotificationDocument(emailSent), context.CancellationToken);
             await context.Publish(emailSent, context.CancellationToken);
         } catch (Exception exception) {
-            var emailFailed = new HouseholdInvitationEmailFailed(
+            var emailFailed = new HouseholdInvitationEmailFailedEvent(
                 Id: Guid.NewGuid(),
                 HouseholdId: message.HouseholdId,
                 InvitationId: message.InvitationId,
@@ -45,7 +45,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(
         }
     }
 
-    private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailSent message) => new(
+    private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailSentEvent message) => new(
         Id: NotificationDocument.BuildId(message.InvitationId),
         HouseholdId: message.HouseholdId,
         InvitationId: message.InvitationId,
@@ -55,7 +55,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(
         Status: NotificationDeliveryStatus.Succeeded,
         OccurredAt: message.SentAt);
 
-    private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailFailed message) => new(
+    private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailFailedEvent message) => new(
         Id: NotificationDocument.BuildId(message.InvitationId),
         HouseholdId: message.HouseholdId,
         InvitationId: message.InvitationId,

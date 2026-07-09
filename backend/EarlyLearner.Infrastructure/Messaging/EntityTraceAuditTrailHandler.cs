@@ -13,7 +13,7 @@ public sealed class EntityTraceAuditTrailHandler(IIntegrationEventPublisher inte
         if (domainEvent is not EntityTraceRecorded) throw new InvalidOperationException($"{nameof(EntityTraceAuditTrailHandler)} cannot handle {domainEvent.GetType().Name}.");
         var entityTrace = (EntityTraceRecorded)domainEvent;
 
-        await integrationEventPublisher.PublishAsync(new AuditTrailEntryRecorded(
+        await integrationEventPublisher.PublishAsync(new AuditTrailEntryRecordedEvent(
             Id: Guid.NewGuid(),
             HouseholdId: entityTrace.HouseholdId,
             Action: entityTrace.Action,
