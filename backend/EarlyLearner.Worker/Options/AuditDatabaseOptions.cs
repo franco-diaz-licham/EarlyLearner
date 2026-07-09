@@ -2,9 +2,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EarlyLearner.Worker.Options;
 
+/// <summary>
+/// Configures the audit database connection used by the worker.
+/// </summary>
 public sealed class AuditDatabaseOptions
 {
     public const string SECTION_NAME = "ConnectionStrings";
 
-    [Required] public string AuditDb { get; init; } = string.Empty;
+    /// <summary>
+    /// Gets the connection string for the audit database.
+    /// </summary>
+    [Required]
+    public string AuditDb { get; init; } = string.Empty;
 }

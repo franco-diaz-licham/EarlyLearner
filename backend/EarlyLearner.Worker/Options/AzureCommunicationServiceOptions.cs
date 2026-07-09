@@ -17,6 +17,9 @@ public sealed class AzureCommunicationServiceOptions
     /// </summary>
     public string SenderAddress { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Returns whether the options contain the minimum settings required to send email through Azure Communication Services.
+    /// </summary>
     public bool HasRequiredConfiguration()
     {
         return !string.IsNullOrWhiteSpace(ConnectionString) && !string.IsNullOrWhiteSpace(SenderAddress);

@@ -2,17 +2,22 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EarlyLearner.Infrastructure.Configuration.Options;
 
+/// <summary>
+/// Configures Azure Blob Storage for stored file content.
+/// </summary>
 public class AzureBlobOptions
 {
     public const string SECTION_NAME = "AzureBlob";
 
     /// <summary>
-    /// Either provide a connection string OR an account Url + managed identity credentials.
+    /// Gets the Azure Blob Storage connection string.
     /// </summary>
-    [Required] public string ConnectionString { get; set; } = null!;
+    [Required]
+    public string ConnectionString { get; set; } = null!;
 
     /// <summary>
-    /// Container name to store files.
+    /// Gets the blob container name used to store uploaded files.
     /// </summary>
-    [Required] public string ContainerName { get; set; } = null!;
+    [Required]
+    public string ContainerName { get; set; } = null!;
 }

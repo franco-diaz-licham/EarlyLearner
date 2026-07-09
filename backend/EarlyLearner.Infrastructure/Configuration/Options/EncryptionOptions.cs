@@ -1,5 +1,8 @@
 namespace EarlyLearner.Infrastructure.Configuration.Options;
 
+/// <summary>
+/// Configures application-level encryption for protected values.
+/// </summary>
 public sealed class EncryptionOptions
 {
     public const string SECTION_NAME = "Encryption";
