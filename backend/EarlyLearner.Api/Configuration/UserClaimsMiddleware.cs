@@ -3,7 +3,7 @@ using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
+using EarlyLearner.Shared.Utilities;
 using Microsoft.AspNetCore.Authorization;
 
 namespace EarlyLearner.Api.Configuration;

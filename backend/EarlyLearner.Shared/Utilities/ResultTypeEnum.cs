@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EarlyLearner.Shared.Enums;
+namespace EarlyLearner.Shared.Utilities;
 
 /// <summary>
 /// Enumerates the possible result types for an operation, indicating its outcome or status.

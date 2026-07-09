@@ -1,5 +1,5 @@
 using System.Net;
-using EarlyLearner.Shared.IdentityContext;
+using EarlyLearner.Shared.Messaging;
 
 namespace EarlyLearner.Worker.Messaging;
 

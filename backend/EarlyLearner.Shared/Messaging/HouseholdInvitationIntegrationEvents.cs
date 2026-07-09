@@ -1,6 +1,4 @@
-using EarlyLearner.Shared.Messaging;
-
-namespace EarlyLearner.Shared.IdentityContext;
+namespace EarlyLearner.Shared.Messaging;
 
 /// <summary>
 /// Requests that an invitation email be sent to a household carer.

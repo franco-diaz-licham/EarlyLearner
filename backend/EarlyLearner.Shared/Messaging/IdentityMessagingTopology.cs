@@ -1,4 +1,4 @@
-namespace EarlyLearner.Shared.IdentityContext;
+namespace EarlyLearner.Shared.Messaging;
 
 public static class IdentityMessagingTopology
 {

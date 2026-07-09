@@ -2,7 +2,6 @@ using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.Features.ReadinessContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
 

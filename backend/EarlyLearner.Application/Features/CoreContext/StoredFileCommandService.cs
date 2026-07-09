@@ -3,7 +3,6 @@ using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 using System.Net.Mime;
 

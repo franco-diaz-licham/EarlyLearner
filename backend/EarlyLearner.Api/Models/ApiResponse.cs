@@ -1,4 +1,4 @@
-using EarlyLearner.Shared.Enums;
+using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Api.Models;
 

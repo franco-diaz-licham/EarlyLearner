@@ -1,6 +1,6 @@
 using EarlyLearner.Application.Features.Notifications;
 using EarlyLearner.Shared.Documents;
-using EarlyLearner.Shared.IdentityContext;
+using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.Notifications;
 using MassTransit;
 

@@ -1,6 +1,5 @@
 using EarlyLearner.Domain.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.ReadinessContext;

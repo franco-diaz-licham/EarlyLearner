@@ -2,7 +2,7 @@ using EarlyLearner.Application.Features.IdentityContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
+using EarlyLearner.Shared.Utilities;
 using Moq;
 using Shouldly;
 

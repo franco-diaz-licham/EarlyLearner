@@ -2,7 +2,6 @@ using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.CoreContext;

@@ -1,5 +1,4 @@
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Shared.Enums;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.Features.AuditContext;
