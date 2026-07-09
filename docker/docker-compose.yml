@@ -19,8 +19,13 @@ services:
       - 10000:10000
       - 10001:10001
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:10000/devstoreaccount1?comp=list"]
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://127.0.0.1:10000/devstoreaccount1?comp=list'', res => process.exit(0)).on(''error'', () => process.exit(1))"',
+        ]
       interval: 5s
+      timeout: 5s
       retries: 5
 
   cosmos-db:
@@ -30,12 +35,17 @@ services:
     environment:
       AZURE_COSMOS_EMULATOR_PARTITION_COUNT: "3"
       AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
-      AZURE_COSMOS_EMULATOR_KEY: "local-dev"
     ports:
       - "8081:8081"
       - "10250-10255:10250-10255"
     volumes:
       - cosmos-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -sS https://localhost:8081/ >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 
   servicebus-mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -62,11 +72,6 @@ services:
       SQL_WAIT_INTERVAL: "15"
     depends_on:
       - servicebus-mssql
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:5300/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
 
   early_learner_local_db:
     image: postgres:17-alpine
@@ -112,15 +117,20 @@ services:
     ports:
       - "5136:80"
     depends_on:
-      - azurite
-      - cosmos-db
-      - early_learner_local_db
-      - otel-collector
-      - servicebus-emulator
+      azurite:
+        condition: service_healthy
+      cosmos-db:
+        condition: service_healthy
+      early_learner_local_db:
+        condition: service_healthy
+      servicebus-emulator:
+        condition: service_started
+      otel-collector:
+        condition: service_started
     environment:
       ConnectionStrings__Db: "Host=early_learner_local_db;Port=5432;Database=main;Username=local-dev;Password=local-dev;Maximum Pool Size=200;Timeout=60"
       AzureBlob__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;"
-      CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
+      CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
@@ -138,15 +148,21 @@ services:
     image: early-learner-worker:local
     container_name: early-learner-worker
     depends_on:
-      - early_learner_local_db
-      - cosmos-db
-      - otel-collector
-      - servicebus-emulator
+      azurite:
+        condition: service_healthy
+      cosmos-db:
+        condition: service_healthy
+      early_learner_local_db:
+        condition: service_healthy
+      servicebus-emulator:
+        condition: service_started
+      otel-collector:
+        condition: service_started
     environment:
       ConnectionStrings__AuditDb: "Host=early_learner_local_db;Port=5432;Database=audit;Username=local-dev;Password=local-dev;Maximum Pool Size=50;Timeout=60"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
-      CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=local-dev;"
+      CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;"
       DOTNET_ENVIRONMENT: "Development"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
 
