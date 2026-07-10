@@ -12,8 +12,3 @@ public interface INotificationPublisher
 {
     ValueTask PublishAsync(NotificationDto notification, CancellationToken cancellationToken = default);
 }
-
-public interface INotificationStream
-{
-    IAsyncEnumerable<NotificationDto> SubscribeAsync(Guid householdId, Guid invitationId, CancellationToken cancellationToken = default);
-}

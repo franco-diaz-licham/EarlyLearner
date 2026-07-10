@@ -75,8 +75,7 @@ public static class ApiAppServices
 
         if (!string.IsNullOrWhiteSpace(azureSignalROptions.ConnectionString)) signalR.AddAzureSignalR(azureSignalROptions.ConnectionString);
 
-        services.AddSingleton<NotificationService>();
-        services.AddSingleton<INotificationPublisher>(sp => sp.GetRequiredService<NotificationService>());
+        services.AddSingleton<INotificationPublisher, NotificationHubPublisher>();
 
         return services;
     }
