@@ -1,6 +1,7 @@
 using EarlyLearner.Api.Models;
 using EarlyLearner.Api.Configuration;
-using EarlyLearner.Api.Endpoints.Notifications;
+using EarlyLearner.Api.Notifications;
+using EarlyLearner.Shared.Realtime;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -29,7 +30,7 @@ public static class ApiEndpointMappings
         api.MapDailyLogEndpoints();
         api.MapReadinessOutcomeEndpoints();
         api.MapReadinessProfileEndpoints();
-        api.MapNotificationEndpoints();
+        endpoints.MapHub<NotificationHub>(RealtimeHubRoutes.NotificationHub);
 
         return endpoints;
     }

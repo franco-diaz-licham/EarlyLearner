@@ -19,9 +19,11 @@ using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
 using EarlyLearner.Shared.Options;
+using EarlyLearner.Shared.Realtime;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -63,7 +65,17 @@ public static class InfraAppServices
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApi(
-                jwtOptions => configuration.Bind(AzureAdOptions.SECTION_NAME, jwtOptions),
+                jwtOptions => {
+                    configuration.Bind(AzureAdOptions.SECTION_NAME, jwtOptions);
+                    jwtOptions.Events ??= new JwtBearerEvents();
+                    var previousOnMessageReceived = jwtOptions.Events.OnMessageReceived;
+                    jwtOptions.Events.OnMessageReceived = async context => {
+                        if (previousOnMessageReceived is not null) await previousOnMessageReceived(context);
+                        if (!string.IsNullOrWhiteSpace(context.Token)) return;
+                        var accessToken = context.Request.Query["access_token"];
+                        if (!string.IsNullOrWhiteSpace(accessToken) && IsHubRequest(context.HttpContext.Request.Path)) context.Token = accessToken;
+                    };
+                },
                 identityOptions => configuration.Bind(AzureAdOptions.SECTION_NAME, identityOptions));
 
         services.AddAuthorization(options => {
@@ -76,6 +88,11 @@ public static class InfraAppServices
         });
 
         return services;
+    }
+
+    private static bool IsHubRequest(PathString path)
+    {
+        return path.StartsWithSegments(RealtimeHubRoutes.VersionedHubPrefix, StringComparison.OrdinalIgnoreCase);
     }
 
     public static IServiceCollection AddDbServices(this IServiceCollection services, IConfiguration configuration)

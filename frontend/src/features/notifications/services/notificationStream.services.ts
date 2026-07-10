@@ -1,5 +1,5 @@
-import { apiStreamClient } from '../../../shared/api/apiStreamClient';
-import { mapServerSentEventChunkToNotifications } from '../mappers/notification.mapper';
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { appConfig } from '../../../shared/config/appConfig';
 import type { NotificationModel } from '../types/notification.types';
 
 interface SubscribeToNotificationStreamOptions {
@@ -10,35 +10,44 @@ interface SubscribeToNotificationStreamOptions {
   onNotifications: (notifications: NotificationModel[]) => void;
 }
 
-const readNotificationStream = async (stream: ReadableStream<Uint8Array>, signal: AbortSignal, onNotifications: (notifications: NotificationModel[]) => void) => {
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let pendingChunk = '';
-
-  while (!signal.aborted) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    pendingChunk += decoder.decode(value, { stream: true });
-    const boundary = pendingChunk.lastIndexOf('\n\n');
-    if (boundary < 0) continue;
-
-    const completedChunk = pendingChunk.slice(0, boundary + 2);
-    pendingChunk = pendingChunk.slice(boundary + 2);
-
-    const notifications = mapServerSentEventChunkToNotifications(completedChunk);
-    if (notifications.length) onNotifications(notifications);
-  }
-};
-
 export const subscribeToNotificationStream = async ({ invitationId, signal, token, onConnected, onNotifications }: SubscribeToNotificationStreamOptions) => {
-  const stream = await apiStreamClient.getReadableStream(`/notifications/stream/${invitationId}`, {
-    headers: { Accept: 'text/event-stream' },
-    signal,
-    token
+  const connection = new HubConnectionBuilder()
+    .withUrl(`${appConfig.apiBaseUrl}/hubs/notifications`, {
+      accessTokenFactory: () => token ?? ''
+    })
+    .withAutomaticReconnect()
+    .build();
+
+  let isStopping = false;
+  const stopConnection = () => {
+    isStopping = true;
+    if (connection.state !== HubConnectionState.Disconnected) void connection.stop();
+  };
+
+  signal.addEventListener('abort', stopConnection, { once: true });
+  connection.on('notification', (notification: NotificationModel) => {
+    onNotifications([notification]);
   });
 
-  onConnected();
+  connection.onreconnected(() => {
+    void connection.invoke('SubscribeToInvitation', invitationId);
+  });
 
-  await readNotificationStream(stream, signal, onNotifications);
+  try {
+    await connection.start();
+    if (signal.aborted) return;
+
+    await connection.invoke('SubscribeToInvitation', invitationId);
+    onConnected();
+
+    await new Promise<void>((resolve, reject) => {
+      connection.onclose((error) => {
+        if (isStopping || signal.aborted) resolve();
+        else reject(error ?? new Error('Notification connection closed.'));
+      });
+    });
+  } finally {
+    signal.removeEventListener('abort', stopConnection);
+    stopConnection();
+  }
 };
