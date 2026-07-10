@@ -35,7 +35,7 @@ public static class ApiAppServices
             .AddPortServices()
             .AddCorsPolicy(builder.Configuration)
             .AddMemoryCache()
-            .AddNotifications();
+            .AddNotifications(builder.Configuration);
     }
 
     private static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
@@ -60,11 +60,23 @@ public static class ApiAppServices
         return services;
     }
 
-    private static IServiceCollection AddNotifications(this IServiceCollection services)
+    private static IServiceCollection AddNotifications(this IServiceCollection services, IConfiguration configuration)
     {
+        services
+            .AddOptions<AzureSignalROptions>()
+            .Bind(configuration.GetSection(AzureSignalROptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var signalR = services.AddSignalR();
+        var azureSignalROptions = configuration
+            .GetSection(AzureSignalROptions.SECTION_NAME)
+            .Get<AzureSignalROptions>() ?? new AzureSignalROptions();
+
+        if (!string.IsNullOrWhiteSpace(azureSignalROptions.ConnectionString)) signalR.AddAzureSignalR(azureSignalROptions.ConnectionString);
+
         services.AddSingleton<NotificationService>();
         services.AddSingleton<INotificationPublisher>(sp => sp.GetRequiredService<NotificationService>());
-        services.AddSingleton<INotificationStream>(sp => sp.GetRequiredService<NotificationService>());
 
         return services;
     }
