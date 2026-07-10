@@ -9,6 +9,24 @@ public static class ApiEndpointMappings
 {
     public static IEndpointRouteBuilder MapApiEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        endpoints.MapHealthEndpoints();
+
+        var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");
+
+        api.MapRealtimeHubs();
+        api.MapIdentityEndpoints();
+        api.MapStoredFileEndpoints();
+        api.MapDashboardEndpoints();
+        api.MapHouseholdEndpoints();
+        api.MapDailyLogEndpoints();
+        api.MapReadinessOutcomeEndpoints();
+        api.MapReadinessProfileEndpoints();
+
+        return endpoints;
+    }
+
+    private static IEndpointRouteBuilder MapHealthEndpoints(this IEndpointRouteBuilder endpoints)
+    {
         endpoints.MapGet(pattern: "/health", handler: () => Results.Ok(new ApiResponse(StatusCodes.Status200OK, "Healthy")))
             .WithName(endpointName: "HealthCheck")
             .WithTags(tags: "Health")
@@ -21,15 +39,11 @@ public static class ApiEndpointMappings
             .AllowAnonymous()
             .Produces<ApiResponse>(StatusCodes.Status200OK);
 
-        var api = endpoints.MapGroup($"/{ApiRouteOptions.VersionedApiPrefix}");
+        return endpoints;
+    }
 
-        api.MapIdentityEndpoints();
-        api.MapStoredFileEndpoints();
-        api.MapDashboardEndpoints();
-        api.MapHouseholdEndpoints();
-        api.MapDailyLogEndpoints();
-        api.MapReadinessOutcomeEndpoints();
-        api.MapReadinessProfileEndpoints();
+    private static IEndpointRouteBuilder MapRealtimeHubs(this IEndpointRouteBuilder endpoints)
+    {
         endpoints.MapHub<NotificationHub>(RealtimeHubRoutes.NotificationHub);
 
         return endpoints;
