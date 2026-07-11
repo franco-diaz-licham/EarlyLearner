@@ -25,13 +25,13 @@ public sealed class NotificationHub(IDocumentStore documentStore, ICurrentUser c
 
         var existingNotification = await GetNotificationAsync(householdId, invitationId, cancellationToken);
         if (existingNotification is not null && existingNotification.IsTerminal) {
-            await Clients.Caller.SendAsync(NotificationReceivedMethod, ToDto(existingNotification), cancellationToken);
+            await Clients.Caller.SendAsync(NotificationReceivedMethod, ToResponse(existingNotification), cancellationToken);
         }
     }
 
     public static string BuildGroupName(Guid householdId, Guid invitationId) => $"household:{householdId:D}:invitation:{invitationId:D}";
 
-    private static NotificationDto ToDto(NotificationDocument notification) => new(
+    private static NotificationResponse ToResponse(NotificationDocument notification) => new(
         Id: notification.InvitationId,
         HouseholdId: notification.HouseholdId,
         Type: notification.Type,

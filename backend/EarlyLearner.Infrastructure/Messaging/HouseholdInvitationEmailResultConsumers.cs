@@ -14,7 +14,7 @@ public sealed class HouseholdInvitationEmailSentConsumer(IDocumentStore document
         var notification = await GetNotificationAsync(message.HouseholdId, message.InvitationId, context.CancellationToken);
         if (notification is null) return;
 
-        await notificationPublisher.PublishAsync(new NotificationDto(
+        await notificationPublisher.PublishAsync(new NotificationResponse(
             Id: notification.InvitationId,
             HouseholdId: notification.HouseholdId,
             Type: notification.Type,
