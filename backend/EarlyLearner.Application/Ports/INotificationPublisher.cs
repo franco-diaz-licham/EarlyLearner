@@ -1,4 +1,4 @@
-namespace EarlyLearner.Application.UseCases.Notifications;
+namespace EarlyLearner.Application.Ports;
 
 /// <summary>
 /// Represents a notification payload delivered to connected API clients for a household invitation workflow.

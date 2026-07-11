@@ -1,7 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using Azure.Storage.Blobs;
-using EarlyLearner.Application.Common;
 using EarlyLearner.Application.UseCases.CoreContext;
 using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.UseCases.LearningContext;

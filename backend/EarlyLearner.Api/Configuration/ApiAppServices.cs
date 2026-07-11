@@ -5,7 +5,6 @@ using EarlyLearner.Application.UseCases.CoreContext;
 using EarlyLearner.Application.UseCases.Dashboard;
 using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.UseCases.LearningContext;
-using EarlyLearner.Application.UseCases.Notifications;
 using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Features.Dashboard;

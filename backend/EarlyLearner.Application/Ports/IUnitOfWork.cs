@@ -1,4 +1,4 @@
-namespace EarlyLearner.Application.Common;
+namespace EarlyLearner.Application.Ports;
 
 public interface IUnitOfWork
 {
