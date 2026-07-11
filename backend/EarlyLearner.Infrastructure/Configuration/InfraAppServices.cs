@@ -8,6 +8,8 @@ using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Configuration.Options;
 using EarlyLearner.Infrastructure.Messaging;
+using EarlyLearner.Infrastructure.Messaging.Consumers;
+using EarlyLearner.Infrastructure.Messaging.Handlers;
 using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Infrastructure.Persistence.Repositories.CoreContext;
 using EarlyLearner.Infrastructure.Persistence.Repositories.IdentityContext;

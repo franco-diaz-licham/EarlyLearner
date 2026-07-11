@@ -4,7 +4,7 @@ using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
 using MassTransit;
 
-namespace EarlyLearner.Infrastructure.Messaging;
+namespace EarlyLearner.Infrastructure.Messaging.Consumers;
 
 public sealed class HouseholdInvitationEmailFailedConsumer(IDocumentStore documentStore, INotificationPublisher notificationPublisher) : IConsumer<HouseholdInvitationEmailFailedEvent>
 {

@@ -3,7 +3,7 @@ using EarlyLearner.Worker.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Worker.Messaging;
+namespace EarlyLearner.Worker.Messaging.Consumers;
 
 public sealed class AuditTrailEntryRecordedConsumer(AuditDbContext db) : IConsumer<AuditTrailEntryRecordedEvent>
 {

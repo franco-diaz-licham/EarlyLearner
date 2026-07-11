@@ -1,11 +1,12 @@
 using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
+using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Options;
 using MassTransit;
 using Microsoft.Extensions.Options;
 
-namespace EarlyLearner.Worker.Messaging;
+namespace EarlyLearner.Worker.Messaging.Consumers;
 
 public sealed class HouseholdInvitationEmailRequestedConsumer(
     IEmailSender emailSender,

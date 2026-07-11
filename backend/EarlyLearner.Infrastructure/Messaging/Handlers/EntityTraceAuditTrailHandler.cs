@@ -2,7 +2,7 @@ using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Shared.Messaging;
 
-namespace EarlyLearner.Infrastructure.Messaging;
+namespace EarlyLearner.Infrastructure.Messaging.Handlers;
 
 public sealed class EntityTraceAuditTrailHandler(IIntegrationEventPublisher integrationEventPublisher) : IDomainEventHandler
 {

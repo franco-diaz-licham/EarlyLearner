@@ -3,7 +3,7 @@ using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Shared.Messaging;
 
-namespace EarlyLearner.Infrastructure.Messaging;
+namespace EarlyLearner.Infrastructure.Messaging.Handlers;
 
 public sealed class HouseholdCarerInvitedHandler(IIntegrationEventPublisher integrationEventPublisher) : IDomainEventHandler
 {

@@ -3,6 +3,7 @@ using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Messaging;
+using EarlyLearner.Worker.Messaging.Consumers;
 using EarlyLearner.Worker.Options;
 using EarlyLearner.Worker.Persistence;
 using Azure.Messaging.ServiceBus;

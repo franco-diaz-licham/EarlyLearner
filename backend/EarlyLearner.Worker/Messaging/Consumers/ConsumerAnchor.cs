@@ -1,4 +1,4 @@
-namespace EarlyLearner.Worker.Messaging;
+namespace EarlyLearner.Worker.Messaging.Consumers;
 
 /// <summary>
 /// Used as an anchor point to register all consumers within the
