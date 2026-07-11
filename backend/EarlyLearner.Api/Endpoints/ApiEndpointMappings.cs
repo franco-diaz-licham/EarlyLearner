@@ -2,6 +2,7 @@ using EarlyLearner.Api.Models;
 using EarlyLearner.Api.Configuration;
 using EarlyLearner.Api.Notifications;
 using EarlyLearner.Shared.Realtime;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace EarlyLearner.Api.Endpoints;
 
@@ -44,7 +45,11 @@ public static class ApiEndpointMappings
 
     private static IEndpointRouteBuilder MapRealtimeHubs(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapHub<NotificationHub>(RealtimeHubRoutes.NotificationHub);
+        endpoints.MapHub<NotificationHub>(
+            RealtimeHubRoutes.NotificationHub,
+            options => {
+                options.Transports = HttpTransportType.ServerSentEvents;
+            });
 
         return endpoints;
     }

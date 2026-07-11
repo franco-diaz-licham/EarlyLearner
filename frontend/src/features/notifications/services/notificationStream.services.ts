@@ -1,4 +1,4 @@
-import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnectionState, HttpTransportType } from '@microsoft/signalr';
 import { appConfig } from '../../../shared/config/appConfig';
 import type { NotificationModel } from '../types/notification.types';
 
@@ -13,7 +13,8 @@ interface SubscribeToNotificationStreamOptions {
 export const subscribeToNotificationStream = async ({ invitationId, signal, token, onConnected, onNotifications }: SubscribeToNotificationStreamOptions) => {
   const connection = new HubConnectionBuilder()
     .withUrl(`${appConfig.apiBaseUrl}/hubs/notifications`, {
-      accessTokenFactory: () => token ?? ''
+      accessTokenFactory: () => token ?? '',
+      transport: HttpTransportType.ServerSentEvents
     })
     .withAutomaticReconnect()
     .build();

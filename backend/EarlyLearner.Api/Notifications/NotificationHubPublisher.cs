@@ -9,9 +9,6 @@ public sealed class NotificationHubPublisher(IHubContext<NotificationHub> hubCon
     {
         await hubContext.Clients
             .Group(NotificationHub.BuildGroupName(notification.HouseholdId, notification.Id))
-            .SendAsync(
-                NotificationHub.NotificationReceivedMethod,
-                notification,
-                cancellationToken);
+            .SendAsync(NotificationHub.NotificationReceivedMethod, notification, cancellationToken);
     }
 }

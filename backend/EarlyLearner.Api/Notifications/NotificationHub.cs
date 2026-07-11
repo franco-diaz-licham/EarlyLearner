@@ -10,6 +10,14 @@ public sealed class NotificationHub(IDocumentStore documentStore, ICurrentUser c
 {
     public const string NotificationReceivedMethod = "notification";
 
+    /// <summary>
+    /// Subscribes the current SignalR connection to invitation-scoped notifications for the current household.
+    /// The frontend calls this after connecting, and again after reconnecting, so invitation email delivery results
+    /// can be pushed to the caller. If the notification already reached a terminal state before the subscription
+    /// was established, the terminal notification is sent to the caller immediately.
+    /// </summary>
+    /// <param name="invitationId">The household invitation to receive notification updates for.</param>
+    /// <param name="cancellationToken">Cancels the group subscription or notification replay.</param>
     public async Task SubscribeToInvitation(Guid invitationId, CancellationToken cancellationToken = default)
     {
         var householdId = currentUser.HouseholdId.Value;
@@ -19,12 +27,6 @@ public sealed class NotificationHub(IDocumentStore documentStore, ICurrentUser c
         if (existingNotification is not null && existingNotification.IsTerminal) {
             await Clients.Caller.SendAsync(NotificationReceivedMethod, ToDto(existingNotification), cancellationToken);
         }
-    }
-
-    public Task UnsubscribeFromInvitation(Guid invitationId, CancellationToken cancellationToken = default)
-    {
-        var householdId = currentUser.HouseholdId.Value;
-        return Groups.RemoveFromGroupAsync(Context.ConnectionId, BuildGroupName(householdId, invitationId), cancellationToken);
     }
 
     public static string BuildGroupName(Guid householdId, Guid invitationId) => $"household:{householdId:D}:invitation:{invitationId:D}";
