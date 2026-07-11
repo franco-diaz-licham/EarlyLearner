@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EarlyLearner.Worker.Options;
+namespace EarlyLearner.Worker.Configuration.Options;
 
 /// <summary>
 /// Configures the audit database connection used by the worker.

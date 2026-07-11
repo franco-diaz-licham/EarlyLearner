@@ -1,4 +1,4 @@
-namespace EarlyLearner.Worker.Options;
+namespace EarlyLearner.Worker.Configuration.Options;
 
 /// <summary>
 /// Configures Azure Communication Services email delivery.

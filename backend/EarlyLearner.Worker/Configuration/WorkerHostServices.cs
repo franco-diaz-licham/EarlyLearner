@@ -1,5 +1,5 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
-using EarlyLearner.Worker.Options;
+using EarlyLearner.Worker.Configuration.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;

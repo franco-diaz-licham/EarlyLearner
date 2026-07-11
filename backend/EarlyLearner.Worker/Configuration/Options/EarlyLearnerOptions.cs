@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EarlyLearner.Worker.Options;
+namespace EarlyLearner.Worker.Configuration.Options;
 
 /// <summary>
 /// Configures public EarlyLearner application links used by worker-generated messages.

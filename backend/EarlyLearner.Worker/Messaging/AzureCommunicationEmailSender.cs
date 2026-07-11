@@ -1,6 +1,6 @@
 using Azure;
 using Azure.Communication.Email;
-using EarlyLearner.Worker.Options;
+using EarlyLearner.Worker.Configuration.Options;
 using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Worker.Messaging;
