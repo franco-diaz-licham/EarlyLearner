@@ -4,7 +4,7 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Features.IdentityContext;
+namespace EarlyLearner.Infrastructure.Persistence.Repositories.IdentityContext;
 
 public class UserRepository(DatabaseContext db) : IUserQueryRepository, IUserProvisioningRepository
 {

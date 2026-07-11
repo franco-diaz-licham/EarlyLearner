@@ -4,7 +4,7 @@ using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Features.ReadinessContext;
+namespace EarlyLearner.Infrastructure.Persistence.Repositories.ReadinessContext;
 
 public sealed class ReadinessOutcomeRepository(DatabaseContext db) : IReadinessOutcomeQueryRepository, IReadinessOutcomeCommandRepository
 {

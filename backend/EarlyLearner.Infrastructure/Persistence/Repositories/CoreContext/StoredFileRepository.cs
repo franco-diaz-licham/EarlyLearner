@@ -5,7 +5,7 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Features.CoreContext;
+namespace EarlyLearner.Infrastructure.Persistence.Repositories.CoreContext;
 
 public sealed class StoredFileRepository(DatabaseContext db) : IStoredFileQueryRepository, IStoredFileCommandRepository
 {

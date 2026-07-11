@@ -7,7 +7,7 @@ using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Infrastructure.Features.Dashboard;
+using EarlyLearner.Infrastructure.Persistence.Queries.Dashboard;
 using EarlyLearner.Shared.DocumentStoreService;
 using FluentValidation;
 

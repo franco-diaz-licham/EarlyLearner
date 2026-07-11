@@ -4,7 +4,7 @@ using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Shared.Utilities;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Features.Dashboard;
+namespace EarlyLearner.Infrastructure.Persistence.Queries.Dashboard;
 
 public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentUser currentUser) : IGetHomeDashboardQueryHandler
 {
