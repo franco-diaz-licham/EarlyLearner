@@ -5,7 +5,7 @@ using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Persistence.Repositories.ReadinessContext;
+namespace EarlyLearner.Infrastructure.Persistence.Repositories;
 
 public sealed class ReadinessProfileRepository(DatabaseContext db) : IReadinessProfileQueryRepository, IReadinessProfileCommandRepository
 {

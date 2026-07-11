@@ -5,7 +5,7 @@ using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Persistence.Repositories.LearningContext;
+namespace EarlyLearner.Infrastructure.Persistence.Repositories;
 
 public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepository, IDailyLogCommandRepository
 {
