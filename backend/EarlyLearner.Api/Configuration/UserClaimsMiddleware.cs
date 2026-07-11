@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using EarlyLearner.Application.Features.IdentityContext;
-using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
@@ -13,7 +12,7 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
     private static readonly TimeSpan ClaimsCacheTtl = TimeSpan.FromMinutes(5);
     private const string IdentitySessionPath = "/api/v1/identity/session";
 
-    public async Task Invoke(HttpContext context, ICurrentUserProvisioningService userProvisioningService, ICachingService cache, ILogger<UserClaimsMiddleware> logger)
+    public async Task Invoke(HttpContext context, ICurrentUserProvisioningService userProvisioningService, IUserClaimsCache userClaimsCache, ILogger<UserClaimsMiddleware> logger)
     {
         if (context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null) {
             await next(context);
@@ -37,8 +36,8 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
             return;
         }
 
-        var cacheKey = $"user-claims:{identity.ExternalTenantId}:{identity.ExternalObjectId}";
-        if (!cache.TryGetValue(cacheKey, out UserModel? userModel)) {
+        var userModel = await userClaimsCache.GetAsync(identity, context.RequestAborted);
+        if (userModel is null) {
             var userResult = await userProvisioningService.ResolveCurrentUserAsync(identity, context.RequestAborted);
             if (!userResult.IsSuccess) {
                 logger.LogWarning("No local user could be resolved for external object id {ObjectId}.", identity.ExternalObjectId);
@@ -47,10 +46,10 @@ public sealed class UserClaimsMiddleware(RequestDelegate next)
             }
 
             userModel = userResult.Value;
-            cache.Set(cacheKey, userModel, ClaimsCacheTtl);
+            await userClaimsCache.SetAsync(identity, userModel, ClaimsCacheTtl, context.RequestAborted);
         }
 
-        EnrichPrincipal(context, userModel!);
+        EnrichPrincipal(context, userModel);
         await next(context);
     }
 
