@@ -15,14 +15,16 @@ namespace EarlyLearner.Worker.Configuration;
 
 public static class WorkerAppServices
 {
-    public static void AddAppServices(HostApplicationBuilder builder)
+    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
-        builder.Services
-            .AuditDatabaseServices(builder.Configuration)
-            .EarlyLearnerServices(builder.Configuration)
-            .AddCosmosServices(builder.Configuration)
-            .EmailServices(builder.Configuration, builder.Environment)
-            .MessagingServices(builder.Configuration);
+        services
+            .AuditDatabaseServices(configuration)
+            .EarlyLearnerServices(configuration)
+            .AddCosmosServices(configuration)
+            .EmailServices(configuration, environment)
+            .MessagingServices(configuration);
+
+        return services;
     }
 
 

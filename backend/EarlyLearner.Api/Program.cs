@@ -6,11 +6,10 @@ using Serilog;
 
 try {
     var builder = WebApplication.CreateBuilder(args);
-    builder.AddSerilog();
-    builder.AddEarlyLearnerObservability("earlylearner-api");
+    builder.AddHostServices("earlylearner-api");
 
     try {
-        ApiAppServices.AddAppServices(builder);
+        ApiAppServices.AddAppServices(builder.Services, builder.Configuration);
         InfraAppServices.AddAppServices(builder.Services, builder.Configuration);
     } catch (Exception ex) {
         Log.Fatal(ex, "Exception thrown during InfraAppServices.AddAppServices");

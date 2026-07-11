@@ -1,20 +1,25 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
-using EarlyLearner.Api.Configuration.Options;
+using EarlyLearner.Worker.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace EarlyLearner.Api.Configuration;
+namespace EarlyLearner.Worker.Configuration;
 
 /// <summary>
-/// Extension methods for host-level infrastructure registrations (observability, API host configuration, middleware).
-/// Kept separate from <see cref="ApiAppServices"/> so that infrastructure concerns
+/// Extension methods for host-level infrastructure registrations (observability, worker host configuration).
+/// Kept separate from <see cref="WorkerAppServices"/> so that infrastructure concerns
 /// do not bleed into the application service graph.
 /// </summary>
-public static class HostServiceExtensions
+public static class WorkerHostServices
 {
-    public static IHostApplicationBuilder AddEarlyLearnerObservability(this IHostApplicationBuilder builder, string serviceName)
+    public static IHostApplicationBuilder AddHostServices(this IHostApplicationBuilder builder, string serviceName)
+    {
+        return builder.AddObservability(serviceName);
+    }
+
+    public static IHostApplicationBuilder AddObservability(this IHostApplicationBuilder builder, string serviceName)
     {
         builder.Services
             .AddOptions<ObservabilityOptions>()
@@ -41,7 +46,6 @@ public static class HostServiceExtensions
             .ConfigureResource(resource => resource.AddService(serviceName))
             .WithTracing(tracing => {
                 tracing
-                    .AddAspNetCoreInstrumentation()
                     .AddEntityFrameworkCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddSource("MassTransit");
@@ -51,7 +55,6 @@ public static class HostServiceExtensions
             })
             .WithMetrics(metrics => {
                 metrics
-                    .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
 
