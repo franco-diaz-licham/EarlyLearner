@@ -4,6 +4,8 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Events;
 
 namespace EarlyLearner.Worker.Configuration;
 
@@ -16,7 +18,48 @@ public static class WorkerHostServices
 {
     public static IHostApplicationBuilder AddHostServices(this IHostApplicationBuilder builder, string serviceName)
     {
-        return builder.AddObservability(serviceName);
+        return builder
+            .AddSerilog()
+            .AddObservability(serviceName);
+    }
+
+    /// <summary>
+    /// Configures Serilog console and rolling file logging for the worker host.
+    /// </summary>
+    public static IHostApplicationBuilder AddSerilog(this IHostApplicationBuilder builder)
+    {
+        builder.Services
+            .AddOptions<SerilogOptions>()
+            .Bind(builder.Configuration.GetSection(SerilogOptions.SECTION_NAME))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Serilog must be configured before the DI container builds, so we resolve
+        // the file path directly here using the bound value from configuration.
+        var serilogOptions = new SerilogOptions();
+        builder.Configuration.GetSection(SerilogOptions.SECTION_NAME).Bind(serilogOptions);
+
+        var logFile = Path.Combine(builder.Environment.ContentRootPath, serilogOptions.LogFilePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(logFile)!);
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .MinimumLevel.Override(source: "Microsoft", minimumLevel: LogEventLevel.Warning)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File(path: logFile, rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        // Force Serilog to export an error file if problems occur during startup.
+        Serilog.Debugging.SelfLog.Enable(msg => {
+            File.AppendAllText(Path.Combine(builder.Environment.ContentRootPath, "Logs", "serilog-selflog.txt"), msg);
+        });
+
+        // Plug Serilog into .NET logging as the worker initialises.
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSerilog(Log.Logger, dispose: true);
+
+        return builder;
     }
 
     public static IHostApplicationBuilder AddObservability(this IHostApplicationBuilder builder, string serviceName)

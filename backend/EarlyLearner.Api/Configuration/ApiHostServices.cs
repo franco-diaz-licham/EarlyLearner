@@ -1,6 +1,5 @@
 using Azure.Monitor.OpenTelemetry.Exporter;
 using EarlyLearner.Api.Configuration.Options;
-using EarlyLearner.Infrastructure.Configuration.Options;
 using Microsoft.OpenApi;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -95,18 +94,18 @@ public static class ApiHostServices
     {
         builder.Services
             .AddOptions<SerilogOptions>()
-            .Bind(builder.Configuration.GetSection(key: SerilogOptions.SECTION_NAME))
+            .Bind(builder.Configuration.GetSection(SerilogOptions.SECTION_NAME))
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
         // Serilog must be configured before the DI container builds, so we resolve
         // the file path directly here using the bound value from configuration.
-        var env = builder.Environment;
-        var logPath = builder.Configuration
-            .GetSection(key: SerilogOptions.SECTION_NAME)
-            .GetValue<string>(key: nameof(SerilogOptions.LogFilePath)) ?? "Logs\\LogFile.txt";
-        var logFile = Path.Combine(path1: env.ContentRootPath, path2: logPath);
+        var serilogOptions = new SerilogOptions();
+        builder.Configuration.GetSection(SerilogOptions.SECTION_NAME).Bind(serilogOptions);
+
+        var logFile = Path.Combine(builder.Environment.ContentRootPath, serilogOptions.LogFilePath);
         Directory.CreateDirectory(Path.GetDirectoryName(logFile)!);
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .MinimumLevel.Override(source: "Microsoft", minimumLevel: LogEventLevel.Warning)
@@ -115,13 +114,14 @@ public static class ApiHostServices
             .WriteTo.File(path: logFile, rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
-        // force serilog to export error file if problems when startup.
+        // Force Serilog to export an error file if problems occur during startup.
         Serilog.Debugging.SelfLog.Enable(msg => {
-            File.AppendAllText(path: Path.Combine(path1: env.ContentRootPath, path2: "Logs", path3: "serilog-selflog.txt"), contents: msg);
+            File.AppendAllText(Path.Combine(builder.Environment.ContentRootPath, "Logs", "serilog-selflog.txt"), msg);
         });
 
-        // Plug Serilog into .NET logging as app initialises.
-        builder.Host.UseSerilog();
+        // Plug Serilog into .NET logging as the app initialises.
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSerilog(Log.Logger, dispose: true);
 
         return builder;
     }

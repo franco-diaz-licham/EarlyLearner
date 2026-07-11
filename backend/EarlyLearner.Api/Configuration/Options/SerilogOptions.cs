@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EarlyLearner.Infrastructure.Configuration.Options;
+namespace EarlyLearner.Api.Configuration.Options;
 
 /// <summary>
 /// Configures Serilog file logging options.
