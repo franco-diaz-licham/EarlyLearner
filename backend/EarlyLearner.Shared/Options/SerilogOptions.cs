@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EarlyLearner.Api.Configuration.Options;
+namespace EarlyLearner.Shared.Options;
 
 /// <summary>
-/// Configures Serilog file logging options.
+/// Configures Serilog file logging options for hosted services.
 /// </summary>
 public sealed class SerilogOptions
 {
