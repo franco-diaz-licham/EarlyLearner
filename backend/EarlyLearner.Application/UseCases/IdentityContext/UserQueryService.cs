@@ -3,7 +3,7 @@ using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.IdentityContext;
+namespace EarlyLearner.Application.UseCases.IdentityContext;
 
 public interface IUserQueryService
 {

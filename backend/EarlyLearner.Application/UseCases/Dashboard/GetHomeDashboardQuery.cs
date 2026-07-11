@@ -1,6 +1,6 @@
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.Dashboard;
+namespace EarlyLearner.Application.UseCases.Dashboard;
 
 public sealed record GetHomeDashboardQuery(DateOnly Today);
 

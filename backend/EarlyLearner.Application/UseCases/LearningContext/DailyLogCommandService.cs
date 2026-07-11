@@ -5,7 +5,7 @@ using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.LearningContext;
+namespace EarlyLearner.Application.UseCases.LearningContext;
 
 public sealed record CreateDailyLogCommand(ChildId ChildId, DateOnly LogDate);
 

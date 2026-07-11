@@ -1,4 +1,4 @@
-using EarlyLearner.Application.Features.Dashboard;
+using EarlyLearner.Application.UseCases.Dashboard;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Shared.Utilities;

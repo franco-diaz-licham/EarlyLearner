@@ -2,7 +2,7 @@ using EarlyLearner.Domain.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.ReadinessContext;
+namespace EarlyLearner.Application.UseCases.ReadinessContext;
 
 public sealed record ReadinessOutcomeResponse(Guid ReadinessOutcomeId, string Code, string Name, string Description, string Category, int SortOrder, ReadinessOutcomeStatusEnum Status);
 

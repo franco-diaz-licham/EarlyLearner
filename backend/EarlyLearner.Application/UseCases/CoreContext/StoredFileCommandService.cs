@@ -6,7 +6,7 @@ using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 using System.Net.Mime;
 
-namespace EarlyLearner.Application.Features.CoreContext;
+namespace EarlyLearner.Application.UseCases.CoreContext;
 
 public sealed record CreateStoredFileCommand(
     Stream Content,

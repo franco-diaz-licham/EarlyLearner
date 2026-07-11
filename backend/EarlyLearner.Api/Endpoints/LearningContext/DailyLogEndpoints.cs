@@ -1,6 +1,6 @@
 using EarlyLearner.Api.Models;
 using EarlyLearner.Api.Helpers;
-using EarlyLearner.Application.Features.LearningContext;
+using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;

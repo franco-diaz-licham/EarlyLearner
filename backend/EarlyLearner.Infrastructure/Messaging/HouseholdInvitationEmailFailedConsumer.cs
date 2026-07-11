@@ -1,4 +1,4 @@
-using EarlyLearner.Application.Features.Notifications;
+using EarlyLearner.Application.UseCases.Notifications;
 using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;

@@ -5,7 +5,7 @@ using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.ReadinessContext;
+namespace EarlyLearner.Application.UseCases.ReadinessContext;
 
 public sealed record CreateReadinessProfileCommand(ChildId ChildId, IReadOnlyList<ReadinessOutcomeId> ReadinessOutcomeIds);
 

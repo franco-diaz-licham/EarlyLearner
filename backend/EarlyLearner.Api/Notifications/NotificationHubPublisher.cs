@@ -1,4 +1,4 @@
-using EarlyLearner.Application.Features.Notifications;
+using EarlyLearner.Application.UseCases.Notifications;
 using Microsoft.AspNetCore.SignalR;
 
 namespace EarlyLearner.Api.Notifications;

@@ -1,5 +1,5 @@
 using EarlyLearner.Api.Helpers;
-using EarlyLearner.Application.Features.CoreContext;
+using EarlyLearner.Application.UseCases.CoreContext;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using FluentValidation;

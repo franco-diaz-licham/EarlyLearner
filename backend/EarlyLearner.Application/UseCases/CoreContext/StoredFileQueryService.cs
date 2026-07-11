@@ -4,7 +4,7 @@ using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.CoreContext;
+namespace EarlyLearner.Application.UseCases.CoreContext;
 
 public sealed record StoredFileResponse(
     Guid StoredFileId,

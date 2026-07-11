@@ -6,7 +6,7 @@ using EarlyLearner.Shared.Utilities;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 
-namespace EarlyLearner.Application.Features.IdentityContext;
+namespace EarlyLearner.Application.UseCases.IdentityContext;
 
 public sealed record UpdateHouseholdCommand(string Name);
 

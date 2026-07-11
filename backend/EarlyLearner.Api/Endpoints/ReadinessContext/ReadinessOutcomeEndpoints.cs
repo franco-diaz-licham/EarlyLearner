@@ -1,5 +1,5 @@
 using EarlyLearner.Api.Helpers;
-using EarlyLearner.Application.Features.ReadinessContext;
+using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;

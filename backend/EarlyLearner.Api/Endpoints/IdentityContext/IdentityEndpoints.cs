@@ -1,6 +1,6 @@
 using EarlyLearner.Api.Configuration;
 using EarlyLearner.Api.Helpers;
-using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Api.Endpoints;

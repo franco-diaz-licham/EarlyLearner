@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;

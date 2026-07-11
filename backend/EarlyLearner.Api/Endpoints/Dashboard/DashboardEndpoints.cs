@@ -1,5 +1,5 @@
 using EarlyLearner.Api.Helpers;
-using EarlyLearner.Application.Features.Dashboard;
+using EarlyLearner.Application.UseCases.Dashboard;
 
 namespace EarlyLearner.Api.Endpoints;
 

@@ -3,7 +3,7 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.LearningContext;
+namespace EarlyLearner.Application.UseCases.LearningContext;
 
 public sealed record DailyLogResponse(
     Guid DailyLogId,

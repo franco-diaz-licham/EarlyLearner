@@ -3,7 +3,7 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.ReadinessContext;
+namespace EarlyLearner.Application.UseCases.ReadinessContext;
 
 public sealed record ReadinessProfileResponse(Guid ReadinessProfileId, Guid HouseholdId, Guid ChildId, IReadOnlyList<Guid> ReadinessOutcomeIds);
 

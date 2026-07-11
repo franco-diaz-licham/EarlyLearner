@@ -1,4 +1,4 @@
-using EarlyLearner.Application.Features.ReadinessContext;
+using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.ReadinessContext.ValueObjects;

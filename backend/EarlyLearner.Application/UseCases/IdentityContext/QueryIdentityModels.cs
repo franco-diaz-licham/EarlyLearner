@@ -1,7 +1,7 @@
 using EarlyLearner.Domain.IdentityContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 
-namespace EarlyLearner.Application.Features.IdentityContext;
+namespace EarlyLearner.Application.UseCases.IdentityContext;
 
 public sealed record UserModel(
     string FullName,

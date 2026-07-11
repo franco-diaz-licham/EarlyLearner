@@ -2,7 +2,7 @@ using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
-namespace EarlyLearner.Application.Features.IdentityContext;
+namespace EarlyLearner.Application.UseCases.IdentityContext;
 
 public sealed record HouseholdResponse(Guid Id, string Name, List<CarerResponse> Carers, List<ChildResponse> Children, List<HouseholdInvitationResponse> Invitations);
 public sealed record CarerResponse(Guid Id, Guid UserId, string Email, string FirstName, string LastName, string Role, string AccountStatus);

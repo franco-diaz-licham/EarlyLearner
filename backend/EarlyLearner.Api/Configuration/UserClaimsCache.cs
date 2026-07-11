@@ -1,4 +1,4 @@
-using EarlyLearner.Application.Features.IdentityContext;
+using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Shared.DocumentStoreService;
 
 namespace EarlyLearner.Api.Configuration;
