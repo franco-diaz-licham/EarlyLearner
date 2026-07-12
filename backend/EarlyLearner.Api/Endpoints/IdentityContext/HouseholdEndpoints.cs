@@ -54,8 +54,8 @@ public static class HouseholdEndpoints
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
 
-        var command = new AddHouseholdCarerCommand(Email: request.Email, Role: request.Role);
-        var result = await commandService.AddCarerAsync(command, cancellationToken);
+        var command = new InviteHouseholdCarerCommand(Email: request.Email, Role: request.Role);
+        var result = await commandService.InviteCarerAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 

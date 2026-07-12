@@ -66,12 +66,12 @@ public class HouseholdCommandServiceTests
     }
 
     [Test]
-    public async Task AddCarerAsync_Should_CreateInvitation_On_NewCarerEmail()
+    public async Task InviteCarerAsync_Should_CreateInvitation_On_NewCarerEmail()
     {
         // Arrange
         var household = Household.Create("Taylor Household", new UserId(Guid.NewGuid()));
         var response = new HouseholdResponse(household.Id.Value, household.Name, Carers: [], Children: [], Invitations: []);
-        var command = new AddHouseholdCarerCommand("caregiver@example.com", HouseholdRoleEnum.Caregiver);
+        var command = new InviteHouseholdCarerCommand("caregiver@example.com", HouseholdRoleEnum.Caregiver);
 
         _currentUser
             .SetupGet(user => user.HouseholdId)
@@ -93,7 +93,7 @@ public class HouseholdCommandServiceTests
             .ReturnsAsync(response);
 
         // Act
-        var result = await _sut.AddCarerAsync(command, CancellationToken.None);
+        var result = await _sut.InviteCarerAsync(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

@@ -9,7 +9,7 @@ namespace EarlyLearner.Application.UseCases.IdentityContext;
 
 public sealed record UpdateHouseholdCommand(string Name);
 
-public sealed record AddHouseholdCarerCommand(string Email, HouseholdRoleEnum Role);
+public sealed record InviteHouseholdCarerCommand(string Email, HouseholdRoleEnum Role);
 
 public sealed record RemoveHouseholdCarerCommand(CarerId CarerId);
 
@@ -24,7 +24,7 @@ public sealed record RemoveHouseholdChildCommand(ChildId ChildId);
 public interface IHouseholdCommandService
 {
     Task<Result<HouseholdResponse>> UpdateAsync(UpdateHouseholdCommand command, CancellationToken cancellationToken);
-    Task<Result<HouseholdResponse>> AddCarerAsync(AddHouseholdCarerCommand command, CancellationToken cancellationToken);
+    Task<Result<HouseholdResponse>> InviteCarerAsync(InviteHouseholdCarerCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> RemoveCarerAsync(RemoveHouseholdCarerCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> RevokeCarerInvitationAsync(RevokeHouseholdCarerInvitationCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> AddChildAsync(AddHouseholdChildCommand command, CancellationToken cancellationToken);
@@ -59,7 +59,7 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
-    public async Task<Result<HouseholdResponse>> AddCarerAsync(AddHouseholdCarerCommand command, CancellationToken cancellationToken)
+    public async Task<Result<HouseholdResponse>> InviteCarerAsync(InviteHouseholdCarerCommand command, CancellationToken cancellationToken)
     {
         var household = await householdRepo.GetAsync(user.HouseholdId, cancellationToken);
         if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);

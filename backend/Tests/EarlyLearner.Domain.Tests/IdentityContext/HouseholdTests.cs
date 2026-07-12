@@ -46,31 +46,41 @@ public sealed class HouseholdTests
     }
 
     [Test]
-    public void AddCarer_ShouldAddNewHouseholdMember()
+    public void AcceptInvitation_ShouldAddNewHouseholdMemberAndMarkInvitationAccepted()
     {
         // Arrange
         var household = CreateHousehold();
+        var invitation = household.InviteNewCarer("caregiver@example.com", HouseholdRoleEnum.Caregiver, OwnerUserId, DateTimeOffset.UtcNow.AddDays(7));
+        household.ClearDomainEvents();
 
         // Act
-        household.AddCarer(SecondUserId, HouseholdRoleEnum.Caregiver);
+        var carer = household.AcceptInvitation(invitation.Id, SecondUserId);
 
         // Assert
+        invitation.Status.ShouldBe(HouseholdInvitationStatusEnum.Accepted);
+        invitation.AcceptedByUserId.ShouldBe(SecondUserId);
         household.Carers.Count.ShouldBe(2);
-        household.Carers.ShouldContain(carer => carer.UserId == SecondUserId && carer.Role == HouseholdRoleEnum.Caregiver);
+        household.Carers.ShouldContain(carer);
+        carer.UserId.ShouldBe(SecondUserId);
+        carer.Role.ShouldBe(HouseholdRoleEnum.Caregiver);
+        household.DomainEvents.OfType<EntityTraceRecorded>().ShouldContain(trace => trace.Action == "HouseholdCarerAdded");
+        household.DomainEvents.OfType<EntityTraceRecorded>().ShouldContain(trace => trace.Action == "HouseholdCarerInvitationAccepted");
         household.UpdatedOn.ShouldNotBeNull();
     }
 
     [Test]
-    public void AddCarer_ShouldThrow_WhenUserAlreadyBelongsToHousehold()
+    public void AcceptInvitation_ShouldThrow_WhenUserAlreadyBelongsToHousehold()
     {
         // Arrange
         var household = CreateHousehold();
+        var invitation = household.InviteNewCarer("owner@example.com", HouseholdRoleEnum.Caregiver, OwnerUserId, DateTimeOffset.UtcNow.AddDays(7));
 
         // Act
-        var exception = Should.Throw<DomainException>(() => household.AddCarer(OwnerUserId, HouseholdRoleEnum.Caregiver));
+        var exception = Should.Throw<DomainException>(() => household.AcceptInvitation(invitation.Id, OwnerUserId));
 
         // Assert
         exception.Message.ShouldBe("Carer already belongs to this household.");
+        invitation.Status.ShouldBe(HouseholdInvitationStatusEnum.Pending);
     }
 
     [Test]
@@ -92,14 +102,14 @@ public sealed class HouseholdTests
     {
         // Arrange
         var household = CreateHousehold();
-        household.AddCarer(SecondUserId, HouseholdRoleEnum.Caregiver);
-        var carerId = household.Carers.Single(carer => carer.UserId == SecondUserId).Id;
+        var invitation = household.InviteNewCarer("caregiver@example.com", HouseholdRoleEnum.Caregiver, OwnerUserId, DateTimeOffset.UtcNow.AddDays(7));
+        var carer = household.AcceptInvitation(invitation.Id, SecondUserId);
 
         // Act
-        household.RemoveCarer(carerId);
+        household.RemoveCarer(carer.Id);
 
         // Assert
-        household.Carers.ShouldNotContain(carer => carer.Id == carerId);
+        household.Carers.ShouldNotContain(existingCarer => existingCarer.Id == carer.Id);
         household.UpdatedOn.ShouldNotBeNull();
     }
 

@@ -57,16 +57,53 @@ public sealed class Household : Entity<HouseholdId>
 
     public void Rename(string name)
     {
+        var previousName = Name;
         Name = Required(name, nameof(name));
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseHouseholdTrace(
+            entityId: Id.Value.ToString(),
+            action: "HouseholdRenamed",
+            summary: "Household renamed",
+            details: $"Household was renamed from {previousName} to {Name}.",
+            occurredAt: occurredAt);
         SetUpdatedOn();
     }
 
-    public void AddCarer(UserId userId, HouseholdRoleEnum role)
+    public Carer AcceptInvitation(HouseholdInvitationId invitationId, UserId acceptedByUserId)
     {
-        if (_carers.Any(carer => carer.UserId == userId)) throw new DomainException("Carer already belongs to this household.");
+        var invitation = _invitations.SingleOrDefault(existingInvitation => existingInvitation.Id == invitationId);
+        if (invitation is null) throw new DomainException("Invitation does not belong to this household.");
+        if (_carers.Any(carer => carer.UserId == acceptedByUserId)) throw new DomainException("Carer already belongs to this household.");
+
+        invitation.MarkAccepted(acceptedByUserId);
+        var carer = AddCarerMembership(acceptedByUserId, invitation.Role);
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(HouseholdInvitation),
+            entityId: invitation.Id.Value.ToString(),
+            action: "HouseholdCarerInvitationAccepted",
+            summary: "Carer invitation accepted",
+            details: $"{invitation.Email} accepted an invitation to join {Name}.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
+        SetUpdatedOn();
+        return carer;
+    }
+
+    private Carer AddCarerMembership(UserId userId, HouseholdRoleEnum role)
+    {
         var carer = new Carer(new CarerId(Guid.NewGuid()), Id, userId, role);
         _carers.Add(carer);
-        SetUpdatedOn();
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(Carer),
+            entityId: carer.Id.Value.ToString(),
+            action: "HouseholdCarerAdded",
+            summary: "Carer added",
+            details: $"Carer {userId.Value} was added to {Name} as {role}.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
+        return carer;
     }
 
     public HouseholdInvitation InviteNewCarer(string email, HouseholdRoleEnum role, UserId invitedByUserId, DateTimeOffset expiresAt)
@@ -148,6 +185,15 @@ public sealed class Household : Entity<HouseholdId>
         if (carer.Role == HouseholdRoleEnum.Owner) throw new DomainException("Household owner cannot be removed.");
 
         _carers.Remove(carer);
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(Carer),
+            entityId: carer.Id.Value.ToString(),
+            action: "HouseholdCarerRemoved",
+            summary: "Carer removed",
+            details: $"Carer {carer.UserId.Value} was removed from {Name}.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
         SetUpdatedOn();
     }
 
@@ -157,6 +203,15 @@ public sealed class Household : Entity<HouseholdId>
         if (invitation is null) throw new DomainException("Invitation does not belong to this household.");
 
         invitation.Revoke();
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(HouseholdInvitation),
+            entityId: invitation.Id.Value.ToString(),
+            action: "HouseholdCarerInvitationRevoked",
+            summary: "Carer invitation revoked",
+            details: $"{invitation.Email} can no longer join {Name} using this invitation.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
         SetUpdatedOn();
     }
 
@@ -184,6 +239,15 @@ public sealed class Household : Entity<HouseholdId>
         if (child is null) throw new DomainException("Child does not belong to this household.");
 
         child.Archive();
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(Child),
+            entityId: child.Id.Value.ToString(),
+            action: "ChildArchived",
+            summary: "Child profile archived",
+            details: $"Child profile {child.Id.Value} was archived.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
         SetUpdatedOn();
     }
 
@@ -193,7 +257,28 @@ public sealed class Household : Entity<HouseholdId>
         if (child is null) throw new DomainException("Child does not belong to this household.");
 
         child.UpdateDetails(firstName, lastName, dateOfBirth, avatarStoredFileId);
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(Child),
+            entityId: child.Id.Value.ToString(),
+            action: "ChildUpdated",
+            summary: "Child profile updated",
+            details: $"Child profile {child.Id.Value} was updated.",
+            householdId: Id.Value,
+            occurredAt: occurredAt);
         SetUpdatedOn();
+    }
+
+    private void RaiseHouseholdTrace(string entityId, string action, string summary, string? details, DateTimeOffset occurredAt)
+    {
+        RaiseTraceEvent(
+            entityName: nameof(Household),
+            entityId: entityId,
+            action: action,
+            summary: summary,
+            details: details,
+            householdId: Id.Value,
+            occurredAt: occurredAt);
     }
 
     private static string Required(string value, string name)
