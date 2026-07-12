@@ -62,10 +62,10 @@ public sealed class HouseholdRepository(DatabaseContext db) : IHouseholdQueryRep
     public Task<Household?> GetAsync(HouseholdId householdId, CancellationToken cancellationToken)
     {
         return db.Households
-            .AsSplitQuery()
             .Include(household => household.Carers).ThenInclude(carer => carer.User)
             .Include(household => household.Children)
             .Include(household => household.Invitations)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(item => item.Id == householdId, cancellationToken);
     }
 
