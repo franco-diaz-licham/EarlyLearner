@@ -14,13 +14,13 @@ export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
 
   const householdQuery = useHouseholdQuery();
-  const readinessOutcomesQuery = useReadinessOutcomesQuery();
+  const learningOutcomesQuery = useReadinessOutcomesQuery();
   const dailyLogsQuery = useDailyLogsQuery();
   const createDailyLogMutation = useCreateDailyLogMutation();
   const deleteDailyLogMutation = useDeleteDailyLogMutation();
 
   const children = householdQuery.data?.children ?? [];
-  const readinessOutcomes = readinessOutcomesQuery.data ?? [];
+  const learningOutcomes = learningOutcomesQuery.data ?? [];
   const dailyLogs = dailyLogsQuery.data ?? [];
   const today = formatDateInputValue(new Date());
 
@@ -68,7 +68,7 @@ export const LearningPage = () => {
       <LearningLogForm
         key={addLog ? 'add-log-open' : 'add-log-closed'}
         children={children}
-        readinessOutcomes={readinessOutcomes}
+        learningOutcomes={learningOutcomes}
         saving={createDailyLogMutation.isPending}
         visible={addLog}
         onHide={() => {

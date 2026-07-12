@@ -11,7 +11,7 @@ import type { LearningLogFormModel, LearningMomentKind } from '../types/dailyLog
 
 interface LearningLogFormProps {
   children: ChildModel[];
-  readinessOutcomes: ReadinessOutcomeModel[];
+  learningOutcomes: ReadinessOutcomeModel[];
   saving: boolean;
   visible: boolean;
   onHide: () => void;
@@ -27,7 +27,7 @@ const learningKindOptions = [
 
 const kindLabel = (kind: LearningMomentKind) => learningKindOptions.find((option) => option.value === kind)?.label ?? kind;
 
-export const LearningLogForm = ({ children, readinessOutcomes, saving, visible, onHide, onSave }: LearningLogFormProps) => {
+export const LearningLogForm = ({ children, learningOutcomes, saving, visible, onHide, onSave }: LearningLogFormProps) => {
   const initialDraft = useMemo(() => createEmptyLearningLogForm(children[0]?.id ?? ''), [children]);
   const form = useLearningLogForm(initialDraft);
   const { draft, errors } = form;
@@ -42,8 +42,8 @@ export const LearningLogForm = ({ children, readinessOutcomes, saving, visible, 
     [children]
   );
 
-  const handleOutcomeToggle = (readinessOutcomeId: string) => {
-    form.updateField('readinessOutcomeIds', draft.readinessOutcomeIds.includes(readinessOutcomeId) ? draft.readinessOutcomeIds.filter((id) => id !== readinessOutcomeId) : [...draft.readinessOutcomeIds, readinessOutcomeId]);
+  const handleOutcomeToggle = (learningOutcomeId: string) => {
+    form.updateField('learningOutcomeIds', draft.learningOutcomeIds.includes(learningOutcomeId) ? draft.learningOutcomeIds.filter((id) => id !== learningOutcomeId) : [...draft.learningOutcomeIds, learningOutcomeId]);
   };
 
   const handleSave = () => {
@@ -105,18 +105,18 @@ export const LearningLogForm = ({ children, readinessOutcomes, saving, visible, 
 
         <div>
           <p className="mb-2 text-sm font-semibold text-brand-heading">
-            Readiness outcomes
+            Learning outcomes
             <span aria-hidden="true" className="ml-1 text-red-600">
               *
             </span>
           </p>
           <div className="grid max-h-48 gap-2 overflow-y-auto pr-1 md:grid-cols-2">
-            {readinessOutcomes.map((outcome) => (
+            {learningOutcomes.map((outcome) => (
               <label className="flex cursor-pointer items-start gap-3 rounded-md border border-brand-border bg-white p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft" key={outcome.readinessOutcomeId}>
                 <input
                   className="mt-1 h-4 w-4 accent-brand-primary"
                   type="checkbox"
-                  checked={draft.readinessOutcomeIds.includes(outcome.readinessOutcomeId)}
+                  checked={draft.learningOutcomeIds.includes(outcome.readinessOutcomeId)}
                   onChange={() => {
                     handleOutcomeToggle(outcome.readinessOutcomeId);
                   }}
@@ -128,7 +128,7 @@ export const LearningLogForm = ({ children, readinessOutcomes, saving, visible, 
               </label>
             ))}
           </div>
-          {errors.readinessOutcomeIds ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.readinessOutcomeIds}</span> : null}
+          {errors.learningOutcomeIds ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.learningOutcomeIds}</span> : null}
         </div>
 
         <div className="flex justify-end gap-3 pt-2">

@@ -12,7 +12,7 @@ export interface LearningMomentListItem {
   kind: LearningMomentKind;
   title: string;
   notes: string;
-  readinessOutcomeIds: string[];
+  learningOutcomeIds: string[];
 }
 
 interface LearningMomentListProps {

@@ -11,7 +11,7 @@ const learningLogSchema = z.object({
   kind: z.enum(['activity', 'observation', 'reading', 'routine']),
   title: z.string().trim().min(1, 'Title is required.').max(220, 'Title must be 220 characters or fewer.'),
   notes: z.string().trim().min(1, 'Notes are required.').max(2000, 'Notes must be 2000 characters or fewer.'),
-  readinessOutcomeIds: z.array(z.string().trim().min(1)).min(1, 'At least one readiness outcome is required.')
+  learningOutcomeIds: z.array(z.string().trim().min(1)).min(1, 'At least one learning outcome is required.')
 });
 
 type LearningLogFormErrors = Partial<Record<keyof LearningLogFormModel, string>>;
@@ -25,7 +25,7 @@ export const createEmptyLearningLogForm = (childId = ''): LearningLogFormModel =
   kind: 'activity',
   title: '',
   notes: '',
-  readinessOutcomeIds: []
+  learningOutcomeIds: []
 });
 
 const getLearningLogFormErrors = (draft: LearningLogFormModel): LearningLogFormErrors => {

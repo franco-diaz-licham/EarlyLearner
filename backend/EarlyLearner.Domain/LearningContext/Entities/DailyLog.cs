@@ -1,14 +1,13 @@
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Domain.ReadinessContext.Entities;
 using EarlyLearner.Domain.CoreContext;
 
 namespace EarlyLearner.Domain.LearningContext.Entities;
 
 /// <summary>
 /// Aggregate root for a child's daily learning record. It supports quick parent
-/// capture while preserving evidence that can feed readiness progress.
+/// capture while preserving evidence that can feed learning progress.
 /// </summary>
 public sealed class DailyLog : Entity<DailyLogId>
 {
@@ -47,7 +46,7 @@ public sealed class DailyLog : Entity<DailyLogId>
     #region Nav props
 
     /// <summary>
-    /// Learning moments captured on this day that may become readiness evidence.
+    /// Learning moments captured on this day.
     /// </summary>
     public IReadOnlyCollection<LearningMoment> LearningMoments => _learningMoments.AsReadOnly();
 
@@ -72,9 +71,9 @@ public sealed class DailyLog : Entity<DailyLogId>
         LearningMomentKindEnum kind,
         string title,
         string notes,
-        IEnumerable<ReadinessOutcome> readinessOutcomes)
+        IEnumerable<LearningOutcome> learningOutcomes)
     {
-        var moment = new LearningMoment(new LearningMomentId(Guid.NewGuid()), Id, kind, title, notes, readinessOutcomes);
+        var moment = new LearningMoment(new LearningMomentId(Guid.NewGuid()), Id, kind, title, notes, learningOutcomes);
         _learningMoments.Add(moment);
         var occurredAt = DateTimeOffset.UtcNow;
         RaiseDomainEvent(new LearningMomentRecorded(Id, moment.Id, ChildId, occurredAt));

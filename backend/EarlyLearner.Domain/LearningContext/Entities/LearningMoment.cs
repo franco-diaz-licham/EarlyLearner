@@ -1,17 +1,16 @@
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Domain.CoreContext;
 using EarlyLearner.Domain.CoreContext.Entities;
-using EarlyLearner.Domain.ReadinessContext.Entities;
 
 namespace EarlyLearner.Domain.LearningContext.Entities;
 
 /// <summary>
 /// A parent-recorded learning moment owned by a daily log. It captures the
-/// concrete evidence that may support one or more readiness outcomes.
+/// concrete evidence that may support one or more learning outcomes.
 /// </summary>
 public sealed class LearningMoment : Entity<LearningMomentId>
 {
-    private readonly List<ReadinessOutcome> _readinessOutcomes = [];
+    private readonly List<LearningOutcome> _learningOutcomes = [];
     private readonly List<StoredFile> _storedFiles = [];
 
     private LearningMoment() { }
@@ -22,16 +21,16 @@ public sealed class LearningMoment : Entity<LearningMomentId>
         LearningMomentKindEnum kind,
         string title,
         string notes,
-        IEnumerable<ReadinessOutcome> readinessOutcomes)
+        IEnumerable<LearningOutcome> learningOutcomes)
     {
         Id = id;
         DailyLogId = dailyLogId;
         Kind = kind;
         Title = Required(title, nameof(title));
         Notes = Required(notes, nameof(notes));
-        var requiredReadinessOutcomes = readinessOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
-        if (requiredReadinessOutcomes.Length == 0) throw new DomainException("Learning moment must target at least one readiness outcome.");
-        _readinessOutcomes.AddRange(requiredReadinessOutcomes);
+        var requiredLearningOutcomes = learningOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredLearningOutcomes.Length == 0) throw new DomainException("Learning moment must target at least one learning outcome.");
+        _learningOutcomes.AddRange(requiredLearningOutcomes);
         SetCreatedOn();
     }
 
@@ -56,9 +55,9 @@ public sealed class LearningMoment : Entity<LearningMomentId>
     public string Notes { get; } = default!;
 
     /// <summary>
-    /// Readiness areas this moment practised or demonstrated.
+    /// Learning outcomes this moment practised or demonstrated.
     /// </summary>
-    public IReadOnlyCollection<ReadinessOutcome> ReadinessOutcomes => _readinessOutcomes.AsReadOnly();
+    public IReadOnlyCollection<LearningOutcome> LearningOutcomes => _learningOutcomes.AsReadOnly();
 
     #region Nav props
 

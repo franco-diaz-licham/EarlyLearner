@@ -3,8 +3,6 @@ using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
-using EarlyLearner.Domain.ReadinessContext.Entities;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
 namespace EarlyLearner.Application.UseCases.LearningContext;
@@ -15,7 +13,7 @@ public sealed record CreateDailyLogCommand(
     LearningMomentKindEnum Kind,
     string Title,
     string Notes,
-    IReadOnlyList<ReadinessOutcomeId> ReadinessOutcomeIds);
+    IReadOnlyList<LearningOutcomeId> LearningOutcomeIds);
 
 public interface IDailyLogCommandService
 {
@@ -26,7 +24,7 @@ public interface IDailyLogCommandService
 public interface IDailyLogCommandRepository
 {
     Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken);
-    Task<List<ReadinessOutcome>> GetReadinessOutcomesAsync(IReadOnlyList<ReadinessOutcomeId> readinessOutcomeIds, CancellationToken cancellationToken);
+    Task<List<LearningOutcome>> GetLearningOutcomesAsync(IReadOnlyList<LearningOutcomeId> learningOutcomeIds, CancellationToken cancellationToken);
     Task<DailyLog?> GetByChildAndDateAsync(HouseholdId householdId, ChildId childId, DateOnly logDate, CancellationToken cancellationToken);
     Task<DailyLog?> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
     Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
@@ -41,9 +39,9 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
         var childExists = await dailyLogRepo.ChildExistsAsync(currentUser.HouseholdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<DailyLogResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
-        var readinessOutcomes = await dailyLogRepo.GetReadinessOutcomesAsync(command.ReadinessOutcomeIds, cancellationToken);
-        if (readinessOutcomes.Count != command.ReadinessOutcomeIds.Distinct().Count()) {
-            return Result<DailyLogResponse>.Fail("One or more readiness outcomes were not found.", ResultTypeEnum.NotFound);
+        var learningOutcomes = await dailyLogRepo.GetLearningOutcomesAsync(command.LearningOutcomeIds, cancellationToken);
+        if (learningOutcomes.Count != command.LearningOutcomeIds.Distinct().Count()) {
+            return Result<DailyLogResponse>.Fail("One or more learning outcomes were not found.", ResultTypeEnum.NotFound);
         }
 
         var log = await dailyLogRepo.GetByChildAndDateAsync(currentUser.HouseholdId, command.ChildId, command.LogDate, cancellationToken);
@@ -52,7 +50,7 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
             dailyLogRepo.Add(log);
         }
 
-        log.RecordLearningMoment(command.Kind, command.Title, command.Notes, readinessOutcomes);
+        log.RecordLearningMoment(command.Kind, command.Title, command.Notes, learningOutcomes);
 
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         if (!saved) return Result<DailyLogResponse>.Fail("Daily log could not be created.", ResultTypeEnum.Invalid);

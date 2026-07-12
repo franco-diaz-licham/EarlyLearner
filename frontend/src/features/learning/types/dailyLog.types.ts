@@ -5,7 +5,7 @@ export interface LearningMomentResponse {
   kind: LearningMomentKind;
   title: string;
   notes: string;
-  readinessOutcomeIds: string[];
+  learningOutcomeIds: string[];
 }
 
 export interface LearningMomentModel {
@@ -13,7 +13,7 @@ export interface LearningMomentModel {
   kind: LearningMomentKind;
   title: string;
   notes: string;
-  readinessOutcomeIds: string[];
+  learningOutcomeIds: string[];
 }
 
 export interface DailyLogResponse {
@@ -40,7 +40,7 @@ export interface CreateDailyLogRequest {
   kind: LearningMomentKind;
   title: string;
   notes: string;
-  readinessOutcomeIds: string[];
+  learningOutcomeIds: string[];
 }
 
 export interface LearningLogFormModel {
@@ -49,5 +49,5 @@ export interface LearningLogFormModel {
   kind: LearningMomentKind;
   title: string;
   notes: string;
-  readinessOutcomeIds: string[];
+  learningOutcomeIds: string[];
 }

@@ -11,7 +11,7 @@ export const mapDailyLogResponseToModel = (response: DailyLogResponse): DailyLog
     kind: moment.kind,
     title: moment.title,
     notes: moment.notes,
-    readinessOutcomeIds: moment.readinessOutcomeIds
+    learningOutcomeIds: moment.learningOutcomeIds
   }))
 });
 

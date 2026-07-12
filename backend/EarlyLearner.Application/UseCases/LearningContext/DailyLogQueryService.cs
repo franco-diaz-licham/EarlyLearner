@@ -19,7 +19,7 @@ public sealed record LearningMomentResponse(
     LearningMomentKindEnum Kind,
     string Title,
     string Notes,
-    IReadOnlyList<Guid> ReadinessOutcomeIds);
+    IReadOnlyList<Guid> LearningOutcomeIds);
 
 public interface IDailyLogQueryService
 {

@@ -2,8 +2,6 @@ using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
-using EarlyLearner.Domain.ReadinessContext.Entities;
-using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -35,13 +33,13 @@ public sealed class LearningMomentConfig : IEntityTypeConfiguration<LearningMome
         builder.Property(moment => moment.Title).HasMaxLength(220).IsRequired();
         builder.Property(moment => moment.Notes).HasMaxLength(2000).IsRequired();
 
-        builder.HasMany(moment => moment.ReadinessOutcomes)
+        builder.HasMany(moment => moment.LearningOutcomes)
             .WithMany()
-            .UsingEntity<LearningMomentReadinessOutcome>(
+            .UsingEntity<LearningMomentLearningOutcome>(
                 right => right
-                    .HasOne(join => join.ReadinessOutcome)
+                    .HasOne(join => join.LearningOutcome)
                     .WithMany()
-                    .HasForeignKey(join => join.ReadinessOutcomeId)
+                    .HasForeignKey(join => join.LearningOutcomeId)
                     .OnDelete(DeleteBehavior.Restrict),
                 left => left
                     .HasOne(join => join.LearningMoment)
@@ -49,13 +47,13 @@ public sealed class LearningMomentConfig : IEntityTypeConfiguration<LearningMome
                     .HasForeignKey(join => join.LearningMomentId)
                     .OnDelete(DeleteBehavior.Cascade),
                 join => {
-                    join.HasKey(item => new { item.LearningMomentId, item.ReadinessOutcomeId });
-                    join.HasIndex(item => item.ReadinessOutcomeId);
-                    join.ToTable(StringHelpers.Pluralise(nameof(LearningMomentReadinessOutcome)));
+                    join.HasKey(item => new { item.LearningMomentId, item.LearningOutcomeId });
+                    join.HasIndex(item => item.LearningOutcomeId);
+                    join.ToTable(StringHelpers.Pluralise(nameof(LearningMomentLearningOutcome)));
                     join.Property(item => item.LearningMomentId)
                         .HasConversion(id => id.Value, value => new LearningMomentId(value));
-                    join.Property(item => item.ReadinessOutcomeId)
-                        .HasConversion(id => id.Value, value => new ReadinessOutcomeId(value));
+                    join.Property(item => item.LearningOutcomeId)
+                        .HasConversion(id => id.Value, value => new LearningOutcomeId(value));
                 });
 
         builder.HasMany(moment => moment.StoredFiles)
@@ -81,19 +79,19 @@ public sealed class LearningMomentConfig : IEntityTypeConfiguration<LearningMome
                         .HasConversion(id => id.Value, value => new StoredFileId(value));
                 });
 
-        builder.Navigation(moment => moment.ReadinessOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(moment => moment.LearningOutcomes).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(moment => moment.StoredFiles).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Property(moment => moment.CreatedOn).IsRequired();
         builder.Property(moment => moment.UpdatedOn).IsRequired(false);
         builder.Ignore(moment => moment.DomainEvents);
     }
 
-    private sealed class LearningMomentReadinessOutcome
+    private sealed class LearningMomentLearningOutcome
     {
         public LearningMomentId LearningMomentId { get; set; }
         public LearningMoment LearningMoment { get; set; } = null!;
-        public ReadinessOutcomeId ReadinessOutcomeId { get; set; }
-        public ReadinessOutcome ReadinessOutcome { get; set; } = null!;
+        public LearningOutcomeId LearningOutcomeId { get; set; }
+        public LearningOutcome LearningOutcome { get; set; } = null!;
     }
 
     private sealed class LearningMomentStoredFile

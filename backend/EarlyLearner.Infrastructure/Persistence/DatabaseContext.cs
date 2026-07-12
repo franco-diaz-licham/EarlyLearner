@@ -19,6 +19,7 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<ReadinessProfile> ReadinessProfiles => Set<ReadinessProfile>();
     public DbSet<TrackedReadinessOutcome> TrackedReadinessOutcomes => Set<TrackedReadinessOutcome>();
     public DbSet<ReadinessEvidence> ReadinessEvidence => Set<ReadinessEvidence>();
+    public DbSet<LearningOutcome> LearningOutcomes => Set<LearningOutcome>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
     public DbSet<LearningMoment> LearningMoments => Set<LearningMoment>();
 
