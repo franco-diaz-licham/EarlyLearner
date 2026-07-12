@@ -108,6 +108,19 @@ describe('householdService', () => {
     expect(apiClientMock.deleteResult).toHaveBeenCalledWith('/households/carers/carer-1');
   });
 
+  test('revokes a carer invitation', async () => {
+    // Arrange
+    apiClientMock.deleteResult.mockResolvedValue(householdResponse);
+
+    // Act
+    const result = await householdService.revokeCarerInvitation('invitation-1');
+
+    // Assert
+    expect(result).toEqual(householdResponse);
+    expect(apiClientMock.deleteResult).toHaveBeenCalledTimes(1);
+    expect(apiClientMock.deleteResult).toHaveBeenCalledWith('/households/carer-invitations/invitation-1');
+  });
+
   test('adds a child', async () => {
     // Arrange
     const request: AddHouseholdChildRequest = {

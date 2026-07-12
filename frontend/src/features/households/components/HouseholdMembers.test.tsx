@@ -54,6 +54,7 @@ describe('HouseholdMembers', () => {
   const onEditChild = vi.fn<(child: ChildModel) => void>();
   const onRemoveCarer = vi.fn<(carerId: string) => void>();
   const onRemoveChild = vi.fn<(childId: string) => void>();
+  const onRevokeInvitation = vi.fn<(invitationId: string) => void>();
 
   beforeEach(() => {
     getStatusTone.mockReset();
@@ -61,15 +62,27 @@ describe('HouseholdMembers', () => {
     onEditChild.mockClear();
     onRemoveCarer.mockClear();
     onRemoveChild.mockClear();
+    onRevokeInvitation.mockClear();
   });
 
   const renderMembers = (overrides: Partial<Parameters<typeof HouseholdMembers>[0]> = {}) =>
-    render(<HouseholdMembers household={household} getStatusTone={getStatusTone} isRemovingCarer={false} isRemovingChild={false} onEditChild={onEditChild} onRemoveCarer={onRemoveCarer} onRemoveChild={onRemoveChild} {...overrides} />);
+    render(
+      <HouseholdMembers
+        household={household}
+        getStatusTone={getStatusTone}
+        isRemovingCarer={false}
+        isRemovingChild={false}
+        isRevokingInvitation={false}
+        onEditChild={onEditChild}
+        onRemoveCarer={onRemoveCarer}
+        onRemoveChild={onRemoveChild}
+        onRevokeInvitation={onRevokeInvitation}
+        {...overrides}
+      />
+    );
 
   test('renders carers, children, and invitations', () => {
-    // Arrange
-
-    // Act
+    // Arrange & Act
     renderMembers();
 
     // Assert
@@ -86,24 +99,23 @@ describe('HouseholdMembers', () => {
   test('calls member action handlers with the selected ids and child', async () => {
     // Arrange
     const user = userEvent.setup();
-
     renderMembers();
 
     // Act
     await user.click(screen.getByRole('button', { name: 'Remove Sam Taylor' }));
     await user.click(screen.getByRole('button', { name: 'Edit Mia Rivera' }));
     await user.click(screen.getByRole('button', { name: 'Remove Mia Rivera' }));
+    await user.click(screen.getByRole('button', { name: 'Revoke invitation for viewer@example.com' }));
 
     // Assert
     expect(onRemoveCarer).toHaveBeenCalledWith('carer-caregiver');
     expect(onEditChild).toHaveBeenCalledWith(child);
     expect(onRemoveChild).toHaveBeenCalledWith('child-1');
+    expect(onRevokeInvitation).toHaveBeenCalledWith('invitation-1');
   });
 
   test('does not render a remove action for the owner', () => {
-    // Arrange
-
-    // Act
+    // Arrange & Act
     renderMembers();
 
     // Assert
@@ -111,14 +123,13 @@ describe('HouseholdMembers', () => {
   });
 
   test('disables remove actions while removals are in progress', () => {
-    // Arrange
-
-    // Act
-    renderMembers({ isRemovingCarer: true, isRemovingChild: true });
+    // Arrange & Act
+    renderMembers({ isRemovingCarer: true, isRemovingChild: true, isRevokingInvitation: true });
 
     // Assert
     expect(screen.getByRole('button', { name: 'Remove Sam Taylor' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Remove Mia Rivera' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Revoke invitation for viewer@example.com' })).toBeDisabled();
   });
 
   test('renders an empty member state', () => {

@@ -12,6 +12,7 @@ vi.mock('../queries/household.queries', () => ({
   useInviteHouseholdCarerMutation: vi.fn(),
   useRemoveHouseholdCarerMutation: vi.fn(),
   useRemoveHouseholdChildMutation: vi.fn(),
+  useRevokeHouseholdCarerInvitationMutation: vi.fn(),
   useUpdateHouseholdChildMutation: vi.fn(),
   useUpdateHouseholdMutation: vi.fn()
 }));
@@ -89,6 +90,11 @@ const removeHouseholdCarerMutation = {
   mutateAsync: vi.fn()
 };
 
+const revokeHouseholdCarerInvitationMutation = {
+  isPending: false,
+  mutateAsync: vi.fn()
+};
+
 const addHouseholdChildMutation = {
   isPending: false,
   mutateAsync: vi.fn()
@@ -124,6 +130,7 @@ describe('HouseholdsPage', () => {
     vi.mocked(householdQueries.useUpdateHouseholdMutation).mockReturnValue(updateHouseholdMutation as unknown as ReturnType<typeof householdQueries.useUpdateHouseholdMutation>);
     vi.mocked(householdQueries.useInviteHouseholdCarerMutation).mockReturnValue(inviteHouseholdCarerMutation as unknown as ReturnType<typeof householdQueries.useInviteHouseholdCarerMutation>);
     vi.mocked(householdQueries.useRemoveHouseholdCarerMutation).mockReturnValue(removeHouseholdCarerMutation as unknown as ReturnType<typeof householdQueries.useRemoveHouseholdCarerMutation>);
+    vi.mocked(householdQueries.useRevokeHouseholdCarerInvitationMutation).mockReturnValue(revokeHouseholdCarerInvitationMutation as unknown as ReturnType<typeof householdQueries.useRevokeHouseholdCarerInvitationMutation>);
     vi.mocked(householdQueries.useAddHouseholdChildMutation).mockReturnValue(addHouseholdChildMutation as unknown as ReturnType<typeof householdQueries.useAddHouseholdChildMutation>);
     vi.mocked(householdQueries.useUpdateHouseholdChildMutation).mockReturnValue(updateHouseholdChildMutation as unknown as ReturnType<typeof householdQueries.useUpdateHouseholdChildMutation>);
     vi.mocked(householdQueries.useRemoveHouseholdChildMutation).mockReturnValue(removeHouseholdChildMutation as unknown as ReturnType<typeof householdQueries.useRemoveHouseholdChildMutation>);
@@ -135,6 +142,7 @@ describe('HouseholdsPage', () => {
     updateHouseholdMutation.mutateAsync.mockResolvedValue(household);
     inviteHouseholdCarerMutation.mutateAsync.mockResolvedValue(household);
     removeHouseholdCarerMutation.mutateAsync.mockResolvedValue(household);
+    revokeHouseholdCarerInvitationMutation.mutateAsync.mockResolvedValue(household);
     addHouseholdChildMutation.mutateAsync.mockResolvedValue(household);
     updateHouseholdChildMutation.mutateAsync.mockResolvedValue(household);
     removeHouseholdChildMutation.mutateAsync.mockResolvedValue(household);
@@ -270,5 +278,18 @@ describe('HouseholdsPage', () => {
       expect(removeHouseholdCarerMutation.mutateAsync).toHaveBeenCalledWith('carer-caregiver');
     });
     expect(removeHouseholdChildMutation.mutateAsync).toHaveBeenCalledWith('child-1');
+  });
+
+  test('revokes a pending household invitation', async () => {
+    // Arrange
+    const user = userEvent.setup();
+
+    renderPage();
+
+    // Act
+    await user.click(screen.getByRole('button', { name: 'Revoke invitation for viewer@example.com' }));
+
+    // Assert
+    expect(revokeHouseholdCarerInvitationMutation.mutateAsync).toHaveBeenCalledWith('invitation-1');
   });
 });

@@ -12,6 +12,7 @@ import {
   useInviteHouseholdCarerMutation,
   useRemoveHouseholdCarerMutation,
   useRemoveHouseholdChildMutation,
+  useRevokeHouseholdCarerInvitationMutation,
   useUpdateHouseholdChildMutation,
   useUpdateHouseholdMutation
 } from './household.queries';
@@ -23,6 +24,7 @@ vi.mock('../services/household.services', () => ({
     update: vi.fn(),
     inviteCarer: vi.fn(),
     removeCarer: vi.fn(),
+    revokeCarerInvitation: vi.fn(),
     addChild: vi.fn(),
     updateChild: vi.fn(),
     removeChild: vi.fn()
@@ -35,6 +37,7 @@ interface HouseholdServiceMock {
   update: Mock;
   inviteCarer: Mock;
   removeCarer: Mock;
+  revokeCarerInvitation: Mock;
   addChild: Mock;
   updateChild: Mock;
   removeChild: Mock;
@@ -155,6 +158,24 @@ describe('household queries', () => {
 
     // Assert
     expect(householdServiceMock.removeCarer).toHaveBeenCalledWith('carer-1');
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: householdKeys.lists() });
+    expect(queryClient.getQueryData(householdKeys.current())).toEqual(updatedHouseholdResponse);
+  });
+
+  test('revokes a household carer invitation and refreshes household query data', async () => {
+    // Arrange
+    householdServiceMock.revokeCarerInvitation.mockResolvedValue(updatedHouseholdResponse);
+
+    const { queryClient, result } = renderHookWithClient(() => useRevokeHouseholdCarerInvitationMutation());
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
+
+    // Act
+    await act(async () => {
+      await result.current.mutateAsync('invitation-1');
+    });
+
+    // Assert
+    expect(householdServiceMock.revokeCarerInvitation).toHaveBeenCalledWith('invitation-1');
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: householdKeys.lists() });
     expect(queryClient.getQueryData(householdKeys.current())).toEqual(updatedHouseholdResponse);
   });
