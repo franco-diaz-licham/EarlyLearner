@@ -24,6 +24,10 @@ export const householdService = {
     return apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/carers/${carerId}`);
   },
 
+  async revokeCarerInvitation(invitationId: string): Promise<HouseholdResponse> {
+    return apiClient.deleteResult<HouseholdResponse>(`${HOUSEHOLDS_URL}/carer-invitations/${invitationId}`);
+  },
+
   async addChild(request: AddHouseholdChildRequest): Promise<HouseholdResponse> {
     return apiClient.post<HouseholdResponse>(`${HOUSEHOLDS_URL}/children`, request);
   },

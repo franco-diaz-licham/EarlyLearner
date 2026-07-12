@@ -83,6 +83,21 @@ export const useRemoveHouseholdCarerMutation = () => {
   });
 };
 
+export const useRevokeHouseholdCarerInvitationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (invitationId: string) => {
+      const household = await householdService.revokeCarerInvitation(invitationId);
+      return mapHouseholdResponseToModel(household);
+    },
+    onSuccess: (household) => {
+      void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
+      setHouseholdQueryData(queryClient, household);
+    }
+  });
+};
+
 export const useAddHouseholdChildMutation = () => {
   const queryClient = useQueryClient();
 

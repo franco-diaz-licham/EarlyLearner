@@ -12,6 +12,7 @@ import {
   useInviteHouseholdCarerMutation,
   useRemoveHouseholdCarerMutation,
   useRemoveHouseholdChildMutation,
+  useRevokeHouseholdCarerInvitationMutation,
   useUpdateHouseholdChildMutation,
   useUpdateHouseholdMutation
 } from '../queries/household.queries';
@@ -29,6 +30,7 @@ export const HouseholdsPage = () => {
   const updateHouseholdMutation = useUpdateHouseholdMutation();
   const inviteHouseholdCarerMutation = useInviteHouseholdCarerMutation();
   const removeHouseholdCarerMutation = useRemoveHouseholdCarerMutation();
+  const revokeHouseholdCarerInvitationMutation = useRevokeHouseholdCarerInvitationMutation();
   const addHouseholdChildMutation = useAddHouseholdChildMutation();
   const updateHouseholdChildMutation = useUpdateHouseholdChildMutation();
   const removeHouseholdChildMutation = useRemoveHouseholdChildMutation();
@@ -132,6 +134,11 @@ export const HouseholdsPage = () => {
     await removeHouseholdCarerMutation.mutateAsync(carerId);
   };
 
+  const revokeInvitation = async (invitationId: string) => {
+    if (!household) return;
+    await revokeHouseholdCarerInvitationMutation.mutateAsync(invitationId);
+  };
+
   return (
     <section aria-labelledby="households-title" className="space-y-5">
       <HouseholdHeader
@@ -156,12 +163,16 @@ export const HouseholdsPage = () => {
             getStatusTone={getStatusTone}
             isRemovingCarer={removeHouseholdCarerMutation.isPending}
             isRemovingChild={removeHouseholdChildMutation.isPending}
+            isRevokingInvitation={revokeHouseholdCarerInvitationMutation.isPending}
             onEditChild={handleEditChild}
             onRemoveCarer={(carerId) => {
               void removeCarer(carerId);
             }}
             onRemoveChild={(childId) => {
               void removeChild(childId);
+            }}
+            onRevokeInvitation={(invitationId) => {
+              void revokeInvitation(invitationId);
             }}
           />
 
