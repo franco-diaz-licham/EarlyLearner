@@ -12,11 +12,8 @@ public sealed record NotificationDocument(
     DateTimeOffset OccurredAt)
 {
     public bool IsTerminal => Status is NotificationDeliveryStatus.Succeeded or NotificationDeliveryStatus.Failed;
-
     public const string ContainerName = "notifications";
     public const string PartitionKeyPath = "/householdId";
-
     public static string BuildId(Guid invitationId) => invitationId.ToString("D");
-
     public static string BuildPartitionKey(Guid householdId) => householdId.ToString("D");
 }

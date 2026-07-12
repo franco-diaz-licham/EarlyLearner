@@ -1,7 +1,6 @@
 using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
-using EarlyLearner.Worker.Messaging;
 using EarlyLearner.Worker.Configuration.Options;
 using MassTransit;
 using Microsoft.Extensions.Options;
