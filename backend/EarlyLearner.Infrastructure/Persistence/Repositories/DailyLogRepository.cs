@@ -2,6 +2,8 @@ using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.Entities;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +22,16 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
                 HouseholdId: log.HouseholdId.Value,
                 ChildId: log.ChildId.Value,
                 LogDate: log.LogDate,
-                LearningMomentCount: log.LearningMoments.Count))
+                LearningMomentCount: log.LearningMoments.Count,
+                LearningMoments: log.LearningMoments
+                    .OrderByDescending(moment => moment.CreatedOn)
+                    .Select(moment => new LearningMomentResponse(
+                        moment.Id.Value,
+                        moment.Kind,
+                        moment.Title,
+                        moment.Notes,
+                        moment.ReadinessOutcomes.Select(outcome => outcome.Id.Value).ToList()))
+                    .ToList()))
             .ToListAsync(cancellationToken);
     }
 
@@ -29,9 +40,27 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
         return db.Children.AnyAsync(child => child.Id == childId && child.HouseholdId == householdId, cancellationToken);
     }
 
+    public Task<List<ReadinessOutcome>> GetReadinessOutcomesAsync(IReadOnlyList<ReadinessOutcomeId> readinessOutcomeIds, CancellationToken cancellationToken)
+    {
+        return db.ReadinessOutcomes
+            .Where(outcome => readinessOutcomeIds.Contains(outcome.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<DailyLog?> GetByChildAndDateAsync(HouseholdId householdId, ChildId childId, DateOnly logDate, CancellationToken cancellationToken)
+    {
+        return db.DailyLogs
+            .Include(log => log.LearningMoments)
+            .ThenInclude(moment => moment.ReadinessOutcomes)
+            .SingleOrDefaultAsync(log => log.HouseholdId == householdId && log.ChildId == childId && log.LogDate == logDate, cancellationToken);
+    }
+
     public Task<DailyLog?> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)
     {
-        return db.DailyLogs.SingleOrDefaultAsync(item => item.Id == dailyLogId, cancellationToken);
+        return db.DailyLogs
+            .Include(log => log.LearningMoments)
+            .ThenInclude(moment => moment.ReadinessOutcomes)
+            .SingleOrDefaultAsync(item => item.Id == dailyLogId, cancellationToken);
     }
 
     public async Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)
@@ -44,7 +73,16 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
                 HouseholdId: item.HouseholdId.Value,
                 ChildId: item.ChildId.Value,
                 LogDate: item.LogDate,
-                LearningMomentCount: item.LearningMoments.Count))
+                LearningMomentCount: item.LearningMoments.Count,
+                LearningMoments: item.LearningMoments
+                    .OrderByDescending(moment => moment.CreatedOn)
+                    .Select(moment => new LearningMomentResponse(
+                        moment.Id.Value,
+                        moment.Kind,
+                        moment.Title,
+                        moment.Notes,
+                        moment.ReadinessOutcomes.Select(outcome => outcome.Id.Value).ToList()))
+                    .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
     }
 

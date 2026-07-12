@@ -2,7 +2,9 @@ using EarlyLearner.Api.Models;
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
+using EarlyLearner.Domain.ReadinessContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
 
@@ -53,7 +55,11 @@ public static class DailyLogEndpoints
 
         var command = new CreateDailyLogCommand(
             ChildId: new ChildId(request.ChildId),
-            LogDate: request.LogDate);
+            LogDate: request.LogDate,
+            Kind: request.Kind,
+            Title: request.Title,
+            Notes: request.Notes,
+            ReadinessOutcomeIds: request.ReadinessOutcomeIds.Select(id => new ReadinessOutcomeId(id)).ToList());
 
         var result = await commandService.CreateAsync(command, cancellationToken);
         var locationUrl = result.IsSuccess ? $"/daily-logs/{result.Value.DailyLogId}" : null;
@@ -74,7 +80,13 @@ public static class DailyLogEndpoints
     }
 }
 
-public sealed record CreateDailyLogRequest(Guid ChildId, DateOnly LogDate);
+public sealed record CreateDailyLogRequest(
+    Guid ChildId,
+    DateOnly LogDate,
+    LearningMomentKindEnum Kind,
+    string Title,
+    string Notes,
+    IReadOnlyList<Guid> ReadinessOutcomeIds);
 
 public sealed class CreateDailyLogRequestValidator : AbstractValidator<CreateDailyLogRequest>
 {
@@ -82,5 +94,10 @@ public sealed class CreateDailyLogRequestValidator : AbstractValidator<CreateDai
     {
         RuleFor(request => request.ChildId).NotEmpty();
         RuleFor(request => request.LogDate).NotEqual(default(DateOnly));
+        RuleFor(request => request.Kind).IsInEnum();
+        RuleFor(request => request.Title).NotEmpty().MaximumLength(220);
+        RuleFor(request => request.Notes).NotEmpty().MaximumLength(2000);
+        RuleFor(request => request.ReadinessOutcomeIds).NotEmpty();
+        RuleForEach(request => request.ReadinessOutcomeIds).NotEmpty();
     }
 }

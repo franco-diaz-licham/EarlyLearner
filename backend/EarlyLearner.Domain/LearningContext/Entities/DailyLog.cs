@@ -55,7 +55,17 @@ public sealed class DailyLog : Entity<DailyLogId>
 
     public static DailyLog Create(HouseholdId householdId, ChildId childId, DateOnly logDate)
     {
-        return new DailyLog(new DailyLogId(Guid.NewGuid()), householdId, childId, logDate);
+        var dailyLog = new DailyLog(new DailyLogId(Guid.NewGuid()), householdId, childId, logDate);
+        var occurredAt = DateTimeOffset.UtcNow;
+        dailyLog.RaiseTraceEvent(
+            entityName: nameof(DailyLog),
+            entityId: dailyLog.Id.Value.ToString(),
+            action: "DailyLogCreated",
+            summary: "Daily log created",
+            details: $"Daily log was created for child {childId.Value} on {logDate}.",
+            householdId: householdId.Value,
+            occurredAt: occurredAt);
+        return dailyLog;
     }
 
     public LearningMoment RecordLearningMoment(
@@ -66,7 +76,16 @@ public sealed class DailyLog : Entity<DailyLogId>
     {
         var moment = new LearningMoment(new LearningMomentId(Guid.NewGuid()), Id, kind, title, notes, readinessOutcomes);
         _learningMoments.Add(moment);
-        RaiseDomainEvent(new LearningMomentRecorded(Id, moment.Id, ChildId, DateTimeOffset.UtcNow));
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseDomainEvent(new LearningMomentRecorded(Id, moment.Id, ChildId, occurredAt));
+        RaiseTraceEvent(
+            entityName: nameof(LearningMoment),
+            entityId: moment.Id.Value.ToString(),
+            action: "LearningMomentRecorded",
+            summary: "Learning moment recorded",
+            details: $"{moment.Title} was recorded for child {ChildId.Value}.",
+            householdId: HouseholdId.Value,
+            occurredAt: occurredAt);
         SetUpdatedOn();
         return moment;
     }

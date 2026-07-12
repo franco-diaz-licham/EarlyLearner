@@ -1,5 +1,6 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
+using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 
@@ -10,7 +11,15 @@ public sealed record DailyLogResponse(
     Guid HouseholdId,
     Guid ChildId,
     DateOnly LogDate,
-    int LearningMomentCount);
+    int LearningMomentCount,
+    IReadOnlyList<LearningMomentResponse> LearningMoments);
+
+public sealed record LearningMomentResponse(
+    Guid LearningMomentId,
+    LearningMomentKindEnum Kind,
+    string Title,
+    string Notes,
+    IReadOnlyList<Guid> ReadinessOutcomeIds);
 
 public interface IDailyLogQueryService
 {
