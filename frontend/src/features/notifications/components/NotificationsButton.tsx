@@ -5,6 +5,12 @@ import { useHouseholdsQuery } from '../../households/queries/household.queries';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
 import { useNotificationStream } from '../hooks/useNotificationStream';
 
+interface ActiveInvitations {
+  householdId: string;
+  invitationId: string;
+  invitedAt: string;
+}
+
 const activeInvitationStatuses = new Set(['invited', 'pending']);
 
 const formatNotificationTime = (occurredAt: string) => {
@@ -16,12 +22,25 @@ const formatNotificationTime = (occurredAt: string) => {
 export const NotificationsButton = () => {
   const panelRef = useRef<OverlayPanel>(null);
   const householdsQuery = useHouseholdsQuery();
-  const invitationId = useMemo(() => {
-    const invitations = householdsQuery.data?.flatMap((household) => household.invitations) ?? [];
-    return invitations.find((invitation) => activeInvitationStatuses.has(invitation.status.toLowerCase()))?.id ?? null;
+
+  const subscription = useMemo<ActiveInvitations | null>(() => {
+    const activeInvitations = [];
+    for (const household of householdsQuery.data ?? []) {
+      for (const invitation of household.invitations) {
+        if (activeInvitationStatuses.has(invitation.status.toLowerCase())) {
+          activeInvitations.push({
+            householdId: household.id,
+            invitationId: invitation.id,
+            invitedAt: invitation.invitedAt
+          });
+        }
+      }
+    }
+
+    return activeInvitations.sort((first, second) => Date.parse(second.invitedAt) - Date.parse(first.invitedAt))[0] ?? null;
   }, [householdsQuery.data]);
 
-  const { notifications, status } = useNotificationStream(invitationId);
+  const { notifications, status } = useNotificationStream(subscription);
   const hasNewNotifications = notifications.length > 0;
 
   return (
@@ -37,17 +56,17 @@ export const NotificationsButton = () => {
         onClick={(event) => panelRef.current?.toggle(event)}
       />
 
-      <OverlayPanel ref={panelRef} className="w-80">
-        <div className="space-y-3">
-          <div>
+      <OverlayPanel ref={panelRef} className="app-notifications-panel rounded-md! border! border-brand-border! bg-white shadow-app-card!" dismissable>
+        <div className="flex w-80 flex-col gap-3 p-2">
+          <div className="border-b border-brand-border px-2 pb-3">
             <p className="text-sm font-bold text-brand-heading">Notifications</p>
-            <p className="text-xs text-brand-muted">{invitationId ? `Stream ${status}` : 'No active invitations to watch.'}</p>
+            <p className="mt-1 text-xs font-semibold text-brand-muted">{subscription ? `Stream ${status}` : 'No active invitations to watch.'}</p>
           </div>
 
           {notifications.length ? (
-            <ul className="max-h-80 space-y-3 overflow-auto">
+            <ul className="max-h-80 space-y-2 overflow-auto px-1">
               {notifications.map((notification) => (
-                <li className="rounded-md border border-brand-border/70 p-3" key={notification.id}>
+                <li className="rounded-md border border-brand-border/70 bg-white p-3" key={notification.id}>
                   <p className="text-sm font-semibold text-brand-heading">{notification.title}</p>
                   <p className="mt-1 text-sm text-brand-muted">{notification.message}</p>
                   <p className="mt-2 text-xs text-brand-muted">{formatNotificationTime(notification.occurredAt)}</p>

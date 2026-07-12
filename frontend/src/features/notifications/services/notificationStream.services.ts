@@ -9,6 +9,12 @@ interface SubscribeToNotificationStreamOptions {
   onNotifications: (notifications: NotificationModel[]) => void;
 }
 
+/**
+ * SignalR client method name used by the API when pushing notification payloads.
+ * This must match NotificationHub.NotificationReceivedMethod on the backend.
+ */
+const notificationReceivedMethod = 'notification';
+
 export const subscribeToNotificationStream = async ({ householdId, invitationId, signal, onConnected, onNotifications }: SubscribeToNotificationStreamOptions) => {
   const connection = createHubConnection('/hubs/notifications', {
     query: { householdId, invitationId }
@@ -21,7 +27,8 @@ export const subscribeToNotificationStream = async ({ householdId, invitationId,
   };
 
   signal.addEventListener('abort', stopConnection, { once: true });
-  connection.on('notification', (notification: NotificationModel) => {
+
+  connection.on(notificationReceivedMethod, (notification: NotificationModel) => {
     onNotifications([notification]);
   });
 

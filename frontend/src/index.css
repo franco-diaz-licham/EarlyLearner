@@ -100,6 +100,8 @@ body,
 }
 
 .app-account-menu-panel::before,
-.app-account-menu-panel::after {
+.app-account-menu-panel::after,
+.app-notifications-panel::before,
+.app-notifications-panel::after {
   display: none !important;
 }

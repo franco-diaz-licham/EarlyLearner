@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '../../auth/stores/auth.store';
 import { subscribeToNotificationStream } from '../services/notificationStream.services';
 import type { NotificationModel, NotificationStreamStatus } from '../types/notification.types';
 
@@ -12,20 +11,19 @@ const prependNotifications = (current: NotificationModel[], next: NotificationMo
 type ActiveNotificationStreamStatus = Exclude<NotificationStreamStatus, 'idle'>;
 
 interface StartNotificationStreamOptions {
+  householdId: string;
   invitationId: string;
   signal: AbortSignal;
   onStatusChanged: (status: ActiveNotificationStreamStatus) => void;
   onNotifications: (notifications: NotificationModel[]) => void;
 }
 
-const startNotificationStream = async ({ invitationId, signal, onStatusChanged, onNotifications }: StartNotificationStreamOptions) => {
+const startNotificationStream = async ({ householdId, invitationId, signal, onStatusChanged, onNotifications }: StartNotificationStreamOptions) => {
   try {
-    const token = await useAuthStore.getState().getAccessToken();
-
     await subscribeToNotificationStream({
+      householdId,
       invitationId,
       signal,
-      token,
       onConnected: () => {
         if (!signal.aborted) onStatusChanged('connected');
       },
@@ -36,20 +34,21 @@ const startNotificationStream = async ({ invitationId, signal, onStatusChanged, 
   }
 };
 
-export const useNotificationStream = (invitationId: string | null) => {
+export const useNotificationStream = (subscription: { householdId: string; invitationId: string } | null) => {
   const [notifications, setNotifications] = useState<NotificationModel[]>([]);
   const [streamStatus, setStreamStatus] = useState<{ invitationId: string; status: ActiveNotificationStreamStatus } | null>(null);
 
   useEffect(() => {
-    if (!invitationId) return;
+    if (!subscription) return;
 
     const abortController = new AbortController();
 
     void startNotificationStream({
-      invitationId,
+      householdId: subscription.householdId,
+      invitationId: subscription.invitationId,
       signal: abortController.signal,
       onStatusChanged: (status) => {
-        setStreamStatus({ invitationId, status });
+        setStreamStatus({ invitationId: subscription.invitationId, status });
       },
       onNotifications: (nextNotifications) => {
         setNotifications((current) => prependNotifications(current, nextNotifications));
@@ -59,9 +58,9 @@ export const useNotificationStream = (invitationId: string | null) => {
     return () => {
       abortController.abort();
     };
-  }, [invitationId]);
+  }, [subscription]);
 
-  const status: NotificationStreamStatus = !invitationId ? 'idle' : streamStatus?.invitationId === invitationId ? streamStatus.status : 'connecting';
+  const status: NotificationStreamStatus = !subscription ? 'idle' : streamStatus?.invitationId === subscription.invitationId ? streamStatus.status : 'connecting';
 
   return { notifications, status };
 };
