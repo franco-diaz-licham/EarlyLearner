@@ -28,9 +28,4 @@ public sealed class CosmosDbOptions
     [Range(60, int.MaxValue)]
     public int DefaultTimeToLiveSeconds { get; init; } = 86400;
 
-    /// <summary>
-    /// Gets a value indicating whether the Cosmos DB emulator's self-signed certificate should be trusted.
-    /// This should only be enabled for local development.
-    /// </summary>
-    public bool AllowInsecureEmulatorCertificate { get; init; }
 }

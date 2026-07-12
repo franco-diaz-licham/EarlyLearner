@@ -10,7 +10,7 @@ try {
 
     try {
         ApiAppServices.AddAppServices(builder.Services, builder.Configuration);
-        InfraAppServices.AddAppServices(builder.Services, builder.Configuration);
+        InfraAppServices.AddAppServices(builder.Services, builder.Configuration, builder.Environment);
     } catch (Exception ex) {
         Log.Fatal(ex, "Exception thrown during InfraAppServices.AddAppServices");
         throw;

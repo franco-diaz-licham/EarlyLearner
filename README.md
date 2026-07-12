@@ -189,6 +189,14 @@ Run the API locally:
 dotnet run --project backend/EarlyLearner.Api
 ```
 
+If the API is run from the host with the Docker Cosmos DB emulator, trust the emulator HTTPS certificate once:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/trust-cosmos-emulator-cert.ps1
+```
+
+The API and worker connect to `https://localhost:8081` during local `dotnet run`. Trusting the emulator certificate avoids insecure certificate bypasses in application code.
+
 Build the API:
 
 ```powershell

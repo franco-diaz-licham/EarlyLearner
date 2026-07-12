@@ -137,6 +137,7 @@ describe('household queries', () => {
       role: 'caregiver'
     } satisfies InviteHouseholdCarerRequest);
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: householdKeys.lists() });
+    expect(queryClient.getQueryData(householdKeys.list())).toEqual([updatedHouseholdResponse]);
     expect(queryClient.getQueryData(householdKeys.current())).toEqual(updatedHouseholdResponse);
   });
 

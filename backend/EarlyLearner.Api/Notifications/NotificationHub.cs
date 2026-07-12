@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace EarlyLearner.Api.Notifications;
 
-public sealed class NotificationHub(IDocumentStore documentStore, ICurrentUser currentUser) : Hub
+public sealed class NotificationHub(IDocumentStore documentStore, ICurrentUser currentUser, ILogger<NotificationHub> logger) : Hub
 {
     public const string NotificationReceivedMethod = "notification";
 
@@ -20,10 +20,22 @@ public sealed class NotificationHub(IDocumentStore documentStore, ICurrentUser c
     public async Task SubscribeToInvitation(Guid invitationId, CancellationToken cancellationToken = default)
     {
         var householdId = currentUser.HouseholdId.Value;
-        await Groups.AddToGroupAsync(Context.ConnectionId, BuildGroupName(householdId, invitationId), cancellationToken);
+        var groupName = BuildGroupName(householdId, invitationId);
+
+        logger.LogInformation(
+            "Subscribing SignalR connection {ConnectionId} to notification group {GroupName}.",
+            Context.ConnectionId,
+            groupName);
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, groupName, cancellationToken);
 
         var existingNotification = await GetNotificationAsync(householdId, invitationId, cancellationToken);
         if (existingNotification is not null && existingNotification.IsTerminal) {
+            logger.LogInformation(
+                "Replaying terminal notification {NotificationId} to SignalR connection {ConnectionId}.",
+                existingNotification.Id,
+                Context.ConnectionId);
+
             await Clients.Caller.SendAsync(NotificationReceivedMethod, ToResponse(existingNotification), cancellationToken);
         }
     }

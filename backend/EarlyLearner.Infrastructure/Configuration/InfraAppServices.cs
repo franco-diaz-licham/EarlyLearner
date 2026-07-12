@@ -26,6 +26,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 
@@ -33,20 +34,20 @@ namespace EarlyLearner.Infrastructure.Configuration;
 
 public static class InfraAppServices
 {
-    public static void AddAppServices(this IServiceCollection services, IConfiguration config)
+    public static void AddAppServices(this IServiceCollection services, IConfiguration config, IHostEnvironment environment)
     {
         services
             .AddAzureAdAuthentication(config)
             .AddDbServices(config)
-            .AddCosmosServices(config)
+            .AddCosmosServices(config, environment)
             .AddFileStorageServices(config)
             .AddApiMessagingServices(config)
             .AddRepositoryServices();
     }
 
-    private static IServiceCollection AddCosmosServices(this IServiceCollection services, IConfiguration config)
+    private static IServiceCollection AddCosmosServices(this IServiceCollection services, IConfiguration config, IHostEnvironment environment)
     {
-        services.AddCosmosDb(config);
+        services.AddCosmosDb(config, environment);
         services.AddSingleton(new DocumentContainerDefinition(
             NotificationDocument.ContainerName,
             NotificationDocument.PartitionKeyPath));

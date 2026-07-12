@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mapAddChildFormToRequest, mapHouseholdResponseToModel, mapHouseholdResponsesToModels, mapInviteCarerFormToRequest, mapRenameHouseholdFormToRequest, mapUpdateChildFormToRequest } from '../mappers/household.mapper';
 import { householdService } from '../services/household.services';
-import type { AddChildForm, InviteCarerForm, RenameHouseholdForm } from '../types/household.types';
+import type { AddChildForm, HouseholdModel, InviteCarerForm, RenameHouseholdForm } from '../types/household.types';
 
 export const householdKeys = {
   all: ['households'] as const,
@@ -29,6 +29,15 @@ export const useHouseholdQuery = () =>
     }
   });
 
+const setHouseholdQueryData = (queryClient: ReturnType<typeof useQueryClient>, household: HouseholdModel) => {
+  queryClient.setQueryData<HouseholdModel[]>(householdKeys.list(), (current) => {
+    if (!current) return [household];
+    if (!current.some((item) => item.id === household.id)) return [...current, household];
+    return current.map((item) => (item.id === household.id ? household : item));
+  });
+  queryClient.setQueryData(householdKeys.current(), household);
+};
+
 export const useUpdateHouseholdMutation = () => {
   const queryClient = useQueryClient();
 
@@ -39,7 +48,7 @@ export const useUpdateHouseholdMutation = () => {
     },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.current(), household);
+      setHouseholdQueryData(queryClient, household);
     }
   });
 };
@@ -54,7 +63,7 @@ export const useInviteHouseholdCarerMutation = () => {
     },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.current(), household);
+      setHouseholdQueryData(queryClient, household);
     }
   });
 };
@@ -69,7 +78,7 @@ export const useRemoveHouseholdCarerMutation = () => {
     },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.current(), household);
+      setHouseholdQueryData(queryClient, household);
     }
   });
 };
@@ -84,7 +93,7 @@ export const useAddHouseholdChildMutation = () => {
     },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.current(), household);
+      setHouseholdQueryData(queryClient, household);
     }
   });
 };
@@ -99,7 +108,7 @@ export const useRemoveHouseholdChildMutation = () => {
     },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.current(), household);
+      setHouseholdQueryData(queryClient, household);
     }
   });
 };
@@ -114,7 +123,7 @@ export const useUpdateHouseholdChildMutation = () => {
     },
     onSuccess: (household) => {
       void queryClient.invalidateQueries({ queryKey: householdKeys.lists() });
-      queryClient.setQueryData(householdKeys.current(), household);
+      setHouseholdQueryData(queryClient, household);
     }
   });
 };

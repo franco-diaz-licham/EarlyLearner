@@ -133,6 +133,7 @@ services:
       CosmosDb__ConnectionString: "AccountEndpoint=https://cosmos-db:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;"
       AzureServiceBus__ConnectionString: "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
       AzureServiceBus__AdministrationConnectionString: "Endpoint=sb://servicebus-emulator:5300;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+      ASPNETCORE_ENVIRONMENT: "Development"
       Observability__OtlpEndpoint: "http://otel-collector:4317"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost/health/ready"]

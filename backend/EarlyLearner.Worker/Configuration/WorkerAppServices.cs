@@ -21,7 +21,7 @@ public static class WorkerAppServices
         services
             .AuditDatabaseServices(configuration)
             .EarlyLearnerServices(configuration)
-            .AddCosmosServices(configuration)
+            .AddCosmosServices(configuration, environment)
             .EmailServices(configuration, environment)
             .MessagingServices(configuration);
 
@@ -29,9 +29,9 @@ public static class WorkerAppServices
     }
 
 
-    private static IServiceCollection AddCosmosServices(this IServiceCollection services, IConfiguration config)
+    private static IServiceCollection AddCosmosServices(this IServiceCollection services, IConfiguration config, IHostEnvironment environment)
     {
-        services.AddCosmosDb(config);
+        services.AddCosmosDb(config, environment);
         services.AddSingleton(new DocumentContainerDefinition(
             NotificationDocument.ContainerName,
             NotificationDocument.PartitionKeyPath));

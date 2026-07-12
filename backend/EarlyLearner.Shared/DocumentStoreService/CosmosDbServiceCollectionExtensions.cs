@@ -2,13 +2,14 @@ using EarlyLearner.Shared.Options;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Shared.DocumentStoreService;
 
 public static class CosmosDbServiceCollectionExtensions
 {
-    public static IServiceCollection AddCosmosDb(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCosmosDb(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services
             .AddOptions<CosmosDbOptions>()
@@ -20,12 +21,13 @@ public static class CosmosDbServiceCollectionExtensions
             var options = sp.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
             var clientOptions = new CosmosClientOptions {
                 ConnectionMode = ConnectionMode.Gateway,
+                LimitToEndpoint = environment.IsDevelopment(),
                 SerializerOptions = new CosmosSerializationOptions {
                     PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
                 }
             };
 
-            if (options.AllowInsecureEmulatorCertificate) {
+            if (environment.IsDevelopment()) {
                 clientOptions.HttpClientFactory = () => new HttpClient(new HttpClientHandler {
                     ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                 });
