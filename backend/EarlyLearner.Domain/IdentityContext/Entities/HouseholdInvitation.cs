@@ -67,7 +67,6 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
     public void Resend(DateTimeOffset expiresAt)
     {
         if (Status == HouseholdInvitationStatusEnum.Accepted) throw new DomainException("Accepted invitations cannot be resent.");
-
         Status = HouseholdInvitationStatusEnum.Pending;
         ExpiresAt = expiresAt;
         SetUpdatedOn();
@@ -76,7 +75,6 @@ public sealed class HouseholdInvitation : Entity<HouseholdInvitationId>
     public void Revoke()
     {
         if (Status == HouseholdInvitationStatusEnum.Accepted) throw new DomainException("Accepted invitations cannot be revoked.");
-
         Status = HouseholdInvitationStatusEnum.Revoked;
         SetUpdatedOn();
     }

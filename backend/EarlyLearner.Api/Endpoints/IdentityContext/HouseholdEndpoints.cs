@@ -18,6 +18,7 @@ public static class HouseholdEndpoints
         households.MapGet("/current", GetHousehold).WithName(nameof(GetHousehold));
         households.MapPut("/", UpdateHousehold).WithName(nameof(UpdateHousehold));
         households.MapPost("/carer-invitations", InviteCarer).WithName(nameof(InviteCarer));
+        households.MapDelete("/carer-invitations/{invitationId:guid}", RevokeCarerInvitation).WithName(nameof(RevokeCarerInvitation));
         households.MapDelete("/carers/{carerId:guid}", RemoveCarer).WithName(nameof(RemoveCarer));
         households.MapPost("/children", AddChild).WithName(nameof(AddChild));
         households.MapPut("/children/{childId:guid}", UpdateChild).WithName(nameof(UpdateChild));
@@ -64,6 +65,15 @@ public static class HouseholdEndpoints
 
         var command = new RemoveHouseholdCarerCommand(CarerId: new CarerId(carerId));
         var result = await commandService.RemoveCarerAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
+
+    public static async Task<IResult> RevokeCarerInvitation(Guid invitationId, IHouseholdCommandService commandService, CancellationToken cancellationToken = default)
+    {
+        if (invitationId == Guid.Empty) return Result<HouseholdResponse>.Fail("Invitation id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var command = new RevokeHouseholdCarerInvitationCommand(InvitationId: new HouseholdInvitationId(invitationId));
+        var result = await commandService.RevokeCarerInvitationAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 

@@ -13,6 +13,8 @@ public sealed record AddHouseholdCarerCommand(string Email, HouseholdRoleEnum Ro
 
 public sealed record RemoveHouseholdCarerCommand(CarerId CarerId);
 
+public sealed record RevokeHouseholdCarerInvitationCommand(HouseholdInvitationId InvitationId);
+
 public sealed record AddHouseholdChildCommand(string FirstName, string LastName, DateOnly DateOfBirth, StoredFileId? AvatarStoredFileId);
 
 public sealed record UpdateHouseholdChildCommand(ChildId ChildId, string FirstName, string LastName, DateOnly DateOfBirth, StoredFileId? AvatarStoredFileId);
@@ -24,6 +26,7 @@ public interface IHouseholdCommandService
     Task<Result<HouseholdResponse>> UpdateAsync(UpdateHouseholdCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> AddCarerAsync(AddHouseholdCarerCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> RemoveCarerAsync(RemoveHouseholdCarerCommand command, CancellationToken cancellationToken);
+    Task<Result<HouseholdResponse>> RevokeCarerInvitationAsync(RevokeHouseholdCarerInvitationCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> AddChildAsync(AddHouseholdChildCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> UpdateChildAsync(UpdateHouseholdChildCommand command, CancellationToken cancellationToken);
     Task<Result<HouseholdResponse>> RemoveChildAsync(RemoveHouseholdChildCommand command, CancellationToken cancellationToken);
@@ -85,6 +88,20 @@ public sealed class HouseholdCommandService(IHouseholdCommandRepository househol
 
         var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
         if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after removing carer.", ResultTypeEnum.Invalid);
+        return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
+    }
+
+    public async Task<Result<HouseholdResponse>> RevokeCarerInvitationAsync(RevokeHouseholdCarerInvitationCommand command, CancellationToken cancellationToken)
+    {
+        var household = await householdRepo.GetAsync(user.HouseholdId, cancellationToken);
+        if (household is null) return Result<HouseholdResponse>.Fail("Household was not found.", ResultTypeEnum.NotFound);
+
+        household.RevokeInvitation(command.InvitationId);
+        var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
+        if (!saved) return Result<HouseholdResponse>.Fail("Carer invitation could not be revoked.", ResultTypeEnum.Invalid);
+
+        var result = await householdRepo.GetResponseAsync(household.Id, cancellationToken);
+        if (result is null) return Result<HouseholdResponse>.Fail("Household could not be retrieved after revoking invitation.", ResultTypeEnum.Invalid);
         return Result<HouseholdResponse>.Success(result, ResultTypeEnum.Updated);
     }
 

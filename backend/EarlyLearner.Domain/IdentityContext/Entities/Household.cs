@@ -151,6 +151,15 @@ public sealed class Household : Entity<HouseholdId>
         SetUpdatedOn();
     }
 
+    public void RevokeInvitation(HouseholdInvitationId invitationId)
+    {
+        var invitation = _invitations.SingleOrDefault(existingInvitation => existingInvitation.Id == invitationId);
+        if (invitation is null) throw new DomainException("Invitation does not belong to this household.");
+
+        invitation.Revoke();
+        SetUpdatedOn();
+    }
+
     public Child AddChild(string firstName, string lastName, DateOnly dateOfBirth, StoredFileId? avatarStoredFileId)
     {
         var child = new Child(new ChildId(Guid.NewGuid()), Id, firstName, lastName, dateOfBirth, avatarStoredFileId);
