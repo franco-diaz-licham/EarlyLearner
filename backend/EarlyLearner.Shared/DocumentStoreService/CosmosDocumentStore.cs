@@ -40,5 +40,16 @@ public sealed class CosmosDocumentStore(CosmosClient client, IOptions<CosmosDbOp
             cancellationToken: cancellationToken);
     }
 
+    public async Task DeleteAsync(string containerName, string id, string partitionKey, CancellationToken cancellationToken = default)
+    {
+        try {
+            await GetContainer(containerName).DeleteItemAsync<object>(
+                id,
+                new PartitionKey(partitionKey),
+                cancellationToken: cancellationToken);
+        } catch (CosmosException exception) when (exception.StatusCode == System.Net.HttpStatusCode.NotFound) {
+        }
+    }
+
     private Container GetContainer(string containerName) => client.GetContainer(options.DatabaseName, containerName);
 }

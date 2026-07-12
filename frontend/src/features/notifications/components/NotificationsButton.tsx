@@ -1,4 +1,4 @@
-import { UilBell } from '@iconscout/react-unicons';
+import { UilBell, UilTimes } from '@iconscout/react-unicons';
 import { useMemo, useRef } from 'react';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { useHouseholdsQuery } from '../../households/queries/household.queries';
@@ -40,7 +40,7 @@ export const NotificationsButton = () => {
     return activeInvitations.sort((first, second) => Date.parse(second.invitedAt) - Date.parse(first.invitedAt))[0] ?? null;
   }, [householdsQuery.data]);
 
-  const { notifications, status } = useNotificationStream(subscription);
+  const { dismissNotification, notifications, status } = useNotificationStream(subscription);
   const hasNewNotifications = notifications.length > 0;
 
   return (
@@ -67,9 +67,20 @@ export const NotificationsButton = () => {
             <ul className="max-h-80 space-y-2 overflow-auto px-1">
               {notifications.map((notification) => (
                 <li className="rounded-md border border-brand-border/70 bg-white p-3" key={notification.id}>
-                  <p className="text-sm font-semibold text-brand-heading">{notification.title}</p>
-                  <p className="mt-1 text-sm text-brand-muted">{notification.message}</p>
-                  <p className="mt-2 text-xs text-brand-muted">{formatNotificationTime(notification.occurredAt)}</p>
+                  <div className="flex items-start gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-brand-heading">{notification.title}</p>
+                      <p className="mt-1 text-sm text-brand-muted">{notification.message}</p>
+                      <p className="mt-2 text-xs text-brand-muted">{formatNotificationTime(notification.occurredAt)}</p>
+                    </div>
+                    <AppIconButton
+                      aria-label={`Dismiss ${notification.title}`}
+                      icon={<UilTimes aria-hidden="true" className="h-4 w-4" />}
+                      onClick={() => {
+                        void dismissNotification(notification);
+                      }}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

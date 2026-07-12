@@ -20,6 +20,7 @@ declare module '@iconscout/react-unicons' {
   export const UilPlus: UniconComponent;
   export const UilSearch: UniconComponent;
   export const UilShieldCheck: UniconComponent;
+  export const UilTimes: UniconComponent;
   export const UilTrashAlt: UniconComponent;
   export const UilUserPlus: UniconComponent;
   export const UilUsersAlt: UniconComponent;

@@ -19,6 +19,7 @@ public static class ApiEndpointMappings
         api.MapStoredFileEndpoints();
         api.MapDashboardEndpoints();
         api.MapHouseholdEndpoints();
+        api.MapNotificationEndpoints();
         api.MapDailyLogEndpoints();
         api.MapReadinessOutcomeEndpoints();
         api.MapReadinessProfileEndpoints();

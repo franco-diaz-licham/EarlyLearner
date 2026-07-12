@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { notificationService } from '../services/notification.services';
 import { subscribeToNotificationStream } from '../services/notificationStream.services';
 import type { NotificationModel, NotificationStreamStatus } from '../types/notification.types';
 
@@ -62,5 +63,10 @@ export const useNotificationStream = (subscription: { householdId: string; invit
 
   const status: NotificationStreamStatus = !subscription ? 'idle' : streamStatus?.invitationId === subscription.invitationId ? streamStatus.status : 'connecting';
 
-  return { notifications, status };
+  const dismissNotification = useCallback(async (notification: NotificationModel) => {
+    await notificationService.dismiss(notification.id, notification.householdId);
+    setNotifications((current) => current.filter((item) => item.id !== notification.id));
+  }, []);
+
+  return { dismissNotification, notifications, status };
 };
