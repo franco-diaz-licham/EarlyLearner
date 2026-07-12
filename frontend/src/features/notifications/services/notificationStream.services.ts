@@ -1,28 +1,23 @@
-import { HubConnectionBuilder, HubConnectionState, HttpTransportType } from '@microsoft/signalr';
-import { appConfig } from '../../../shared/config/appConfig';
+import { createHubConnection } from '../../../shared/api/hubClient';
 import type { NotificationModel } from '../types/notification.types';
 
 interface SubscribeToNotificationStreamOptions {
+  householdId: string;
   invitationId: string;
   signal: AbortSignal;
-  token: string | null;
   onConnected: () => void;
   onNotifications: (notifications: NotificationModel[]) => void;
 }
 
-export const subscribeToNotificationStream = async ({ invitationId, signal, token, onConnected, onNotifications }: SubscribeToNotificationStreamOptions) => {
-  const connection = new HubConnectionBuilder()
-    .withUrl(`${appConfig.apiBaseUrl}/hubs/notifications`, {
-      accessTokenFactory: () => token ?? '',
-      transport: HttpTransportType.ServerSentEvents
-    })
-    .withAutomaticReconnect()
-    .build();
+export const subscribeToNotificationStream = async ({ householdId, invitationId, signal, onConnected, onNotifications }: SubscribeToNotificationStreamOptions) => {
+  const connection = createHubConnection('/hubs/notifications', {
+    query: { householdId, invitationId }
+  });
 
   let isStopping = false;
   const stopConnection = () => {
     isStopping = true;
-    if (connection.state !== HubConnectionState.Disconnected) void connection.stop();
+    void connection.stop();
   };
 
   signal.addEventListener('abort', stopConnection, { once: true });
@@ -30,15 +25,10 @@ export const subscribeToNotificationStream = async ({ invitationId, signal, toke
     onNotifications([notification]);
   });
 
-  connection.onreconnected(() => {
-    void connection.invoke('SubscribeToInvitation', invitationId);
-  });
-
   try {
     await connection.start();
     if (signal.aborted) return;
 
-    await connection.invoke('SubscribeToInvitation', invitationId);
     onConnected();
 
     await new Promise<void>((resolve, reject) => {
