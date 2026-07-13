@@ -50,23 +50,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "outbox_state",
-                columns: table => new
-                {
-                    outbox_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lock_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    row_version = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: true),
-                    created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    delivered = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    last_sequence_number = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_outbox_state", x => x.outbox_id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "readiness_outcomes",
+                name: "learning_outcomes",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -81,7 +65,23 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_readiness_outcomes", x => x.id);
+                    table.PrimaryKey("pk_learning_outcomes", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "outbox_state",
+                columns: table => new
+                {
+                    outbox_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    lock_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    row_version = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: true),
+                    created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    delivered = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    last_sequence_number = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_outbox_state", x => x.outbox_id);
                 });
 
             migrationBuilder.CreateTable(
@@ -290,33 +290,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "readiness_profiles",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    household_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    child_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_readiness_profiles", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_readiness_profiles_children_child_id",
-                        column: x => x.child_id,
-                        principalTable: "children",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_readiness_profiles_households_household_id",
-                        column: x => x.household_id,
-                        principalTable: "households",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "learning_moments",
                 columns: table => new
                 {
@@ -340,83 +313,25 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "readiness_evidences",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    readiness_profile_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    readiness_outcome_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    source_type = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),
-                    evidence_record_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    observed_on = table.Column<DateOnly>(type: "date", nullable: false),
-                    summary = table.Column<string>(type: "character varying(800)", maxLength: 800, nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_on = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_readiness_evidences", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_readiness_evidences_readiness_outcomes_readiness_outcome_id",
-                        column: x => x.readiness_outcome_id,
-                        principalTable: "readiness_outcomes",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_readiness_evidences_readiness_profiles_readiness_profile_id",
-                        column: x => x.readiness_profile_id,
-                        principalTable: "readiness_profiles",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "tracked_readiness_outcomes",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    readiness_profile_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    readiness_outcome_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    status = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_tracked_readiness_outcomes", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_tracked_readiness_outcomes_readiness_outcomes_readiness_out",
-                        column: x => x.readiness_outcome_id,
-                        principalTable: "readiness_outcomes",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_tracked_readiness_outcomes_readiness_profiles_readiness_pro",
-                        column: x => x.readiness_profile_id,
-                        principalTable: "readiness_profiles",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "learning_moment_readiness_outcomes",
+                name: "learning_moment_learning_outcomes",
                 columns: table => new
                 {
                     learning_moment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    readiness_outcome_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    learning_outcome_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_learning_moment_readiness_outcomes", x => new { x.learning_moment_id, x.readiness_outcome_id });
+                    table.PrimaryKey("pk_learning_moment_learning_outcomes", x => new { x.learning_moment_id, x.learning_outcome_id });
                     table.ForeignKey(
-                        name: "fk_learning_moment_readiness_outcomes_learning_moments_learnin",
+                        name: "fk_learning_moment_learning_outcomes_learning_moments_learning",
                         column: x => x.learning_moment_id,
                         principalTable: "learning_moments",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_learning_moment_readiness_outcomes_readiness_outcomes_readi",
-                        column: x => x.readiness_outcome_id,
-                        principalTable: "readiness_outcomes",
+                        name: "fk_learning_moment_learning_outcomes_learning_outcomes_learnin",
+                        column: x => x.learning_outcome_id,
+                        principalTable: "learning_outcomes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -488,9 +403,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 column: "delivered");
 
             migrationBuilder.CreateIndex(
-                name: "ix_learning_moment_readiness_outcomes_readiness_outcome_id",
-                table: "learning_moment_readiness_outcomes",
-                column: "readiness_outcome_id");
+                name: "ix_learning_moment_learning_outcomes_learning_outcome_id",
+                table: "learning_moment_learning_outcomes",
+                column: "learning_outcome_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_learning_moment_stored_files_stored_file_id",
@@ -501,6 +416,17 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 name: "ix_learning_moments_daily_log_id",
                 table: "learning_moments",
                 column: "daily_log_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_learning_outcomes_category_sort_order",
+                table: "learning_outcomes",
+                columns: new[] { "category", "sort_order" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_learning_outcomes_code",
+                table: "learning_outcomes",
+                column: "code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_outbox_message_enqueue_time",
@@ -530,52 +456,9 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 column: "created");
 
             migrationBuilder.CreateIndex(
-                name: "ix_readiness_evidences_readiness_outcome_id",
-                table: "readiness_evidences",
-                column: "readiness_outcome_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_readiness_evidences_readiness_profile_id",
-                table: "readiness_evidences",
-                column: "readiness_profile_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_readiness_outcomes_category_sort_order",
-                table: "readiness_outcomes",
-                columns: new[] { "category", "sort_order" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_readiness_outcomes_code",
-                table: "readiness_outcomes",
-                column: "code",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_readiness_profiles_child_id",
-                table: "readiness_profiles",
-                column: "child_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_readiness_profiles_household_id_child_id",
-                table: "readiness_profiles",
-                columns: new[] { "household_id", "child_id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "ix_stored_files_household_id_storage_key",
                 table: "stored_files",
                 columns: new[] { "household_id", "storage_key" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_tracked_readiness_outcomes_readiness_outcome_id",
-                table: "tracked_readiness_outcomes",
-                column: "readiness_outcome_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_tracked_readiness_outcomes_readiness_profile_id_readiness_o",
-                table: "tracked_readiness_outcomes",
-                columns: new[] { "readiness_profile_id", "readiness_outcome_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -601,7 +484,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 name: "household_invitations");
 
             migrationBuilder.DropTable(
-                name: "learning_moment_readiness_outcomes");
+                name: "learning_moment_learning_outcomes");
 
             migrationBuilder.DropTable(
                 name: "learning_moment_stored_files");
@@ -610,13 +493,10 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                 name: "outbox_message");
 
             migrationBuilder.DropTable(
-                name: "readiness_evidences");
-
-            migrationBuilder.DropTable(
-                name: "tracked_readiness_outcomes");
-
-            migrationBuilder.DropTable(
                 name: "users");
+
+            migrationBuilder.DropTable(
+                name: "learning_outcomes");
 
             migrationBuilder.DropTable(
                 name: "learning_moments");
@@ -629,12 +509,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "outbox_state");
-
-            migrationBuilder.DropTable(
-                name: "readiness_outcomes");
-
-            migrationBuilder.DropTable(
-                name: "readiness_profiles");
 
             migrationBuilder.DropTable(
                 name: "daily_logs");

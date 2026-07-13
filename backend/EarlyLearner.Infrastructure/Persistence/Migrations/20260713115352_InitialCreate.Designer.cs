@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EarlyLearner.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260704103229_InitialCreate")]
+    [Migration("20260713115352_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -433,61 +433,7 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.ToTable("learning_moments", (string)null);
                 });
 
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessEvidence", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
-
-                    b.Property<Guid>("EvidenceRecordId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("evidence_record_id");
-
-                    b.Property<DateOnly>("ObservedOn")
-                        .HasColumnType("date")
-                        .HasColumnName("observed_on");
-
-                    b.Property<Guid>("ReadinessOutcomeId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("readiness_outcome_id");
-
-                    b.Property<Guid>("ReadinessProfileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("readiness_profile_id");
-
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("character varying(60)")
-                        .HasColumnName("source_type");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasMaxLength(800)
-                        .HasColumnType("character varying(800)")
-                        .HasColumnName("summary");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_on");
-
-                    b.HasKey("Id")
-                        .HasName("pk_readiness_evidences");
-
-                    b.HasIndex("ReadinessOutcomeId")
-                        .HasDatabaseName("ix_readiness_evidences_readiness_outcome_id");
-
-                    b.HasIndex("ReadinessProfileId")
-                        .HasDatabaseName("ix_readiness_evidences_readiness_profile_id");
-
-                    b.ToTable("readiness_evidences", (string)null);
-                });
-
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessOutcome", b =>
+            modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.LearningOutcome", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -536,106 +482,35 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                         .HasColumnName("updated_on");
 
                     b.HasKey("Id")
-                        .HasName("pk_readiness_outcomes");
+                        .HasName("pk_learning_outcomes");
 
                     b.HasIndex("Code")
                         .IsUnique()
-                        .HasDatabaseName("ix_readiness_outcomes_code");
+                        .HasDatabaseName("ix_learning_outcomes_code");
 
                     b.HasIndex("Category", "SortOrder")
-                        .HasDatabaseName("ix_readiness_outcomes_category_sort_order");
+                        .HasDatabaseName("ix_learning_outcomes_category_sort_order");
 
-                    b.ToTable("readiness_outcomes", (string)null);
+                    b.ToTable("learning_outcomes", (string)null);
                 });
 
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessProfile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ChildId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("child_id");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on");
-
-                    b.Property<Guid>("HouseholdId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("household_id");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_on");
-
-                    b.HasKey("Id")
-                        .HasName("pk_readiness_profiles");
-
-                    b.HasIndex("ChildId")
-                        .HasDatabaseName("ix_readiness_profiles_child_id");
-
-                    b.HasIndex("HouseholdId", "ChildId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_readiness_profiles_household_id_child_id");
-
-                    b.ToTable("readiness_profiles", (string)null);
-                });
-
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.TrackedReadinessOutcome", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("ReadinessOutcomeId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("readiness_outcome_id");
-
-                    b.Property<Guid>("ReadinessProfileId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("readiness_profile_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id")
-                        .HasName("pk_tracked_readiness_outcomes");
-
-                    b.HasIndex("ReadinessOutcomeId")
-                        .HasDatabaseName("ix_tracked_readiness_outcomes_readiness_outcome_id");
-
-                    b.HasIndex("ReadinessProfileId", "ReadinessOutcomeId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_tracked_readiness_outcomes_readiness_profile_id_readiness_o");
-
-                    b.ToTable("tracked_readiness_outcomes", (string)null);
-                });
-
-            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.LearningMomentConfig+LearningMomentReadinessOutcome", b =>
+            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.LearningMomentConfig+LearningMomentLearningOutcome", b =>
                 {
                     b.Property<Guid>("LearningMomentId")
                         .HasColumnType("uuid")
                         .HasColumnName("learning_moment_id");
 
-                    b.Property<Guid>("ReadinessOutcomeId")
+                    b.Property<Guid>("LearningOutcomeId")
                         .HasColumnType("uuid")
-                        .HasColumnName("readiness_outcome_id");
+                        .HasColumnName("learning_outcome_id");
 
-                    b.HasKey("LearningMomentId", "ReadinessOutcomeId")
-                        .HasName("pk_learning_moment_readiness_outcomes");
+                    b.HasKey("LearningMomentId", "LearningOutcomeId")
+                        .HasName("pk_learning_moment_learning_outcomes");
 
-                    b.HasIndex("ReadinessOutcomeId")
-                        .HasDatabaseName("ix_learning_moment_readiness_outcomes_readiness_outcome_id");
+                    b.HasIndex("LearningOutcomeId")
+                        .HasDatabaseName("ix_learning_moment_learning_outcomes_learning_outcome_id");
 
-                    b.ToTable("learning_moment_readiness_outcomes", (string)null);
+                    b.ToTable("learning_moment_learning_outcomes", (string)null);
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.LearningMomentConfig+LearningMomentStoredFile", b =>
@@ -974,88 +849,25 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
                     b.Navigation("DailyLog");
                 });
 
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessEvidence", b =>
-                {
-                    b.HasOne("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessOutcome", "ReadinessOutcome")
-                        .WithMany()
-                        .HasForeignKey("ReadinessOutcomeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_readiness_evidences_readiness_outcomes_readiness_outcome_id");
-
-                    b.HasOne("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessProfile", "ReadinessProfile")
-                        .WithMany("Evidence")
-                        .HasForeignKey("ReadinessProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_readiness_evidences_readiness_profiles_readiness_profile_id");
-
-                    b.Navigation("ReadinessOutcome");
-
-                    b.Navigation("ReadinessProfile");
-                });
-
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessProfile", b =>
-                {
-                    b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Child", "Child")
-                        .WithMany()
-                        .HasForeignKey("ChildId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_readiness_profiles_children_child_id");
-
-                    b.HasOne("EarlyLearner.Domain.IdentityContext.Entities.Household", "Household")
-                        .WithMany()
-                        .HasForeignKey("HouseholdId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_readiness_profiles_households_household_id");
-
-                    b.Navigation("Child");
-
-                    b.Navigation("Household");
-                });
-
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.TrackedReadinessOutcome", b =>
-                {
-                    b.HasOne("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessOutcome", "ReadinessOutcome")
-                        .WithMany()
-                        .HasForeignKey("ReadinessOutcomeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_tracked_readiness_outcomes_readiness_outcomes_readiness_out");
-
-                    b.HasOne("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessProfile", "ReadinessProfile")
-                        .WithMany("TrackedOutcomes")
-                        .HasForeignKey("ReadinessProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_tracked_readiness_outcomes_readiness_profiles_readiness_pro");
-
-                    b.Navigation("ReadinessOutcome");
-
-                    b.Navigation("ReadinessProfile");
-                });
-
-            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.LearningMomentConfig+LearningMomentReadinessOutcome", b =>
+            modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.LearningMomentConfig+LearningMomentLearningOutcome", b =>
                 {
                     b.HasOne("EarlyLearner.Domain.LearningContext.Entities.LearningMoment", "LearningMoment")
                         .WithMany()
                         .HasForeignKey("LearningMomentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_learning_moment_readiness_outcomes_learning_moments_learnin");
+                        .HasConstraintName("fk_learning_moment_learning_outcomes_learning_moments_learning");
 
-                    b.HasOne("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessOutcome", "ReadinessOutcome")
+                    b.HasOne("EarlyLearner.Domain.LearningContext.Entities.LearningOutcome", "LearningOutcome")
                         .WithMany()
-                        .HasForeignKey("ReadinessOutcomeId")
+                        .HasForeignKey("LearningOutcomeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_learning_moment_readiness_outcomes_readiness_outcomes_readi");
+                        .HasConstraintName("fk_learning_moment_learning_outcomes_learning_outcomes_learnin");
 
                     b.Navigation("LearningMoment");
 
-                    b.Navigation("ReadinessOutcome");
+                    b.Navigation("LearningOutcome");
                 });
 
             modelBuilder.Entity("EarlyLearner.Infrastructure.Persistence.Configurations.LearningContext.LearningMomentConfig+LearningMomentStoredFile", b =>
@@ -1105,13 +917,6 @@ namespace EarlyLearner.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("EarlyLearner.Domain.LearningContext.Entities.DailyLog", b =>
                 {
                     b.Navigation("LearningMoments");
-                });
-
-            modelBuilder.Entity("EarlyLearner.Domain.ReadinessContext.Entities.ReadinessProfile", b =>
-                {
-                    b.Navigation("Evidence");
-
-                    b.Navigation("TrackedOutcomes");
                 });
 #pragma warning restore 612, 618
         }
