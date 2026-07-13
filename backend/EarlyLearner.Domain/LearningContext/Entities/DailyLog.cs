@@ -88,4 +88,23 @@ public sealed class DailyLog : Entity<DailyLogId>
         SetUpdatedOn();
         return moment;
     }
+
+    public LearningMoment RemoveLearningMoment(LearningMomentId learningMomentId)
+    {
+        var moment = _learningMoments.SingleOrDefault(item => item.Id == learningMomentId);
+        if (moment is null) throw new DomainException("Learning moment was not found in this daily log.");
+
+        _learningMoments.Remove(moment);
+        var occurredAt = DateTimeOffset.UtcNow;
+        RaiseTraceEvent(
+            entityName: nameof(LearningMoment),
+            entityId: moment.Id.Value.ToString(),
+            action: "LearningMomentDeleted",
+            summary: "Learning moment deleted",
+            details: $"{moment.Title} was deleted for child {ChildId.Value}.",
+            householdId: HouseholdId.Value,
+            occurredAt: occurredAt);
+        SetUpdatedOn();
+        return moment;
+    }
 }

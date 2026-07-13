@@ -18,7 +18,7 @@ export interface LearningMomentListItem {
 interface LearningMomentListProps {
   isDeleting: boolean;
   moments: LearningMomentListItem[];
-  onDeleteMoment: (dailyLogId: string) => void;
+  onDeleteMoment: (dailyLogId: string, learningMomentId: string) => void;
 }
 
 const learningKindLabels: Record<LearningMomentKind, string> = {
@@ -63,7 +63,7 @@ export const LearningMomentList = ({ isDeleting, moments, onDeleteMoment }: Lear
                   disabled={isDeleting}
                   type="button"
                   onClick={() => {
-                    onDeleteMoment(moment.dailyLogId);
+                    onDeleteMoment(moment.dailyLogId, moment.learningMomentId);
                   }}
                 >
                   <UilTrashAlt aria-hidden="true" className="h-5 w-5" />

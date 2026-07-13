@@ -24,6 +24,7 @@ public interface ILearningOutcomeCommandRepository
 {
     Task<LearningOutcome?> GetAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
     Task<LearningOutcomeResponse?> GetResponseAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
+    Task<bool> IsUsedByLearningMomentAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
     void Add(LearningOutcome learningOutcome);
     void Remove(LearningOutcome learningOutcome);
 }
@@ -75,6 +76,11 @@ public sealed class LearningOutcomeCommandService(ILearningOutcomeCommandReposit
     {
         var outcome = await learningOutcomeRepo.GetAsync(learningOutcomeId, cancellationToken);
         if (outcome is null) return Result.Fail("Learning outcome was not found.", ResultTypeEnum.NotFound);
+
+        var isUsed = await learningOutcomeRepo.IsUsedByLearningMomentAsync(learningOutcomeId, cancellationToken);
+        if (isUsed) {
+            return Result.Fail("Learning outcome is already used by learning moments. Archive it instead of deleting it.", ResultTypeEnum.Conflict);
+        }
 
         learningOutcomeRepo.Remove(outcome);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;

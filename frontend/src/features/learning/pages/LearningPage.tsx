@@ -7,7 +7,7 @@ import { LearningOutcomeForm } from '../components/LearningOutcomeForm';
 import { LearningOutcomeList } from '../components/LearningOutcomeList';
 import { LearningTodaySummaryCard } from '../components/LearningTodaySummaryCard';
 import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
-import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteDailyLogMutation } from '../queries/dailyLog.queries';
+import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteLearningMomentMutation } from '../queries/dailyLog.queries';
 import { useCreateLearningOutcomeMutation, useDeleteLearningOutcomeMutation, useLearningOutcomesQuery, useUpdateLearningOutcomeMutation, useUpdateLearningOutcomeStatusMutation } from '../queries/learningOutcome.queries';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
@@ -24,7 +24,7 @@ export const LearningPage = () => {
   const learningOutcomesQuery = useLearningOutcomesQuery();
   const dailyLogsQuery = useDailyLogsQuery();
   const createDailyLogMutation = useCreateDailyLogMutation();
-  const deleteDailyLogMutation = useDeleteDailyLogMutation();
+  const deleteLearningMomentMutation = useDeleteLearningMomentMutation();
   const createLearningOutcomeMutation = useCreateLearningOutcomeMutation();
   const updateLearningOutcomeMutation = useUpdateLearningOutcomeMutation();
   const updateLearningOutcomeStatusMutation = useUpdateLearningOutcomeStatusMutation();
@@ -91,10 +91,10 @@ export const LearningPage = () => {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px]">
         <LearningMomentList
-          isDeleting={deleteDailyLogMutation.isPending}
+          isDeleting={deleteLearningMomentMutation.isPending}
           moments={latestMoments}
-          onDeleteMoment={(dailyLogId) => {
-            deleteDailyLogMutation.mutate(dailyLogId);
+          onDeleteMoment={(dailyLogId, learningMomentId) => {
+            deleteLearningMomentMutation.mutate({ dailyLogId, learningMomentId });
           }}
         />
 

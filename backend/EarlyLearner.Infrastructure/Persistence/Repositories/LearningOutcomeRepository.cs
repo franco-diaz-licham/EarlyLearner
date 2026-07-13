@@ -45,6 +45,12 @@ public sealed class LearningOutcomeRepository(DatabaseContext db) : ILearningOut
             .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public Task<bool> IsUsedByLearningMomentAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken)
+    {
+        return db.LearningMoments
+            .AnyAsync(moment => moment.LearningOutcomes.Any(outcome => outcome.Id == learningOutcomeId), cancellationToken);
+    }
+
     public void Add(LearningOutcome learningOutcome)
     {
         db.LearningOutcomes.Add(learningOutcome);

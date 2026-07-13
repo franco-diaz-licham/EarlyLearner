@@ -2,6 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { dailyLogService } from '../services/dailyLog.services';
 import type { CreateDailyLogRequest } from '../types/dailyLog.types';
 
+interface DeleteLearningMomentVariables {
+  dailyLogId: string;
+  learningMomentId: string;
+}
+
 export const dailyLogKeys = {
   all: ['dailyLogs'] as const,
   lists: () => [...dailyLogKeys.all, 'list'] as const,
@@ -35,14 +40,14 @@ export const useCreateDailyLogMutation = () => {
   });
 };
 
-export const useDeleteDailyLogMutation = () => {
+export const useDeleteLearningMomentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dailyLogId: string) => dailyLogService.delete(dailyLogId),
-    onSuccess: (_data, dailyLogId) => {
+    mutationFn: ({ dailyLogId, learningMomentId }: DeleteLearningMomentVariables) => dailyLogService.deleteLearningMoment(dailyLogId, learningMomentId),
+    onSuccess: (_data, { dailyLogId }) => {
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
-      queryClient.removeQueries({ queryKey: dailyLogKeys.detail(dailyLogId) });
+      void queryClient.invalidateQueries({ queryKey: dailyLogKeys.detail(dailyLogId) });
     }
   });
 };

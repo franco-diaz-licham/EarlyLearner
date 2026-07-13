@@ -97,4 +97,9 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
     {
         db.DailyLogs.Remove(dailyLog);
     }
+
+    public void RemoveLearningMoment(LearningMoment learningMoment)
+    {
+        db.LearningMoments.Remove(learningMoment);
+    }
 }

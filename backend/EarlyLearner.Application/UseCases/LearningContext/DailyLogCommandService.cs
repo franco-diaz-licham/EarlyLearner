@@ -18,7 +18,7 @@ public sealed record CreateDailyLogCommand(
 public interface IDailyLogCommandService
 {
     Task<Result<DailyLogResponse>> CreateAsync(CreateDailyLogCommand command, CancellationToken cancellationToken);
-    Task<Result> DeleteAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
+    Task<Result> DeleteLearningMomentAsync(DailyLogId dailyLogId, LearningMomentId learningMomentId, CancellationToken cancellationToken);
 }
 
 public interface IDailyLogCommandRepository
@@ -30,6 +30,7 @@ public interface IDailyLogCommandRepository
     Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
     void Add(DailyLog dailyLog);
     void Remove(DailyLog dailyLog);
+    void RemoveLearningMoment(LearningMoment learningMoment);
 }
 
 public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRepo, IUnitOfWork uow, ICurrentUser currentUser) : IDailyLogCommandService
@@ -60,15 +61,17 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
         return Result<DailyLogResponse>.Success(result, ResultTypeEnum.Created);
     }
 
-    public async Task<Result> DeleteAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)
+    public async Task<Result> DeleteLearningMomentAsync(DailyLogId dailyLogId, LearningMomentId learningMomentId, CancellationToken cancellationToken)
     {
         var log = await dailyLogRepo.GetAsync(dailyLogId, cancellationToken);
         if (log is null) return Result.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
+        if (log.HouseholdId != currentUser.HouseholdId) return Result.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
 
-        dailyLogRepo.Remove(log);
+        var moment = log.RemoveLearningMoment(learningMomentId);
+        dailyLogRepo.RemoveLearningMoment(moment);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
         return saved
             ? Result.Success(ResultTypeEnum.Success)
-            : Result.Fail("Daily log could not be deleted.", ResultTypeEnum.Invalid);
+            : Result.Fail("Learning moment could not be deleted.", ResultTypeEnum.Invalid);
     }
 }

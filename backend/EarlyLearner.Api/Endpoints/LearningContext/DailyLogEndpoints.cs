@@ -17,7 +17,7 @@ public static class DailyLogEndpoints
         dailyLogs.MapGet("/", ListDailyLogs).WithName(nameof(ListDailyLogs));
         dailyLogs.MapGet("/{dailyLogId:guid}", GetDailyLog).WithName(nameof(GetDailyLog));
         dailyLogs.MapPost("/", CreateDailyLog).WithName(nameof(CreateDailyLog));
-        dailyLogs.MapDelete("/{dailyLogId:guid}", DeleteDailyLog).WithName(nameof(DeleteDailyLog));
+        dailyLogs.MapDelete("/{dailyLogId:guid}/learning-moments/{learningMomentId:guid}", DeleteLearningMoment).WithName(nameof(DeleteLearningMoment));
 
         return endpoints;
     }
@@ -65,8 +65,9 @@ public static class DailyLogEndpoints
         return result.ToApiResult(locationUrl);
     }
 
-    public static async Task<IResult> DeleteDailyLog(
+    public static async Task<IResult> DeleteLearningMoment(
         Guid dailyLogId,
+        Guid learningMomentId,
         IDailyLogCommandService commandService,
         CancellationToken cancellationToken = default)
     {
@@ -74,7 +75,11 @@ public static class DailyLogEndpoints
             return Result.Fail("Daily log id is required.", ResultTypeEnum.Invalid).ToApiResult();
         }
 
-        var result = await commandService.DeleteAsync(new DailyLogId(dailyLogId), cancellationToken);
+        if (learningMomentId == Guid.Empty) {
+            return Result.Fail("Learning moment id is required.", ResultTypeEnum.Invalid).ToApiResult();
+        }
+
+        var result = await commandService.DeleteLearningMomentAsync(new DailyLogId(dailyLogId), new LearningMomentId(learningMomentId), cancellationToken);
         return result.ToApiResult();
     }
 }
