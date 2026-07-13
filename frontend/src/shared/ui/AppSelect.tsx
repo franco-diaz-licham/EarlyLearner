@@ -4,12 +4,14 @@ import type { ReactNode } from 'react';
 import { useId } from 'react';
 import { mergeClassNames } from './mergeClassNames';
 
-export interface AppSelectOption<TValue extends string = string> {
+type AppSelectValue = string | number;
+
+export interface AppSelectOption<TValue extends AppSelectValue = string> {
   label: string;
   value: TValue;
 }
 
-interface AppSelectProps<TValue extends string> extends Omit<DropdownProps, 'onChange' | 'optionLabel' | 'optionValue' | 'options' | 'value'> {
+interface AppSelectProps<TValue extends AppSelectValue> extends Omit<DropdownProps, 'onChange' | 'optionLabel' | 'optionValue' | 'options' | 'value'> {
   error?: ReactNode;
   label?: ReactNode;
   options: AppSelectOption<TValue>[];
@@ -44,7 +46,7 @@ const selectPassThrough = {
   }
 };
 
-export const AppSelect = <TValue extends string = string>({ className, error, id, label, options, required, value, onChange, ...selectProps }: AppSelectProps<TValue>) => {
+export const AppSelect = <TValue extends AppSelectValue = string>({ className, error, id, label, options, required, value, onChange, ...selectProps }: AppSelectProps<TValue>) => {
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;

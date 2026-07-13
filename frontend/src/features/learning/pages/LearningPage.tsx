@@ -8,11 +8,12 @@ import { LearningOutcomeList } from '../components/LearningOutcomeList';
 import { LearningTodaySummaryCard } from '../components/LearningTodaySummaryCard';
 import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
 import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteDailyLogMutation } from '../queries/dailyLog.queries';
-import { useCreateLearningOutcomeMutation, useDeleteLearningOutcomeMutation, useLearningOutcomesQuery, useUpdateLearningOutcomeMutation } from '../queries/learningOutcome.queries';
+import { useCreateLearningOutcomeMutation, useDeleteLearningOutcomeMutation, useLearningOutcomesQuery, useUpdateLearningOutcomeMutation, useUpdateLearningOutcomeStatusMutation } from '../queries/learningOutcome.queries';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
 
 const formatDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
+const EMPTY_LEARNING_OUTCOMES: LearningOutcomeModel[] = [];
 
 export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
@@ -26,10 +27,11 @@ export const LearningPage = () => {
   const deleteDailyLogMutation = useDeleteDailyLogMutation();
   const createLearningOutcomeMutation = useCreateLearningOutcomeMutation();
   const updateLearningOutcomeMutation = useUpdateLearningOutcomeMutation();
+  const updateLearningOutcomeStatusMutation = useUpdateLearningOutcomeStatusMutation();
   const deleteLearningOutcomeMutation = useDeleteLearningOutcomeMutation();
 
   const children = householdQuery.data?.children ?? [];
-  const learningOutcomes = learningOutcomesQuery.data ?? [];
+  const learningOutcomes = learningOutcomesQuery.data ?? EMPTY_LEARNING_OUTCOMES;
   const activeLearningOutcomes = useMemo(() => learningOutcomes.filter((outcome) => outcome.status === LearningOutcomeStatus.Active), [learningOutcomes]);
   const dailyLogs = dailyLogsQuery.data ?? [];
   const today = formatDateInputValue(new Date());
@@ -87,7 +89,7 @@ export const LearningPage = () => {
         }}
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px]">
         <LearningMomentList
           isDeleting={deleteDailyLogMutation.isPending}
           moments={latestMoments}
@@ -99,18 +101,25 @@ export const LearningPage = () => {
         <aside className="space-y-5">
           <LearningTodaySummaryCard activityCount={todayActivityCount} readingCount={todayReadingCount} routineCount={todayRoutineCount} />
           <LearningOutcomeList
-            archivingId={deleteLearningOutcomeMutation.variables ?? null}
+            deletingId={deleteLearningOutcomeMutation.variables ?? null}
             outcomes={learningOutcomes}
+            updatingStatusId={updateLearningOutcomeStatusMutation.variables?.learningOutcomeId ?? null}
             onAddOutcome={() => {
               setEditingOutcome(null);
               setManageOutcome(true);
             }}
-            onArchiveOutcome={(outcome) => {
+            onDeleteOutcome={(outcome) => {
               deleteLearningOutcomeMutation.mutate(outcome.learningOutcomeId);
             }}
             onEditOutcome={(outcome) => {
               setEditingOutcome(outcome);
               setManageOutcome(true);
+            }}
+            onStatusChange={(outcome, status) => {
+              updateLearningOutcomeStatusMutation.mutate({
+                learningOutcomeId: outcome.learningOutcomeId,
+                request: { status }
+              });
             }}
           />
         </aside>

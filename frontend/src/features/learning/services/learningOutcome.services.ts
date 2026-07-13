@@ -1,6 +1,6 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import { mapLearningOutcomeResponseToModel, mapLearningOutcomeResponsesToModels } from '../mappers/learningOutcome.mapper';
-import type { CreateLearningOutcomeRequest, LearningOutcomeModel, LearningOutcomeResponse, UpdateLearningOutcomeRequest } from '../types/learningOutcome.types';
+import type { CreateLearningOutcomeRequest, LearningOutcomeModel, LearningOutcomeResponse, UpdateLearningOutcomeRequest, UpdateLearningOutcomeStatusRequest } from '../types/learningOutcome.types';
 
 const LEARNING_OUTCOMES_URL = '/learning-outcomes';
 
@@ -22,6 +22,11 @@ export const learningOutcomeService = {
 
   async update(learningOutcomeId: string, request: UpdateLearningOutcomeRequest): Promise<LearningOutcomeModel> {
     const learningOutcome = await apiClient.put<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}`, request);
+    return mapLearningOutcomeResponseToModel(learningOutcome);
+  },
+
+  async updateStatus(learningOutcomeId: string, request: UpdateLearningOutcomeStatusRequest): Promise<LearningOutcomeModel> {
+    const learningOutcome = await apiClient.patch<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}/status`, request);
     return mapLearningOutcomeResponseToModel(learningOutcome);
   },
 

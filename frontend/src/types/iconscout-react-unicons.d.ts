@@ -16,6 +16,7 @@ declare module '@iconscout/react-unicons' {
   export const UilEditAlt: UniconComponent;
   export const UilEstate: UniconComponent;
   export const UilFileAlt: UniconComponent;
+  export const UilHistory: UniconComponent;
   export const UilMicrosoft: UniconComponent;
   export const UilPlus: UniconComponent;
   export const UilSearch: UniconComponent;

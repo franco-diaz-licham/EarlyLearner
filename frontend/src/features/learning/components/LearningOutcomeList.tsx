@@ -2,15 +2,18 @@ import { UilEditAlt, UilPlus, UilTrashAlt } from '@iconscout/react-unicons';
 import { AppButton } from '../../../shared/ui/AppButton';
 import { AppCard } from '../../../shared/ui/AppCard';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
+import { AppSelect } from '../../../shared/ui/AppSelect';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
 
 interface LearningOutcomeListProps {
-  archivingId?: string | null;
+  deletingId?: string | null;
   outcomes: LearningOutcomeModel[];
+  updatingStatusId?: string | null;
   onAddOutcome: () => void;
-  onArchiveOutcome: (outcome: LearningOutcomeModel) => void;
+  onDeleteOutcome: (outcome: LearningOutcomeModel) => void;
   onEditOutcome: (outcome: LearningOutcomeModel) => void;
+  onStatusChange: (outcome: LearningOutcomeModel, status: LearningOutcomeModel['status']) => void;
 }
 
 const getStatusLabel = (status: LearningOutcomeModel['status']) => {
@@ -21,7 +24,13 @@ const getStatusLabel = (status: LearningOutcomeModel['status']) => {
 
 const getStatusTone = (status: LearningOutcomeModel['status']) => (status === LearningOutcomeStatus.Active ? 'success' : status === LearningOutcomeStatus.Inactive ? 'warning' : 'neutral');
 
-export const LearningOutcomeList = ({ archivingId, outcomes, onAddOutcome, onArchiveOutcome, onEditOutcome }: LearningOutcomeListProps) => {
+const learningOutcomeStatusOptions = [
+  { label: 'Active', value: LearningOutcomeStatus.Active },
+  { label: 'Inactive', value: LearningOutcomeStatus.Inactive },
+  { label: 'Archived', value: LearningOutcomeStatus.Archived }
+];
+
+export const LearningOutcomeList = ({ deletingId, outcomes, updatingStatusId, onAddOutcome, onDeleteOutcome, onEditOutcome, onStatusChange }: LearningOutcomeListProps) => {
   return (
     <AppCard>
       <div className="flex items-start justify-between gap-3">
@@ -37,17 +46,30 @@ export const LearningOutcomeList = ({ archivingId, outcomes, onAddOutcome, onArc
           <p className="text-sm text-brand-muted">No learning outcomes configured yet.</p>
         ) : (
           outcomes.map((outcome) => (
-            <article className="rounded-md border border-brand-border bg-white p-3" key={outcome.learningOutcomeId}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-brand-heading">{outcome.name}</h3>
-                    <AppStatusBadge tone={getStatusTone(outcome.status)}>{getStatusLabel(outcome.status)}</AppStatusBadge>
-                  </div>
-                  <p className="mt-1 text-xs font-semibold text-brand-muted">{outcome.category}</p>
-                  <p className="mt-2 text-sm leading-6 text-brand-muted">{outcome.description}</p>
+            <div className="rounded-md border border-brand-border bg-white p-3" key={outcome.learningOutcomeId}>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="min-w-0 text-base font-semibold leading-6 text-brand-heading">{outcome.name}</h3>
+                  <AppStatusBadge tone={getStatusTone(outcome.status)}>{getStatusLabel(outcome.status)}</AppStatusBadge>
                 </div>
-                <div className="flex shrink-0 items-center gap-1">
+                <p className="mt-1 text-xs font-semibold text-brand-muted">{outcome.category}</p>
+                <p className="mt-2 text-sm leading-6 text-brand-muted">{outcome.description}</p>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-brand-border/70 pt-3">
+                <AppSelect
+                  aria-label={`Status for ${outcome.name}`}
+                  className="min-h-9 w-32 text-sm"
+                  disabled={updatingStatusId === outcome.learningOutcomeId}
+                  options={learningOutcomeStatusOptions}
+                  value={outcome.status}
+                  onChange={(status) => {
+                    if (status === outcome.status) return;
+                    onStatusChange(outcome, status);
+                  }}
+                />
+                <div>
+                  {' '}
                   <AppIconButton
                     aria-label={`Edit ${outcome.name}`}
                     className="flex"
@@ -58,18 +80,18 @@ export const LearningOutcomeList = ({ archivingId, outcomes, onAddOutcome, onArc
                     <UilEditAlt aria-hidden="true" className="h-5 w-5" />
                   </AppIconButton>
                   <AppIconButton
-                    aria-label={`Archive ${outcome.name}`}
-                    className="flex"
-                    disabled={outcome.status === LearningOutcomeStatus.Archived || archivingId === outcome.learningOutcomeId}
+                    aria-label={`Delete ${outcome.name}`}
+                    className="flex text-brand-error hover:bg-brand-primary-soft"
+                    disabled={deletingId === outcome.learningOutcomeId}
                     onClick={() => {
-                      onArchiveOutcome(outcome);
+                      onDeleteOutcome(outcome);
                     }}
                   >
                     <UilTrashAlt aria-hidden="true" className="h-5 w-5" />
                   </AppIconButton>
                 </div>
               </div>
-            </article>
+            </div>
           ))
         )}
       </div>

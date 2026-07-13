@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { learningOutcomeService } from '../services/learningOutcome.services';
-import type { CreateLearningOutcomeRequest, UpdateLearningOutcomeRequest } from '../types/learningOutcome.types';
+import type { CreateLearningOutcomeRequest, UpdateLearningOutcomeRequest, UpdateLearningOutcomeStatusRequest } from '../types/learningOutcome.types';
 
 export const learningOutcomeKeys = {
   all: ['learningOutcomes'] as const,
@@ -41,6 +41,19 @@ export const useUpdateLearningOutcomeMutation = () => {
   return useMutation({
     mutationFn: ({ learningOutcomeId, request }: { learningOutcomeId: string; request: UpdateLearningOutcomeRequest }) =>
       learningOutcomeService.update(learningOutcomeId, request),
+    onSuccess: (learningOutcome) => {
+      void queryClient.invalidateQueries({ queryKey: learningOutcomeKeys.lists() });
+      queryClient.setQueryData(learningOutcomeKeys.detail(learningOutcome.learningOutcomeId), learningOutcome);
+    }
+  });
+};
+
+export const useUpdateLearningOutcomeStatusMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ learningOutcomeId, request }: { learningOutcomeId: string; request: UpdateLearningOutcomeStatusRequest }) =>
+      learningOutcomeService.updateStatus(learningOutcomeId, request),
     onSuccess: (learningOutcome) => {
       void queryClient.invalidateQueries({ queryKey: learningOutcomeKeys.lists() });
       queryClient.setQueryData(learningOutcomeKeys.detail(learningOutcome.learningOutcomeId), learningOutcome);

@@ -1,7 +1,7 @@
 export const LearningOutcomeStatus = {
-  Active: 1,
-  Inactive: 2,
-  Archived: 3
+  Active: 'active',
+  Inactive: 'inactive',
+  Archived: 'archived'
 } as const;
 
 export type LearningOutcomeStatus = (typeof LearningOutcomeStatus)[keyof typeof LearningOutcomeStatus];
@@ -39,4 +39,8 @@ export interface UpdateLearningOutcomeRequest {
   description: string;
   category: string;
   sortOrder: number;
+}
+
+export interface UpdateLearningOutcomeStatusRequest {
+  status: LearningOutcomeStatus;
 }
