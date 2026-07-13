@@ -29,29 +29,12 @@ values
     ('44444444-4444-4444-4444-444444444442', '11111111-1111-1111-1111-111111111111', 'Noah', 'Taylor', '2022-08-02', false, now())
 on conflict (id) do nothing;
 
-insert into readiness_outcomes (id, code, name, description, category, sort_order, status, created_on)
+insert into learning_outcomes (id, code, name, description, category, sort_order, status, created_on)
 values
     ('55555555-5555-5555-5555-555555555551', 'language-listening', 'Listens and responds', 'Listens to short instructions and responds with words or actions.', 'Language', 10, 'Active', now()),
     ('55555555-5555-5555-5555-555555555552', 'social-turn-taking', 'Takes turns with others', 'Practises waiting, sharing, and taking turns during play.', 'Social', 20, 'Active', now()),
     ('55555555-5555-5555-5555-555555555553', 'motor-pencil-grip', 'Uses early mark making', 'Uses crayons, pencils, or brushes to make controlled marks.', 'Motor', 30, 'Active', now())
 on conflict (id) do nothing;
-
-insert into readiness_profiles (id, household_id, child_id, created_on)
-values
-    ('66666666-6666-6666-6666-666666666661', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444441', now()),
-    ('66666666-6666-6666-6666-666666666662', '11111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444442', now())
-on conflict (id) do nothing;
-
-insert into tracked_readiness_outcomes (readiness_profile_id, readiness_outcome_id, status)
-values
-    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555551', 'Emerging'),
-    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555552', 'Growing'),
-    ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555553', 'Emerging'),
-    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555551', 'NotYetObserved'),
-    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555552', 'NotYetObserved'),
-    ('66666666-6666-6666-6666-666666666662', '55555555-5555-5555-5555-555555555553', 'NotYetObserved')
-on conflict (readiness_profile_id, readiness_outcome_id) do update set
-    status = excluded.status;
 
 insert into daily_logs (id, household_id, child_id, log_date, created_on)
 values
@@ -65,18 +48,11 @@ values
     ('cccccccc-cccc-cccc-cccc-ccccccccccc1', '99999999-9999-9999-9999-999999999991', 'Routine', 'Practised the morning routine', 'Put shoes near the door and followed two simple steps with one reminder.', now())
 on conflict (id) do nothing;
 
-insert into learning_moment_readiness_outcomes (learning_moment_id, readiness_outcome_id)
+insert into learning_moment_learning_outcomes (learning_moment_id, learning_outcome_id)
 values
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '55555555-5555-5555-5555-555555555552'),
     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '55555555-5555-5555-5555-555555555551'),
     ('cccccccc-cccc-cccc-cccc-ccccccccccc1', '55555555-5555-5555-5555-555555555553')
-on conflict (learning_moment_id, readiness_outcome_id) do nothing;
-
-insert into readiness_evidences (id, readiness_profile_id, readiness_outcome_id, source_type, evidence_record_id, observed_on, summary, created_on)
-values
-    ('dddddddd-dddd-dddd-dddd-ddddddddddd1', '66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555552', 'LearningMoment', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '2026-06-17', 'Waited for turns during a matching game.', now()),
-    ('dddddddd-dddd-dddd-dddd-ddddddddddd2', '66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555551', 'LearningMoment', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', '2026-06-17', 'Named animals and repeated colour words during shared reading.', now()),
-    ('dddddddd-dddd-dddd-dddd-ddddddddddd3', '66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555553', 'LearningMoment', 'cccccccc-cccc-cccc-cccc-ccccccccccc1', '2026-06-17', 'Followed routine steps and managed shoes independently.', now())
-on conflict (id) do nothing;
+on conflict (learning_moment_id, learning_outcome_id) do nothing;
 
 commit;

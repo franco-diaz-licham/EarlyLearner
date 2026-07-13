@@ -8,6 +8,6 @@ describe('HomePage', () => {
 
     expect(screen.getByRole('heading', { name: 'Good morning, Franco!' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Recent Moments' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'School Readiness' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Learning Focus' })).toBeInTheDocument();
   });
 });

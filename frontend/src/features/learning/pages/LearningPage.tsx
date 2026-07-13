@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useHouseholdQuery } from '../../households/queries/household.queries';
-import { useReadinessOutcomesQuery } from '../../readiness/queries/readinessOutcome.queries';
 import { LearningHeader } from '../components/LearningHeader';
 import { LearningLogForm } from '../components/LearningLogForm';
 import { LearningMomentList } from '../components/LearningMomentList';
 import { LearningTodaySummaryCard } from '../components/LearningTodaySummaryCard';
 import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteDailyLogMutation } from '../queries/dailyLog.queries';
+import { useLearningOutcomesQuery } from '../queries/learningOutcome.queries';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
 
 const formatDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
@@ -14,7 +14,7 @@ export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
 
   const householdQuery = useHouseholdQuery();
-  const learningOutcomesQuery = useReadinessOutcomesQuery();
+  const learningOutcomesQuery = useLearningOutcomesQuery();
   const dailyLogsQuery = useDailyLogsQuery();
   const createDailyLogMutation = useCreateDailyLogMutation();
   const deleteDailyLogMutation = useDeleteDailyLogMutation();

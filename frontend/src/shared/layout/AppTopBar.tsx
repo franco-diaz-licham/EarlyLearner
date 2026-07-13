@@ -7,7 +7,6 @@ import { AppAccountMenu } from './AppAccountMenu';
 
 const navigationItems = [
   { label: 'Home', path: '/home' },
-  { label: 'Readiness', path: '/readiness' },
   { label: 'Learning', path: '/learning' }
 ] as const;
 

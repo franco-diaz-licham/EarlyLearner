@@ -5,13 +5,13 @@ import { AppInputText } from '../../../shared/ui/AppInputText';
 import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
 import { AppSelect } from '../../../shared/ui/AppSelect';
 import type { ChildModel } from '../../households/types/household.types';
-import type { ReadinessOutcomeModel } from '../../readiness/types/readinessOutcome.types';
 import { createEmptyLearningLogForm, useLearningLogForm } from '../hooks/useLearningLogForm';
 import type { LearningLogFormModel, LearningMomentKind } from '../types/dailyLog.types';
+import type { LearningOutcomeModel } from '../types/learningOutcome.types';
 
 interface LearningLogFormProps {
   children: ChildModel[];
-  learningOutcomes: ReadinessOutcomeModel[];
+  learningOutcomes: LearningOutcomeModel[];
   saving: boolean;
   visible: boolean;
   onHide: () => void;
@@ -112,13 +112,13 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
           </p>
           <div className="grid max-h-48 gap-2 overflow-y-auto pr-1 md:grid-cols-2">
             {learningOutcomes.map((outcome) => (
-              <label className="flex cursor-pointer items-start gap-3 rounded-md border border-brand-border bg-white p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft" key={outcome.readinessOutcomeId}>
+              <label className="flex cursor-pointer items-start gap-3 rounded-md border border-brand-border bg-white p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft" key={outcome.learningOutcomeId}>
                 <input
                   className="mt-1 h-4 w-4 accent-brand-primary"
                   type="checkbox"
-                  checked={draft.learningOutcomeIds.includes(outcome.readinessOutcomeId)}
+                  checked={draft.learningOutcomeIds.includes(outcome.learningOutcomeId)}
                   onChange={() => {
-                    handleOutcomeToggle(outcome.readinessOutcomeId);
+                    handleOutcomeToggle(outcome.learningOutcomeId);
                   }}
                 />
                 <span>

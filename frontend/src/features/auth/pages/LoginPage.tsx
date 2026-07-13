@@ -44,7 +44,7 @@ export const LoginPage = () => {
           <div className="max-w-lg">
             <p className="text-sm font-extrabold uppercase tracking-wide text-brand-primary">Secure family learning workspace</p>
             <h1 className="mt-4 text-4xl font-extrabold leading-tight text-brand-heading sm:text-5xl">Welcome back</h1>
-            <p className="mt-5 text-lg leading-8 text-brand-text">Sign in with your Microsoft account to continue recording observations and tracking school readiness.</p>
+            <p className="mt-5 text-lg leading-8 text-brand-text">Sign in with your Microsoft account to continue recording observations and learning moments.</p>
           </div>
         </div>
 

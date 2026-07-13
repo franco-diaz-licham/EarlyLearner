@@ -1,7 +1,7 @@
 import { UilBookOpen, UilCalendarAlt, UilShieldCheck } from '@iconscout/react-unicons';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 
-const readinessAreas = [
+const learningAreas = [
   { label: 'Communication', status: 'Growing', tone: 'success' },
   { label: 'Social skills', status: 'Growing', tone: 'success' },
   { label: 'Emotional regulation', status: 'Emerging', tone: 'warning' },
@@ -19,13 +19,13 @@ export const HomeSidebar = () => {
     <div className="space-y-5">
       <section className="rounded-md bg-white p-6 shadow-app-card">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-brand-heading">School Readiness</h2>
+          <h2 className="text-base font-bold text-brand-heading">Learning Focus</h2>
           <button className="text-sm font-semibold text-[#ef7676]" type="button">
             View all
           </button>
         </div>
         <div className="mt-5 space-y-4">
-          {readinessAreas.map((area) => (
+          {learningAreas.map((area) => (
             <div className="flex items-center justify-between gap-3" key={area.label}>
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-sky-50 text-brand-sky-500">
@@ -37,7 +37,7 @@ export const HomeSidebar = () => {
             </div>
           ))}
         </div>
-        <p className="mt-6 text-sm text-brand-muted">School readiness is a journey, not a race.</p>
+        <p className="mt-6 text-sm text-brand-muted">Learning is a journey, not a race.</p>
       </section>
 
       <section className="rounded-md bg-white p-6 shadow-app-card">
