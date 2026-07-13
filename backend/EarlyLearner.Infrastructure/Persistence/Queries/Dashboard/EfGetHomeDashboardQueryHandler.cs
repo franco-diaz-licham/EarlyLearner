@@ -22,9 +22,9 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
                 DateOfBirth: child.DateOfBirth))
             .ToListAsync(cancellationToken);
 
-        var readinessProfileCount = await db.ReadinessProfiles
+        var learningOutcomeCount = await db.LearningOutcomes
             .AsNoTracking()
-            .CountAsync(profile => profile.HouseholdId == householdId, cancellationToken);
+            .CountAsync(cancellationToken);
 
         var weeklyRecordCount = await db.DailyLogs
             .AsNoTracking()
@@ -54,7 +54,7 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
 
         var metrics = new List<HomeDashboardMetricResponse> {
             new(Label: "Active children", Value: children.Count, Detail: "Children currently visible in this household"),
-            new(Label: "Readiness profiles", Value: readinessProfileCount, Detail: "Children with readiness progress tracking"),
+            new(Label: "Learning outcomes", Value: learningOutcomeCount, Detail: "Outcome tags available for learning moments"),
             new(Label: "Moments this week", Value: weeklyLearningMomentCount, Detail: "Learning moments captured in the last seven days"),
             new(Label: "Records this week", Value: weeklyRecordCount, Detail: "Daily logs captured in the last seven days")
         };

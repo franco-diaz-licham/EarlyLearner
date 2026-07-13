@@ -40,7 +40,7 @@ public sealed class Child : Entity<ChildId>
     public string LastName { get; private set; } = default!;
 
     /// <summary>
-    /// Birth date used for age-aware readiness interpretation and future activity suggestions.
+    /// Birth date used for age-aware learning interpretation and future activity suggestions.
     /// </summary>
     public DateOnly DateOfBirth { get; private set; }
 

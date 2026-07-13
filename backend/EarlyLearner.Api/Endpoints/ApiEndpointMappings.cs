@@ -21,8 +21,7 @@ public static class ApiEndpointMappings
         api.MapHouseholdEndpoints();
         api.MapNotificationEndpoints();
         api.MapDailyLogEndpoints();
-        api.MapReadinessOutcomeEndpoints();
-        api.MapReadinessProfileEndpoints();
+        api.MapLearningOutcomeEndpoints();
 
         return endpoints;
     }

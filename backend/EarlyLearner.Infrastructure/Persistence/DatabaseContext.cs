@@ -1,7 +1,6 @@
 using EarlyLearner.Domain.CoreContext.Entities;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.LearningContext.Entities;
-using EarlyLearner.Domain.ReadinessContext.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +14,6 @@ public sealed class DatabaseContext(DbContextOptions<DatabaseContext> options) :
     public DbSet<Carer> Carers => Set<Carer>();
     public DbSet<Child> Children => Set<Child>();
     public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
-    public DbSet<ReadinessOutcome> ReadinessOutcomes => Set<ReadinessOutcome>();
-    public DbSet<ReadinessProfile> ReadinessProfiles => Set<ReadinessProfile>();
-    public DbSet<TrackedReadinessOutcome> TrackedReadinessOutcomes => Set<TrackedReadinessOutcome>();
-    public DbSet<ReadinessEvidence> ReadinessEvidence => Set<ReadinessEvidence>();
     public DbSet<LearningOutcome> LearningOutcomes => Set<LearningOutcome>();
     public DbSet<DailyLog> DailyLogs => Set<DailyLog>();
     public DbSet<LearningMoment> LearningMoments => Set<LearningMoment>();

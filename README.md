@@ -7,7 +7,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 
-EarlyLearner is a full-stack early childhood learning record and school-readiness application. It helps carers manage households and children, capture daily learning moments, attach evidence, and track school-readiness outcomes.
+EarlyLearner is a full-stack early childhood learning record application. It helps carers manage households and children, capture daily learning moments, attach evidence, and tag progress against learning outcomes.
 
 The project is built as a cloud-native, event-driven .NET system using a modular API, background worker, Azure-managed services, and a React frontend.
 
@@ -16,10 +16,8 @@ The project is built as a cloud-native, event-driven .NET system using a modular
 ## ✨ Features
 
 - Household and child profiles
-- Readiness outcome catalogue
-- Child readiness profiles and progress tracking
+- Learning outcome catalogue
 - Daily logs with learning moments and file evidence
-- Readiness evidence modelling
 - Household invitation email workflow
 - Realtime invitation delivery status notifications
 - Dashboard query slice for household summary data
@@ -231,11 +229,9 @@ The seed script inserts a small predictable demo dataset with fixed UUIDs for:
 - household
 - carers
 - children
-- readiness outcomes
-- readiness profiles
+- learning outcomes
 - daily logs
 - learning moments
-- readiness evidence
 
 ---
 

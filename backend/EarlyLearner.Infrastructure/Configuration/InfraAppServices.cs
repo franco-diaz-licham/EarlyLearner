@@ -4,7 +4,6 @@ using Azure.Storage.Blobs;
 using EarlyLearner.Application.UseCases.CoreContext;
 using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.UseCases.LearningContext;
-using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Configuration.Options;
 using EarlyLearner.Infrastructure.Messaging;
@@ -132,10 +131,8 @@ public static class InfraAppServices
         services.AddScoped<IUserProvisioningRepository, UserRepository>();
         services.AddScoped<IDailyLogQueryRepository, DailyLogRepository>();
         services.AddScoped<IDailyLogCommandRepository, DailyLogRepository>();
-        services.AddScoped<IReadinessOutcomeQueryRepository, ReadinessOutcomeRepository>();
-        services.AddScoped<IReadinessOutcomeCommandRepository, ReadinessOutcomeRepository>();
-        services.AddScoped<IReadinessProfileQueryRepository, ReadinessProfileRepository>();
-        services.AddScoped<IReadinessProfileCommandRepository, ReadinessProfileRepository>();
+        services.AddScoped<ILearningOutcomeQueryRepository, LearningOutcomeRepository>();
+        services.AddScoped<ILearningOutcomeCommandRepository, LearningOutcomeRepository>();
 
         return services;
     }

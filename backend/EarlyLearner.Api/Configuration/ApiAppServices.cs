@@ -5,7 +5,6 @@ using EarlyLearner.Application.UseCases.CoreContext;
 using EarlyLearner.Application.UseCases.Dashboard;
 using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.UseCases.LearningContext;
-using EarlyLearner.Application.UseCases.ReadinessContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Persistence.Queries.Dashboard;
 using EarlyLearner.Shared.DocumentStoreService;
@@ -58,10 +57,8 @@ public static class ApiAppServices
         services.AddScoped<ICurrentUserProvisioningService, CurrentUserProvisioningService>();
         services.AddScoped<IDailyLogQueryService, DailyLogQueryService>();
         services.AddScoped<IDailyLogCommandService, DailyLogCommandService>();
-        services.AddScoped<IReadinessOutcomeQueryService, ReadinessOutcomeQueryService>();
-        services.AddScoped<IReadinessOutcomeCommandService, ReadinessOutcomeCommandService>();
-        services.AddScoped<IReadinessProfileQueryService, ReadinessProfileQueryService>();
-        services.AddScoped<IReadinessProfileCommandService, ReadinessProfileCommandService>();
+        services.AddScoped<ILearningOutcomeQueryService, LearningOutcomeQueryService>();
+        services.AddScoped<ILearningOutcomeCommandService, LearningOutcomeCommandService>();
 
         return services;
     }
@@ -88,9 +85,8 @@ public static class ApiAppServices
         services.AddScoped<IValidator<AddHouseholdChildRequest>, AddHouseholdChildRequestValidator>();
         services.AddScoped<IValidator<UpdateHouseholdChildRequest>, UpdateHouseholdChildRequestValidator>();
         services.AddScoped<IValidator<CreateDailyLogRequest>, CreateDailyLogRequestValidator>();
-        services.AddScoped<IValidator<CreateReadinessOutcomeRequest>, CreateReadinessOutcomeRequestValidator>();
-        services.AddScoped<IValidator<UpdateReadinessOutcomeRequest>, UpdateReadinessOutcomeRequestValidator>();
-        services.AddScoped<IValidator<CreateReadinessProfileRequest>, CreateReadinessProfileRequestValidator>();
+        services.AddScoped<IValidator<CreateLearningOutcomeRequest>, CreateLearningOutcomeRequestValidator>();
+        services.AddScoped<IValidator<UpdateLearningOutcomeRequest>, UpdateLearningOutcomeRequestValidator>();
 
         return services;
     }
