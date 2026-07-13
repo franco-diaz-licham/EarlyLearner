@@ -1,91 +1,110 @@
-import { UilBookOpen, UilCalendarAlt, UilShieldCheck } from '@iconscout/react-unicons';
-import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
+import { Link } from 'react-router-dom';
+import { UilBookOpen, UilCalendarAlt, UilShieldCheck, UilUsersAlt } from '@iconscout/react-unicons';
+import type { HomeModel } from '../types/home.types';
 
-const learningAreas = [
-  { label: 'Communication', status: 'Growing', tone: 'success' },
-  { label: 'Social skills', status: 'Growing', tone: 'success' },
-  { label: 'Emotional regulation', status: 'Emerging', tone: 'warning' },
-  { label: 'Early literacy', status: 'Growing', tone: 'success' },
-  { label: 'Fine motor skills', status: 'Emerging', tone: 'warning' }
-] as const;
+interface HomeSidebarProps {
+  home?: HomeModel;
+  isLoading: boolean;
+}
 
-const events = [
-  { month: 'May', day: '23', title: 'Library story time', detail: 'Friday, 10:30am' },
-  { month: 'May', day: '28', title: 'Playdate with Mia', detail: 'Wednesday, 9:30am' },
-  { month: 'Jun', day: '05', title: 'Zoo excursion', detail: 'Thursday, 9:00am' }
-];
-export const HomeSidebar = () => {
+const formatAge = (dateOfBirth: string) => {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let years = today.getFullYear() - birthDate.getFullYear();
+  const monthDelta = today.getMonth() - birthDate.getMonth();
+  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birthDate.getDate())) years -= 1;
+  return years <= 0 ? 'Under 1' : `${String(years)} year${years === 1 ? '' : 's'}`;
+};
+
+export const HomeSidebar = ({ home, isLoading }: HomeSidebarProps) => {
+  const metrics = home?.metrics ?? [];
+  const coverage = home?.outcomeCoverage;
+  const children = home?.children ?? [];
+
   return (
     <div className="space-y-5">
-      <section className="rounded-md bg-white p-6 shadow-app-card">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-brand-heading">Learning Focus</h2>
-          <button className="text-sm font-semibold text-[#ef7676]" type="button">
-            View all
-          </button>
+      <section className="rounded-md bg-white p-5 shadow-app-card">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-sky-50 text-brand-sky-500">
+            <UilShieldCheck aria-hidden="true" size={20} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-brand-heading">Learning Coverage</h2>
+            <p className="text-sm text-brand-muted">Outcome use over the last seven days.</p>
+          </div>
         </div>
-        <div className="mt-5 space-y-4">
-          {learningAreas.map((area) => (
-            <div className="flex items-center justify-between gap-3" key={area.label}>
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-sky-50 text-brand-sky-500">
-                  <UilShieldCheck aria-hidden="true" size={17} />
-                </div>
-                <span className="text-sm font-semibold text-brand-heading">{area.label}</span>
+
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          <div className="rounded-md bg-brand-surface-soft p-3 text-center">
+            <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (coverage?.activeOutcomeCount ?? 0)}</p>
+            <p className="mt-1 text-xs font-semibold text-brand-muted">Active</p>
+          </div>
+          <div className="rounded-md bg-brand-mint-50 p-3 text-center">
+            <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (coverage?.touchedThisWeekCount ?? 0)}</p>
+            <p className="mt-1 text-xs font-semibold text-brand-muted">Touched</p>
+          </div>
+          <div className="rounded-md bg-brand-yellow-50 p-3 text-center">
+            <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (coverage?.untouchedActiveOutcomeCount ?? 0)}</p>
+            <p className="mt-1 text-xs font-semibold text-brand-muted">Untouched</p>
+          </div>
+        </div>
+
+        <Link className="mt-4 inline-flex text-sm font-semibold text-brand-primary hover:text-brand-primary-hover" to="/learning">
+          Manage outcomes
+        </Link>
+      </section>
+
+      <section className="rounded-md bg-white p-5 shadow-app-card">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-primary-soft text-brand-primary">
+            <UilCalendarAlt aria-hidden="true" size={20} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-brand-heading">Household Pulse</h2>
+            <p className="text-sm text-brand-muted">Small operational numbers for today.</p>
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {metrics.map((metric) => (
+            <div className="flex items-start justify-between gap-4 rounded-md border border-brand-border p-3" key={metric.label}>
+              <div>
+                <p className="text-sm font-bold text-brand-heading">{metric.label}</p>
+                <p className="mt-1 text-xs leading-5 text-brand-muted">{metric.detail}</p>
               </div>
-              <AppStatusBadge tone={area.tone}>{area.status}</AppStatusBadge>
+              <p className="text-2xl font-bold text-brand-heading">{metric.value}</p>
             </div>
           ))}
         </div>
-        <p className="mt-6 text-sm text-brand-muted">Learning is a journey, not a race.</p>
       </section>
 
-      <section className="rounded-md bg-white p-6 shadow-app-card">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-brand-heading">Upcoming Events</h2>
-          <button className="text-sm font-semibold text-[#ef7676]" type="button">
-            View calendar
-          </button>
-        </div>
-        <div className="mt-5 divide-y divide-brand-border">
-          {events.map((event) => (
-            <article className="flex items-center gap-4 py-4 first:pt-0 last:pb-0" key={`${event.month}-${event.day}`}>
-              <div className="w-14 rounded-md bg-rose-50 py-2 text-center">
-                <p className="text-xs font-bold uppercase text-[#ef7676]">{event.month}</p>
-                <p className="text-xl font-bold text-brand-heading">{event.day}</p>
-              </div>
-              <div>
-                <h3 className="font-bold text-brand-heading">{event.title}</h3>
-                <p className="text-sm text-brand-muted">{event.detail}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-md bg-[#f5efff] p-6 shadow-app-card">
+      <section className="rounded-md bg-white p-5 shadow-app-card">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/80 text-brand-lavender-500">
-            <UilBookOpen aria-hidden="true" size={22} />
-          </div>
-          <h2 className="text-base font-bold text-brand-heading">Suggested Next Activity</h2>
-        </div>
-        <h3 className="mt-6 text-xl font-bold leading-7 text-brand-heading">Create a butterfly life cycle poster</h3>
-        <p className="mt-3 text-sm leading-6 text-brand-muted">Great for science, talking and fine motor skills.</p>
-        <button className="mt-5 rounded-md bg-white/80 px-6 py-3 text-sm font-bold text-brand-lavender-500" type="button">
-          See idea
-        </button>
-      </section>
-
-      <section className="rounded-md bg-white p-6 shadow-app-card">
-        <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-brand-sky-50 text-brand-sky-500">
-            <UilCalendarAlt aria-hidden="true" size={21} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-lavender-50 text-brand-lavender-500">
+            <UilUsersAlt aria-hidden="true" size={20} />
           </div>
           <div>
-            <h2 className="font-bold text-brand-heading">Today feels open</h2>
-            <p className="text-sm text-brand-muted">Add one small moment when it happens.</p>
+            <h2 className="text-base font-bold text-brand-heading">Children</h2>
+            <p className="text-sm text-brand-muted">{children.length} active in this household</p>
           </div>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          {children.length === 0 ? (
+            <p className="text-sm text-brand-muted">Add children from the household page to start recording learning.</p>
+          ) : (
+            children.map((child) => (
+              <div className="flex items-center gap-3 rounded-md bg-brand-surface-soft p-3" key={child.childId}>
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-brand-primary">
+                  <UilBookOpen aria-hidden="true" size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand-heading">{child.givenName}</p>
+                  <p className="text-xs text-brand-muted">{formatAge(child.dateOfBirth)}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
     </div>
