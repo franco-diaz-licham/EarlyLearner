@@ -13,6 +13,7 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
     {
         return await db.DailyLogs
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(log => log.HouseholdId == householdId)
             .OrderByDescending(log => log.LogDate)
             .Select(log => new DailyLogResponse(
@@ -50,6 +51,7 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
         return db.DailyLogs
             .Include(log => log.LearningMoments)
             .ThenInclude(moment => moment.LearningOutcomes)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(log => log.HouseholdId == householdId && log.ChildId == childId && log.LogDate == logDate, cancellationToken);
     }
 
@@ -58,6 +60,7 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
         return db.DailyLogs
             .Include(log => log.LearningMoments)
             .ThenInclude(moment => moment.LearningOutcomes)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(item => item.Id == dailyLogId, cancellationToken);
     }
 
@@ -65,6 +68,7 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
     {
         return await db.DailyLogs
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(item => item.Id == dailyLogId)
             .Select(item => new DailyLogResponse(
                 DailyLogId: item.Id.Value,

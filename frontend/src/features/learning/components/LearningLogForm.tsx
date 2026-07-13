@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { AppButton } from '../../../shared/ui/AppButton';
+import { AppCheckbox } from '../../../shared/ui/AppCheckbox';
 import { AppDialog } from '../../../shared/ui/AppDialog';
 import { AppInputText } from '../../../shared/ui/AppInputText';
 import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
@@ -23,7 +24,7 @@ const learningKindOptions = [
   { label: 'Observation', value: 'observation' },
   { label: 'Reading', value: 'reading' },
   { label: 'Routine', value: 'routine' }
-] satisfies Array<{ label: string; value: LearningMomentKind }>;
+] satisfies { label: string; value: LearningMomentKind }[];
 
 const kindLabel = (kind: LearningMomentKind) => learningKindOptions.find((option) => option.value === kind)?.label ?? kind;
 
@@ -61,7 +62,17 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
     <AppDialog header="Add learning log" visible={visible} onHide={handleCancel}>
       <div className="space-y-4 pt-4">
         <div className="grid gap-4 md:grid-cols-3">
-          <AppSelect label="Child" options={childOptions} value={draft.childId} onChange={(value) => form.updateField('childId', value)} disabled={childOptions.length === 0} error={errors.childId} required />
+          <AppSelect
+            label="Child"
+            options={childOptions}
+            value={draft.childId}
+            onChange={(value) => {
+              form.updateField('childId', value);
+            }}
+            disabled={childOptions.length === 0}
+            error={errors.childId}
+            required
+          />
           <AppInputText
             error={errors.logDate}
             label="Date"
@@ -72,9 +83,16 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
               form.updateField('logDate', event.target.value);
             }}
           />
-          <AppSelect label="Type" options={learningKindOptions} value={draft.kind} onChange={(value) => form.updateField('kind', value)} required />
+          <AppSelect
+            label="Type"
+            options={learningKindOptions}
+            value={draft.kind}
+            onChange={(value) => {
+              form.updateField('kind', value);
+            }}
+            required
+          />
         </div>
-
         <AppInputText
           autoFocus
           error={errors.title}
@@ -86,7 +104,6 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
             form.updateField('title', event.target.value);
           }}
         />
-
         <div>
           <AppInputTextArea
             autoResize
@@ -102,7 +119,6 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
           />
           {errors.notes ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.notes}</span> : null}
         </div>
-
         <div>
           <p className="mb-2 text-sm font-semibold text-brand-heading">
             Learning outcomes
@@ -112,20 +128,21 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
           </p>
           <div className="grid max-h-48 gap-2 overflow-y-auto pr-1 md:grid-cols-2">
             {learningOutcomes.map((outcome) => (
-              <label className="flex cursor-pointer items-start gap-3 rounded-md border border-brand-border bg-white p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft" key={outcome.learningOutcomeId}>
-                <input
-                  className="mt-1 h-4 w-4 accent-brand-primary"
-                  type="checkbox"
-                  checked={draft.learningOutcomeIds.includes(outcome.learningOutcomeId)}
-                  onChange={() => {
-                    handleOutcomeToggle(outcome.learningOutcomeId);
-                  }}
-                />
-                <span>
-                  <span className="block font-semibold text-brand-heading">{outcome.name}</span>
-                  <span className="mt-1 block text-xs text-brand-muted">{outcome.category}</span>
-                </span>
-              </label>
+              <AppCheckbox
+                checked={draft.learningOutcomeIds.includes(outcome.learningOutcomeId)}
+                className="mt-1"
+                inputId={`learning-outcome-${outcome.learningOutcomeId}`}
+                key={outcome.learningOutcomeId}
+                label={
+                  <>
+                    <span className="block font-semibold text-brand-heading">{outcome.name}</span>
+                    <span className="mt-1 block text-xs text-brand-muted">{outcome.category}</span>
+                  </>
+                }
+                onChange={() => {
+                  handleOutcomeToggle(outcome.learningOutcomeId);
+                }}
+              />
             ))}
           </div>
           {errors.learningOutcomeIds ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.learningOutcomeIds}</span> : null}
