@@ -49,4 +49,9 @@ public sealed class LearningOutcomeRepository(DatabaseContext db) : ILearningOut
     {
         db.LearningOutcomes.Add(learningOutcome);
     }
+
+    public void Remove(LearningOutcome learningOutcome)
+    {
+        db.LearningOutcomes.Remove(learningOutcome);
+    }
 }

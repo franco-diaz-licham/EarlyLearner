@@ -25,6 +25,7 @@ public interface ILearningOutcomeCommandRepository
     Task<LearningOutcome?> GetAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
     Task<LearningOutcomeResponse?> GetResponseAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
     void Add(LearningOutcome learningOutcome);
+    void Remove(LearningOutcome learningOutcome);
 }
 
 public sealed class LearningOutcomeCommandService(ILearningOutcomeCommandRepository learningOutcomeRepo, IUnitOfWork uow) : ILearningOutcomeCommandService
@@ -75,8 +76,8 @@ public sealed class LearningOutcomeCommandService(ILearningOutcomeCommandReposit
         var outcome = await learningOutcomeRepo.GetAsync(learningOutcomeId, cancellationToken);
         if (outcome is null) return Result.Fail("Learning outcome was not found.", ResultTypeEnum.NotFound);
 
-        outcome.Archive();
+        learningOutcomeRepo.Remove(outcome);
         var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
-        return saved ? Result.Success(ResultTypeEnum.Success) : Result.Fail("Learning outcome could not be archived.", ResultTypeEnum.Invalid);
+        return saved ? Result.Success(ResultTypeEnum.Success) : Result.Fail("Learning outcome could not be deleted.", ResultTypeEnum.Invalid);
     }
 }
