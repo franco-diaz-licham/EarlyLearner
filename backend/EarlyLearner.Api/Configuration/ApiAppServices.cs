@@ -87,6 +87,7 @@ public static class ApiAppServices
         services.AddScoped<IValidator<CreateDailyLogRequest>, CreateDailyLogRequestValidator>();
         services.AddScoped<IValidator<CreateLearningOutcomeRequest>, CreateLearningOutcomeRequestValidator>();
         services.AddScoped<IValidator<UpdateLearningOutcomeRequest>, UpdateLearningOutcomeRequestValidator>();
+        services.AddScoped<IValidator<UpdateLearningOutcomeStatusRequest>, UpdateLearningOutcomeStatusRequestValidator>();
 
         return services;
     }

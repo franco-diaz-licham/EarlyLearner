@@ -1,5 +1,6 @@
 using EarlyLearner.Api.Helpers;
 using EarlyLearner.Application.UseCases.LearningContext;
+using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
 using FluentValidation;
@@ -16,6 +17,7 @@ public static class LearningOutcomeEndpoints
         outcomes.MapGet("/{learningOutcomeId:guid}", GetLearningOutcome).WithName(nameof(GetLearningOutcome));
         outcomes.MapPost("/", CreateLearningOutcome).WithName(nameof(CreateLearningOutcome));
         outcomes.MapPut("/{learningOutcomeId:guid}", UpdateLearningOutcome).WithName(nameof(UpdateLearningOutcome));
+        outcomes.MapPatch("/{learningOutcomeId:guid}/status", UpdateLearningOutcomeStatus).WithName(nameof(UpdateLearningOutcomeStatus));
         outcomes.MapDelete("/{learningOutcomeId:guid}", DeleteLearningOutcome).WithName(nameof(DeleteLearningOutcome));
 
         return endpoints;
@@ -35,7 +37,11 @@ public static class LearningOutcomeEndpoints
         return result.ToApiResult();
     }
 
-    public static async Task<IResult> CreateLearningOutcome(CreateLearningOutcomeRequest request, IValidator<CreateLearningOutcomeRequest> validator, ILearningOutcomeCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> CreateLearningOutcome(
+        CreateLearningOutcomeRequest request,
+        IValidator<CreateLearningOutcomeRequest> validator,
+        ILearningOutcomeCommandService commandService,
+        CancellationToken cancellationToken = default)
     {
         var validation = validator.Validate(request).ToResult();
         if (!validation.IsSuccess) return validation.ToApiResult();
@@ -52,7 +58,12 @@ public static class LearningOutcomeEndpoints
         return result.ToApiResult(locationUrl);
     }
 
-    public static async Task<IResult> UpdateLearningOutcome(Guid learningOutcomeId, UpdateLearningOutcomeRequest request, IValidator<UpdateLearningOutcomeRequest> validator, ILearningOutcomeCommandService commandService, CancellationToken cancellationToken = default)
+    public static async Task<IResult> UpdateLearningOutcome(
+        Guid learningOutcomeId,
+        UpdateLearningOutcomeRequest request,
+        IValidator<UpdateLearningOutcomeRequest> validator,
+        ILearningOutcomeCommandService commandService,
+        CancellationToken cancellationToken = default)
     {
         if (learningOutcomeId == Guid.Empty) return Result<LearningOutcomeResponse>.Fail("Learning outcome id is required.", ResultTypeEnum.Invalid).ToApiResult();
 
@@ -67,6 +78,23 @@ public static class LearningOutcomeEndpoints
             SortOrder: request.SortOrder);
 
         var result = await commandService.UpdateAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
+
+    public static async Task<IResult> UpdateLearningOutcomeStatus(
+        Guid learningOutcomeId,
+        UpdateLearningOutcomeStatusRequest request,
+        IValidator<UpdateLearningOutcomeStatusRequest> validator,
+        ILearningOutcomeCommandService commandService,
+        CancellationToken cancellationToken = default)
+    {
+        if (learningOutcomeId == Guid.Empty) return Result<LearningOutcomeResponse>.Fail("Learning outcome id is required.", ResultTypeEnum.Invalid).ToApiResult();
+
+        var validation = validator.Validate(request).ToResult();
+        if (!validation.IsSuccess) return validation.ToApiResult();
+
+        var command = new UpdateLearningOutcomeStatusCommand(LearningOutcomeId: new LearningOutcomeId(learningOutcomeId), Status: request.Status);
+        var result = await commandService.UpdateStatusAsync(command, cancellationToken);
         return result.ToApiResult();
     }
 
@@ -103,5 +131,15 @@ public sealed class UpdateLearningOutcomeRequestValidator : AbstractValidator<Up
         RuleFor(request => request.Description).NotEmpty();
         RuleFor(request => request.Category).NotEmpty();
         RuleFor(request => request.SortOrder).GreaterThanOrEqualTo(0);
+    }
+}
+
+public sealed record UpdateLearningOutcomeStatusRequest(LearningOutcomeStatusEnum Status);
+
+public sealed class UpdateLearningOutcomeStatusRequestValidator : AbstractValidator<UpdateLearningOutcomeStatusRequest>
+{
+    public UpdateLearningOutcomeStatusRequestValidator()
+    {
+        RuleFor(request => request.Status).IsInEnum();
     }
 }

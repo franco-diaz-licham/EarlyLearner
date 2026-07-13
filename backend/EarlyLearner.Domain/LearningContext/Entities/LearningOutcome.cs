@@ -89,6 +89,27 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
         SetUpdatedOn();
     }
 
+    public void Activate()
+    {
+        Status = LearningOutcomeStatusEnum.Active;
+        SetUpdatedOn();
+    }
+
+    public void UpdateStatus(LearningOutcomeStatusEnum status)
+    {
+        if (status == LearningOutcomeStatusEnum.Active) {
+            Activate();
+            return;
+        }
+
+        if (status == LearningOutcomeStatusEnum.Inactive) {
+            Deactivate();
+            return;
+        }
+
+        Archive();
+    }
+
     public void Archive()
     {
         Status = LearningOutcomeStatusEnum.Archived;

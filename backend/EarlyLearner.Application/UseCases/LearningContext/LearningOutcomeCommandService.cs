@@ -1,4 +1,5 @@
 using EarlyLearner.Application.Ports;
+using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
@@ -9,10 +10,13 @@ public sealed record CreateLearningOutcomeCommand(string Code, string Name, stri
 
 public sealed record UpdateLearningOutcomeCommand(LearningOutcomeId LearningOutcomeId, string Name, string Description, string Category, int SortOrder);
 
+public sealed record UpdateLearningOutcomeStatusCommand(LearningOutcomeId LearningOutcomeId, LearningOutcomeStatusEnum Status);
+
 public interface ILearningOutcomeCommandService
 {
     Task<Result<LearningOutcomeResponse>> CreateAsync(CreateLearningOutcomeCommand command, CancellationToken cancellationToken);
     Task<Result<LearningOutcomeResponse>> UpdateAsync(UpdateLearningOutcomeCommand command, CancellationToken cancellationToken);
+    Task<Result<LearningOutcomeResponse>> UpdateStatusAsync(UpdateLearningOutcomeStatusCommand command, CancellationToken cancellationToken);
     Task<Result> DeleteAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
 }
 
@@ -49,6 +53,20 @@ public sealed class LearningOutcomeCommandService(ILearningOutcomeCommandReposit
 
         var result = await learningOutcomeRepo.GetResponseAsync(outcome.Id, cancellationToken);
         if (result is null) return Result<LearningOutcomeResponse>.Fail("Learning outcome could not be retrieved after update.", ResultTypeEnum.Invalid);
+        return Result<LearningOutcomeResponse>.Success(result, ResultTypeEnum.Updated);
+    }
+
+    public async Task<Result<LearningOutcomeResponse>> UpdateStatusAsync(UpdateLearningOutcomeStatusCommand command, CancellationToken cancellationToken)
+    {
+        var outcome = await learningOutcomeRepo.GetAsync(command.LearningOutcomeId, cancellationToken);
+        if (outcome is null) return Result<LearningOutcomeResponse>.Fail("Learning outcome was not found.", ResultTypeEnum.NotFound);
+
+        outcome.UpdateStatus(command.Status);
+        var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
+        if (!saved) return Result<LearningOutcomeResponse>.Fail("Learning outcome status could not be updated.", ResultTypeEnum.Invalid);
+
+        var result = await learningOutcomeRepo.GetResponseAsync(outcome.Id, cancellationToken);
+        if (result is null) return Result<LearningOutcomeResponse>.Fail("Learning outcome could not be retrieved after status update.", ResultTypeEnum.Invalid);
         return Result<LearningOutcomeResponse>.Success(result, ResultTypeEnum.Updated);
     }
 
