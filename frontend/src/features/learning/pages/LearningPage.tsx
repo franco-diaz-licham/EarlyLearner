@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useHouseholdQuery } from '../../households/queries/household.queries';
 import { LearningHeader } from '../components/LearningHeader';
 import { LearningLogForm } from '../components/LearningLogForm';
@@ -7,7 +7,7 @@ import { LearningOutcomeForm } from '../components/LearningOutcomeForm';
 import { LearningOutcomeList } from '../components/LearningOutcomeList';
 import { LearningTodaySummaryCard } from '../components/LearningTodaySummaryCard';
 import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
-import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteLearningMomentMutation } from '../queries/dailyLog.queries';
+import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery } from '../queries/dailyLog.queries';
 import { useCreateLearningOutcomeMutation, useDeleteLearningOutcomeMutation, useLearningOutcomesQuery, useUpdateLearningOutcomeMutation, useUpdateLearningOutcomeStatusMutation } from '../queries/learningOutcome.queries';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
@@ -19,10 +19,15 @@ export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
   const [manageOutcome, setManageOutcome] = useState(false);
   const [editingOutcome, setEditingOutcome] = useState<LearningOutcomeModel | null>(null);
+  const [learningMomentSearchTerm, setLearningMomentSearchTerm] = useState('');
 
   const householdQuery = useHouseholdQuery();
   const learningOutcomesQuery = useLearningOutcomesQuery();
   const dailyLogsQuery = useDailyLogsQuery();
+  const learningMomentFeedQuery = useLearningMomentFeedQuery({
+    pageSize: 10,
+    searchTerm: learningMomentSearchTerm.trim() || null
+  });
   const createDailyLogMutation = useCreateDailyLogMutation();
   const deleteLearningMomentMutation = useDeleteLearningMomentMutation();
   const createLearningOutcomeMutation = useCreateLearningOutcomeMutation();
@@ -36,14 +41,7 @@ export const LearningPage = () => {
   const dailyLogs = dailyLogsQuery.data ?? [];
   const today = formatDateInputValue(new Date());
 
-  const latestMoments = dailyLogs.flatMap((log) =>
-    log.learningMoments.map((moment) => ({
-      ...moment,
-      dailyLogId: log.dailyLogId,
-      childId: log.childId,
-      logDate: log.logDate
-    }))
-  );
+  const latestMoments = learningMomentFeedQuery.data?.pages.flatMap((page) => page.items) ?? [];
 
   const todayLogs = dailyLogs.filter((log) => log.logDate === today);
   const todayActivityCount = todayLogs.flatMap((log) => log.learningMoments).filter((moment) => moment.kind === 'activity' || moment.kind === 'observation').length;
@@ -79,6 +77,12 @@ export const LearningPage = () => {
     setManageOutcome(false);
   };
 
+  const handleLoadMoreLearningMoments = useCallback(() => {
+    if (learningMomentFeedQuery.hasNextPage && !learningMomentFeedQuery.isFetchingNextPage) {
+      void learningMomentFeedQuery.fetchNextPage();
+    }
+  }, [learningMomentFeedQuery]);
+
   const outcomeSaving = createLearningOutcomeMutation.isPending || updateLearningOutcomeMutation.isPending;
 
   return (
@@ -91,11 +95,16 @@ export const LearningPage = () => {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px]">
         <LearningMomentList
+          hasMore={learningMomentFeedQuery.hasNextPage}
           isDeleting={deleteLearningMomentMutation.isPending}
+          isFetchingMore={learningMomentFeedQuery.isFetchingNextPage}
           moments={latestMoments}
+          searchTerm={learningMomentSearchTerm}
           onDeleteMoment={(dailyLogId, learningMomentId) => {
             deleteLearningMomentMutation.mutate({ dailyLogId, learningMomentId });
           }}
+          onLoadMore={handleLoadMoreLearningMoments}
+          onSearchTermChange={setLearningMomentSearchTerm}
         />
         <aside className="space-y-5">
           <LearningTodaySummaryCard activityCount={todayActivityCount} readingCount={todayReadingCount} routineCount={todayRoutineCount} />

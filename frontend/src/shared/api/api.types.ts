@@ -12,8 +12,10 @@ export interface PaginatedResponse {
 export interface ApiPaginatedResponse<T> {
   statusCode: number;
   message: string;
-  data: T[];
-  pagination: PaginatedResponse;
+  data: {
+    items: T[];
+    pagination: PaginatedResponse;
+  };
 }
 
 /** API response wrapper, handles a singular data response. */

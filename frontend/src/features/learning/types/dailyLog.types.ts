@@ -16,6 +16,20 @@ export interface LearningMomentModel {
   learningOutcomeIds: string[];
 }
 
+export interface LearningMomentFeedResponse extends LearningMomentResponse {
+  dailyLogId: string;
+  householdId: string;
+  childId: string;
+  logDate: string;
+}
+
+export interface LearningMomentFeedModel extends LearningMomentModel {
+  dailyLogId: string;
+  householdId: string;
+  childId: string;
+  logDate: string;
+}
+
 export interface DailyLogResponse {
   dailyLogId: string;
   householdId: string;

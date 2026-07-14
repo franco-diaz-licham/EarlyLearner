@@ -10,8 +10,8 @@ export const apiClient = {
   async getPaginatedList<T>(url: string, params?: ApiQueryParams): Promise<PaginatedResult<T>> {
     const response = await http.get<ApiPaginatedResponse<T>>(url, { params });
     return {
-      items: response.data.data,
-      pagination: response.data.pagination
+      items: response.data.data.items,
+      pagination: response.data.data.pagination
     };
   },
 

@@ -1,6 +1,7 @@
 import { UilBookOpen, UilCalendarAlt, UilTrashAlt } from '@iconscout/react-unicons';
 import { AppCard } from '../../../shared/ui/AppCard';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
+import { AppInputText } from '../../../shared/ui/AppInputText';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 import type { LearningMomentKind } from '../types/dailyLog.types';
 
@@ -16,9 +17,14 @@ export interface LearningMomentListItem {
 }
 
 interface LearningMomentListProps {
+  hasMore: boolean;
+  isFetchingMore: boolean;
   isDeleting: boolean;
   moments: LearningMomentListItem[];
+  searchTerm: string;
   onDeleteMoment: (dailyLogId: string, learningMomentId: string) => void;
+  onLoadMore: () => void;
+  onSearchTermChange: (searchTerm: string) => void;
 }
 
 const learningKindLabels: Record<LearningMomentKind, string> = {
@@ -35,13 +41,29 @@ const formatDisplayDate = (value: string) =>
     year: 'numeric'
   }).format(new Date(`${value}T00:00:00`));
 
-export const LearningMomentList = ({ isDeleting, moments, onDeleteMoment }: LearningMomentListProps) => {
+export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moments, searchTerm, onDeleteMoment, onLoadMore, onSearchTermChange }: LearningMomentListProps) => {
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    if (!hasMore || isFetchingMore) return;
+    const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight <= 160) onLoadMore();
+  };
+
   return (
     <AppCard title="Recent Learning">
+      <div className="mb-4">
+        <AppInputText
+          aria-label="Search recent learning"
+          placeholder="Search recent learning"
+          value={searchTerm}
+          onChange={(event) => {
+            onSearchTermChange(event.target.value);
+          }}
+        />
+      </div>
       {moments.length === 0 ? (
         <p className="text-sm text-brand-muted">No learning moments recorded yet.</p>
       ) : (
-        <div className="max-h-[calc(100vh-23rem)] space-y-3 overflow-y-auto pr-1">
+        <div className="max-h-[calc(100vh-23rem)] space-y-3 overflow-y-auto pr-1" onScroll={handleScroll}>
           {moments.map((moment) => (
             <article className="rounded-md border border-brand-border p-4" key={moment.learningMomentId}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -71,6 +93,7 @@ export const LearningMomentList = ({ isDeleting, moments, onDeleteMoment }: Lear
               </div>
             </article>
           ))}
+          {isFetchingMore ? <p className="py-2 text-center text-sm font-semibold text-brand-muted">Loading more...</p> : null}
         </div>
       )}
     </AppCard>
