@@ -2,7 +2,6 @@ using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
-using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Persistence.Repositories;
@@ -37,6 +36,51 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
     public Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken)
     {
         return db.Children.AnyAsync(child => child.Id == childId && child.HouseholdId == householdId, cancellationToken);
+    }
+
+    public async Task<(List<LearningMomentFeedResponse> Items, int TotalCount)> ListLearningMomentsAsync(HouseholdId householdId, ListLearningMomentsQuery query, CancellationToken cancellationToken)
+    {
+        var moments = db.LearningMoments
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(moment => moment.DailyLog.HouseholdId == householdId);
+
+        moments = ApplySearch(moments, query);
+
+        return await ApplyPagination(moments, query, cancellationToken);
+    }
+
+    private static IQueryable<LearningMoment> ApplySearch(IQueryable<LearningMoment> moments, ListLearningMomentsQuery query)
+    {
+        if (string.IsNullOrWhiteSpace(query.SearchTerm)) return moments;
+        var term = query.SearchTerm.Trim().ToLowerInvariant();
+        return moments.Where(moment => moment.Title.ToLower().Contains(term) || moment.Notes.ToLower().Contains(term));
+    }
+
+    private static async Task<(List<LearningMomentFeedResponse> Items, int TotalCount)> ApplyPagination(
+        IQueryable<LearningMoment> moments,
+        ListLearningMomentsQuery query,
+        CancellationToken cancellationToken)
+    {
+        var totalCount = await moments.CountAsync(cancellationToken);
+        var items = await moments
+            .OrderByDescending(moment => moment.DailyLog.LogDate)
+            .ThenByDescending(moment => moment.CreatedOn)
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .Select(moment => new LearningMomentFeedResponse(
+                moment.Id.Value,
+                moment.DailyLogId.Value,
+                moment.DailyLog.HouseholdId.Value,
+                moment.DailyLog.ChildId.Value,
+                moment.DailyLog.LogDate,
+                moment.Kind,
+                moment.Title,
+                moment.Notes,
+                moment.LearningOutcomes.Select(outcome => outcome.Id.Value).ToList()))
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public Task<List<LearningOutcome>> GetLearningOutcomesAsync(IReadOnlyList<LearningOutcomeId> learningOutcomeIds, CancellationToken cancellationToken)

@@ -15,6 +15,7 @@ public static class DailyLogEndpoints
     {
         var dailyLogs = endpoints.MapGroup("/daily-logs").WithTags("Daily logs");
         dailyLogs.MapGet("/", ListDailyLogs).WithName(nameof(ListDailyLogs));
+        dailyLogs.MapGet("/learning-moments", ListLearningMoments).WithName(nameof(ListLearningMoments));
         dailyLogs.MapGet("/{dailyLogId:guid}", GetDailyLog).WithName(nameof(GetDailyLog));
         dailyLogs.MapPost("/", CreateDailyLog).WithName(nameof(CreateDailyLog));
         dailyLogs.MapDelete("/{dailyLogId:guid}/learning-moments/{learningMomentId:guid}", DeleteLearningMoment).WithName(nameof(DeleteLearningMoment));
@@ -26,6 +27,24 @@ public static class DailyLogEndpoints
     {
         var result = await queryService.ListAsync(cancellationToken);
         return result.ToApiResult();
+    }
+
+    public static async Task<IResult> ListLearningMoments(
+        [AsParameters] ListLearningMomentsQueryParams queryParams,
+        IValidator<ListLearningMomentsQueryParams> validator,
+        IDailyLogQueryService queryService,
+        CancellationToken cancellationToken = default)
+    {
+        var validation = validator.Validate(queryParams).ToResult();
+        if (!validation.IsSuccess) return validation.ToApiResult();
+
+        var query = new ListLearningMomentsQuery(
+            PageNumber: queryParams.PageNumber,
+            PageSize: queryParams.PageSize,
+            SearchTerm: queryParams.SearchTerm);
+
+        var result = await queryService.ListLearningMomentsAsync(query, cancellationToken);
+        return result.ToPaginatedApiResult(queryParams.PageNumber, queryParams.PageSize, result.TotalCount);
     }
 
     public static async Task<IResult> GetDailyLog(
@@ -91,6 +110,16 @@ public sealed record CreateDailyLogRequest(
     string Title,
     string Notes,
     IReadOnlyList<Guid> LearningOutcomeIds);
+
+public sealed class ListLearningMomentsQueryParams : BaseQueryParams;
+
+public sealed class ListLearningMomentsQueryParamsValidator : AbstractValidator<ListLearningMomentsQueryParams>
+{
+    public ListLearningMomentsQueryParamsValidator()
+    {
+        Include(new BaseQueryParamsValidator());
+    }
+}
 
 public sealed class CreateDailyLogRequestValidator : AbstractValidator<CreateDailyLogRequest>
 {

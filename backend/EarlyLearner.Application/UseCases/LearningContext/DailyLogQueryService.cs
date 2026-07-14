@@ -21,15 +21,33 @@ public sealed record LearningMomentResponse(
     string Notes,
     IReadOnlyList<Guid> LearningOutcomeIds);
 
+public sealed record LearningMomentFeedResponse(
+    Guid LearningMomentId,
+    Guid DailyLogId,
+    Guid HouseholdId,
+    Guid ChildId,
+    DateOnly LogDate,
+    LearningMomentKindEnum Kind,
+    string Title,
+    string Notes,
+    IReadOnlyList<Guid> LearningOutcomeIds);
+
+public sealed record ListLearningMomentsQuery(
+    int PageNumber,
+    int PageSize,
+    string? SearchTerm);
+
 public interface IDailyLogQueryService
 {
     Task<Result<List<DailyLogResponse>>> ListAsync(CancellationToken cancellationToken);
+    Task<Result<List<LearningMomentFeedResponse>>> ListLearningMomentsAsync(ListLearningMomentsQuery query, CancellationToken cancellationToken);
     Task<Result<DailyLogResponse>> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
 }
 
 public interface IDailyLogQueryRepository
 {
     Task<List<DailyLogResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken);
+    Task<(List<LearningMomentFeedResponse> Items, int TotalCount)> ListLearningMomentsAsync(HouseholdId householdId, ListLearningMomentsQuery query, CancellationToken cancellationToken);
     Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
 }
 
@@ -39,6 +57,12 @@ public sealed class DailyLogQueryService(IDailyLogQueryRepository dailyLogRepo, 
     {
         var logs = await dailyLogRepo.ListAsync(currentUser.HouseholdId, cancellationToken);
         return Result<List<DailyLogResponse>>.Success(logs, ResultTypeEnum.Success, logs.Count);
+    }
+
+    public async Task<Result<List<LearningMomentFeedResponse>>> ListLearningMomentsAsync(ListLearningMomentsQuery query, CancellationToken cancellationToken)
+    {
+        var (items, totalCount) = await dailyLogRepo.ListLearningMomentsAsync(currentUser.HouseholdId, query, cancellationToken);
+        return Result<List<LearningMomentFeedResponse>>.Success(items, ResultTypeEnum.Success, totalCount);
     }
 
     public async Task<Result<DailyLogResponse>> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken)

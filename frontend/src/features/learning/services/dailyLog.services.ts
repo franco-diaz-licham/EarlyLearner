@@ -20,7 +20,7 @@ export const dailyLogService = {
     return mapDailyLogResponseToModel(dailyLog);
   },
 
-  deleteLearningMoment(dailyLogId: string, learningMomentId: string): Promise<void> {
+  async deleteLearningMoment(dailyLogId: string, learningMomentId: string): Promise<void> {
     return apiClient.delete(`${DAILY_LOGS_URL}/${dailyLogId}/learning-moments/${learningMomentId}`);
   }
 };

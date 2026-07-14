@@ -1,5 +1,6 @@
 using EarlyLearner.Api.Configuration.Options;
 using EarlyLearner.Api.Endpoints;
+using EarlyLearner.Api.Models;
 using EarlyLearner.Api.Notifications;
 using EarlyLearner.Application.UseCases.CoreContext;
 using EarlyLearner.Application.UseCases.Dashboard;
@@ -88,6 +89,8 @@ public static class ApiAppServices
         services.AddScoped<IValidator<CreateLearningOutcomeRequest>, CreateLearningOutcomeRequestValidator>();
         services.AddScoped<IValidator<UpdateLearningOutcomeRequest>, UpdateLearningOutcomeRequestValidator>();
         services.AddScoped<IValidator<UpdateLearningOutcomeStatusRequest>, UpdateLearningOutcomeStatusRequestValidator>();
+        services.AddScoped<IValidator<BaseQueryParams>, BaseQueryParamsValidator>();
+        services.AddScoped<IValidator<ListLearningMomentsQueryParams>, ListLearningMomentsQueryParamsValidator>();
 
         return services;
     }

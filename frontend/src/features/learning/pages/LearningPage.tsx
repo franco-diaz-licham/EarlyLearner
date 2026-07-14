@@ -97,7 +97,6 @@ export const LearningPage = () => {
             deleteLearningMomentMutation.mutate({ dailyLogId, learningMomentId });
           }}
         />
-
         <aside className="space-y-5">
           <LearningTodaySummaryCard activityCount={todayActivityCount} readingCount={todayReadingCount} routineCount={todayRoutineCount} />
           <LearningOutcomeList
