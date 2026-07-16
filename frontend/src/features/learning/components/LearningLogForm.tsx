@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { AppButton } from '../../../shared/ui/AppButton';
-import { AppCheckbox } from '../../../shared/ui/AppCheckbox';
 import { AppDialog } from '../../../shared/ui/AppDialog';
 import { AppInputText } from '../../../shared/ui/AppInputText';
 import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
+import { AppMultiCheckboxSelector } from '../../../shared/ui/AppMultiCheckboxSelector';
 import { AppSelect } from '../../../shared/ui/AppSelect';
 import type { ChildModel } from '../../households/types/household.types';
 import { createEmptyLearningLogForm, useLearningLogForm } from '../hooks/useLearningLogForm';
@@ -119,34 +119,23 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
           />
           {errors.notes ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.notes}</span> : null}
         </div>
-        <div>
-          <p className="mb-2 text-sm font-semibold text-brand-heading">
-            Learning outcomes
-            <span aria-hidden="true" className="ml-1 text-red-600">
-              *
-            </span>
-          </p>
-          <div className="grid max-h-48 gap-2 overflow-y-auto pr-1 md:grid-cols-2">
-            {learningOutcomes.map((outcome) => (
-              <AppCheckbox
-                checked={draft.learningOutcomeIds.includes(outcome.learningOutcomeId)}
-                className="mt-1"
-                inputId={`learning-outcome-${outcome.learningOutcomeId}`}
-                key={outcome.learningOutcomeId}
-                label={
-                  <>
-                    <span className="block font-semibold text-brand-heading">{outcome.name}</span>
-                    <span className="mt-1 block text-xs text-brand-muted">{outcome.category}</span>
-                  </>
-                }
-                onChange={() => {
-                  handleOutcomeToggle(outcome.learningOutcomeId);
-                }}
-              />
-            ))}
-          </div>
-          {errors.learningOutcomeIds ? <span className="mt-1 block text-sm font-semibold text-red-600">{errors.learningOutcomeIds}</span> : null}
-        </div>
+        <AppMultiCheckboxSelector
+          error={errors.learningOutcomeIds}
+          label="Learning outcomes"
+          options={learningOutcomes.map((outcome) => ({
+            inputId: `learning-outcome-${outcome.learningOutcomeId}`,
+            label: (
+              <>
+                <span className="block font-semibold text-brand-heading">{outcome.name}</span>
+                <span className="mt-1 block text-xs text-brand-muted">{outcome.category}</span>
+              </>
+            ),
+            value: outcome.learningOutcomeId
+          }))}
+          required
+          selectedValues={draft.learningOutcomeIds}
+          onToggle={handleOutcomeToggle}
+        />
 
         <div className="flex justify-end gap-3 pt-2">
           <AppButton label="Cancel" type="button" variant="secondary" onClick={handleCancel} />
