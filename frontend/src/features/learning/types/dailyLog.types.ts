@@ -57,6 +57,13 @@ export interface CreateDailyLogRequest {
   learningOutcomeIds: string[];
 }
 
+export interface UpdateLearningMomentRequest {
+  kind: LearningMomentKind;
+  title: string;
+  notes: string;
+  learningOutcomeIds: string[];
+}
+
 export interface LearningLogFormModel {
   childId: string;
   logDate: string;

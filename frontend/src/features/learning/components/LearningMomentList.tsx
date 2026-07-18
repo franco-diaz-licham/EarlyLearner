@@ -6,6 +6,7 @@ import { LearningMomentListItemCard } from './LearningMomentListItemCard';
 export interface LearningMomentListItem {
   learningMomentId: string;
   dailyLogId: string;
+  householdId: string;
   childId: string;
   childName: string;
   logDate: string;
@@ -22,11 +23,12 @@ interface LearningMomentListProps {
   moments: LearningMomentListItem[];
   searchTerm: string;
   onDeleteMoment: (dailyLogId: string, learningMomentId: string) => void;
+  onEditMoment: (moment: LearningMomentListItem) => void;
   onLoadMore: () => void;
   onSearchTermChange: (searchTerm: string) => void;
 }
 
-export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moments, searchTerm, onDeleteMoment, onLoadMore, onSearchTermChange }: LearningMomentListProps) => {
+export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moments, searchTerm, onDeleteMoment, onEditMoment, onLoadMore, onSearchTermChange }: LearningMomentListProps) => {
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     if (!hasMore || isFetchingMore) return;
     const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
@@ -50,7 +52,7 @@ export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moment
       ) : (
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1" onScroll={handleScroll}>
           {moments.map((moment) => (
-            <LearningMomentListItemCard isDeleting={isDeleting} key={moment.learningMomentId} moment={moment} onDeleteMoment={onDeleteMoment} />
+            <LearningMomentListItemCard isDeleting={isDeleting} key={moment.learningMomentId} moment={moment} onDeleteMoment={onDeleteMoment} onEditMoment={onEditMoment} />
           ))}
           {isFetchingMore ? <p className="py-2 text-center text-sm font-semibold text-brand-muted">Loading more...</p> : null}
         </div>

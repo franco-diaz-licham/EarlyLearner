@@ -3,12 +3,12 @@ import { useHouseholdQuery } from '../../households/queries/household.queries';
 import type { ChildModel } from '../../households/types/household.types';
 import { LearningHeader } from '../components/LearningHeader';
 import { LearningLogForm } from '../components/LearningLogForm';
-import { LearningMomentList } from '../components/LearningMomentList';
+import { LearningMomentList, type LearningMomentListItem } from '../components/LearningMomentList';
 import { LearningOutcomeForm } from '../components/LearningOutcomeForm';
 import { LearningOutcomeList } from '../components/LearningOutcomeList';
 import { LearningTodaySummaryCard } from '../components/LearningTodaySummaryCard';
 import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
-import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery } from '../queries/dailyLog.queries';
+import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery, useUpdateLearningMomentMutation } from '../queries/dailyLog.queries';
 import { useCreateLearningOutcomeMutation, useDeleteLearningOutcomeMutation, useLearningOutcomesQuery, useUpdateLearningOutcomeMutation, useUpdateLearningOutcomeStatusMutation } from '../queries/learningOutcome.queries';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
@@ -19,6 +19,7 @@ const emptyLearningOutcomes: LearningOutcomeModel[] = [];
 
 export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
+  const [editingMoment, setEditingMoment] = useState<LearningMomentListItem | null>(null);
   const [manageOutcome, setManageOutcome] = useState(false);
   const [editingOutcome, setEditingOutcome] = useState<LearningOutcomeModel | null>(null);
   const [learningMomentSearchTerm, setLearningMomentSearchTerm] = useState('');
@@ -31,6 +32,7 @@ export const LearningPage = () => {
     searchTerm: learningMomentSearchTerm.trim() || null
   });
   const createDailyLogMutation = useCreateDailyLogMutation();
+  const updateLearningMomentMutation = useUpdateLearningMomentMutation();
   const deleteLearningMomentMutation = useDeleteLearningMomentMutation();
   const createLearningOutcomeMutation = useCreateLearningOutcomeMutation();
   const updateLearningOutcomeMutation = useUpdateLearningOutcomeMutation();
@@ -61,20 +63,29 @@ export const LearningPage = () => {
   const todayRoutineCount = todayLogs.flatMap((log) => log.learningMoments).filter((moment) => moment.kind === 'routine').length;
 
   const handleSave = async (form: LearningLogFormModel) => {
-    await createDailyLogMutation.mutateAsync(form);
+    if (editingMoment) {
+      await updateLearningMomentMutation.mutateAsync({
+        dailyLogId: editingMoment.dailyLogId,
+        learningMomentId: editingMoment.learningMomentId,
+        form
+      });
+      setEditingMoment(null);
+    } else {
+      await createDailyLogMutation.mutateAsync(form);
+      setAddLog(false);
+    }
+  };
+
+  const handleLogFormHide = () => {
     setAddLog(false);
+    setEditingMoment(null);
   };
 
   const handleOutcomeSave = async (form: LearningOutcomeFormModel) => {
     if (editingOutcome) {
       await updateLearningOutcomeMutation.mutateAsync({
         learningOutcomeId: editingOutcome.learningOutcomeId,
-        request: {
-          name: form.name,
-          description: form.description,
-          category: form.category,
-          sortOrder: form.sortOrder
-        }
+        form
       });
     } else {
       await createLearningOutcomeMutation.mutateAsync(form);
@@ -95,12 +106,14 @@ export const LearningPage = () => {
     }
   }, [learningMomentFeedQuery]);
 
+  const logSaving = createDailyLogMutation.isPending || updateLearningMomentMutation.isPending;
   const outcomeSaving = createLearningOutcomeMutation.isPending || updateLearningOutcomeMutation.isPending;
 
   return (
     <section aria-labelledby="learning-title" className="space-y-5">
       <LearningHeader
         onAddLog={() => {
+          setEditingMoment(null);
           setAddLog(true);
         }}
       />
@@ -115,6 +128,10 @@ export const LearningPage = () => {
             searchTerm={learningMomentSearchTerm}
             onDeleteMoment={(dailyLogId, learningMomentId) => {
               deleteLearningMomentMutation.mutate({ dailyLogId, learningMomentId });
+            }}
+            onEditMoment={(moment) => {
+              setAddLog(false);
+              setEditingMoment(moment);
             }}
             onLoadMore={handleLoadMoreLearningMoments}
             onSearchTermChange={setLearningMomentSearchTerm}
@@ -140,21 +157,20 @@ export const LearningPage = () => {
             onStatusChange={(outcome, status) => {
               updateLearningOutcomeStatusMutation.mutate({
                 learningOutcomeId: outcome.learningOutcomeId,
-                request: { status }
+                status
               });
             }}
           />
         </aside>
       </div>
       <LearningLogForm
-        key={addLog ? 'add-log-open' : 'add-log-closed'}
+        key={editingMoment?.learningMomentId ?? (addLog ? 'add-log-open' : 'add-log-closed')}
         children={children}
-        learningOutcomes={activeLearningOutcomes}
-        saving={createDailyLogMutation.isPending}
-        visible={addLog}
-        onHide={() => {
-          setAddLog(false);
-        }}
+        moment={editingMoment}
+        learningOutcomes={editingMoment ? learningOutcomes : activeLearningOutcomes}
+        saving={logSaving}
+        visible={addLog || Boolean(editingMoment)}
+        onHide={handleLogFormHide}
         onSave={(form) => {
           void handleSave(form);
         }}

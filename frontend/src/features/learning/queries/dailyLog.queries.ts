@@ -1,13 +1,19 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { dailyLogService } from '../services/dailyLog.services';
-import type { CreateDailyLogRequest } from '../types/dailyLog.types';
+import type { CreateDailyLogRequest, LearningLogFormModel } from '../types/dailyLog.types';
 
-interface DeleteLearningMomentVariables {
+interface UpdateLearningMoment {
+  dailyLogId: string;
+  learningMomentId: string;
+  form: LearningLogFormModel;
+}
+
+interface DeleteLearningMoment {
   dailyLogId: string;
   learningMomentId: string;
 }
 
-interface LearningMomentFeedQueryParams {
+interface LearningMomentFeedQuery {
   pageSize?: number;
   searchBy?: string | null;
   searchTerm?: string | null;
@@ -18,7 +24,7 @@ export const dailyLogKeys = {
   lists: () => [...dailyLogKeys.all, 'list'] as const,
   list: () => [...dailyLogKeys.lists(), 'current'] as const,
   momentFeeds: () => [...dailyLogKeys.all, 'learningMoments'] as const,
-  momentFeed: (params: LearningMomentFeedQueryParams) => [...dailyLogKeys.momentFeeds(), params] as const,
+  momentFeed: (params: LearningMomentFeedQuery) => [...dailyLogKeys.momentFeeds(), params] as const,
   details: () => [...dailyLogKeys.all, 'detail'] as const,
   detail: (dailyLogId: string) => [...dailyLogKeys.details(), dailyLogId] as const
 };
@@ -36,7 +42,7 @@ export const useDailyLogQuery = (dailyLogId: string) =>
     enabled: Boolean(dailyLogId)
   });
 
-export const useLearningMomentFeedQuery = ({ pageSize = 10, searchBy = null, searchTerm = null }: LearningMomentFeedQueryParams = {}) =>
+export const useLearningMomentFeedQuery = ({ pageSize = 10, searchBy = null, searchTerm = null }: LearningMomentFeedQuery = {}) =>
   useInfiniteQuery({
     queryKey: dailyLogKeys.momentFeed({ pageSize, searchBy, searchTerm }),
     initialPageParam: 1,
@@ -66,11 +72,30 @@ export const useCreateDailyLogMutation = () => {
   });
 };
 
+export const useUpdateLearningMomentMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ dailyLogId, learningMomentId, form }: UpdateLearningMoment) =>
+      dailyLogService.updateLearningMoment(dailyLogId, learningMomentId, {
+        kind: form.kind,
+        title: form.title,
+        notes: form.notes,
+        learningOutcomeIds: form.learningOutcomeIds
+      }),
+    onSuccess: (dailyLog) => {
+      void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: dailyLogKeys.momentFeeds() });
+      queryClient.setQueryData(dailyLogKeys.detail(dailyLog.dailyLogId), dailyLog);
+    }
+  });
+};
+
 export const useDeleteLearningMomentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ dailyLogId, learningMomentId }: DeleteLearningMomentVariables) => dailyLogService.deleteLearningMoment(dailyLogId, learningMomentId),
+    mutationFn: ({ dailyLogId, learningMomentId }: DeleteLearningMoment) => dailyLogService.deleteLearningMoment(dailyLogId, learningMomentId),
     onSuccess: (_data, { dailyLogId }) => {
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.momentFeeds() });

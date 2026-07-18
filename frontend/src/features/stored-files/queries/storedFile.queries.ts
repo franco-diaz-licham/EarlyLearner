@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { storedFileService } from '../services/storedFile.services';
-import type { CreateStoredFileRequest, UpdateStoredFileStatusRequest } from '../types/storedFile.types';
+import type { CreateStoredFileRequest, StoredFileStatus } from '../types/storedFile.types';
+
+interface UpdateStoredFileStatus {
+  storedFileId: string;
+  status: StoredFileStatus;
+}
 
 export const storedFileKeys = {
   all: ['storedFiles'] as const,
@@ -39,7 +44,7 @@ export const useUpdateStoredFileStatusMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ storedFileId, request }: { storedFileId: string; request: UpdateStoredFileStatusRequest }) => storedFileService.updateStatus(storedFileId, request),
+    mutationFn: ({ storedFileId, status }: UpdateStoredFileStatus) => storedFileService.updateStatus(storedFileId, { status }),
     onSuccess: (storedFile) => {
       void queryClient.invalidateQueries({ queryKey: storedFileKeys.lists() });
       queryClient.setQueryData(storedFileKeys.detail(storedFile.storedFileId), storedFile);

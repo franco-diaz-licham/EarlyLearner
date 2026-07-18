@@ -3,6 +3,11 @@ import { mapAddChildFormToRequest, mapHouseholdResponseToModel, mapHouseholdResp
 import { householdService } from '../services/household.services';
 import type { AddChildForm, HouseholdModel, InviteCarerForm, RenameHouseholdForm } from '../types/household.types';
 
+interface UpdateHouseholdChild {
+  childId: string;
+  form: AddChildForm;
+}
+
 export const householdKeys = {
   all: ['households'] as const,
   lists: () => [...householdKeys.all, 'list'] as const,
@@ -132,7 +137,7 @@ export const useUpdateHouseholdChildMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ childId, form }: { childId: string; form: AddChildForm }) => {
+    mutationFn: async ({ childId, form }: UpdateHouseholdChild) => {
       const household = await householdService.updateChild(childId, mapUpdateChildFormToRequest(form));
       return mapHouseholdResponseToModel(household);
     },

@@ -1,5 +1,6 @@
-import { UilBookOpen, UilCalendarAlt, UilTrashAlt, UilUsersAlt } from '@iconscout/react-unicons';
+import { UilBookOpen, UilCalendarAlt, UilEditAlt, UilTrashAlt, UilUsersAlt } from '@iconscout/react-unicons';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
+import { formatDisplayDate } from '../../../shared/utils/dateFormat';
 import type { LearningMomentKind } from '../types/dailyLog.types';
 import type { LearningMomentListItem } from './LearningMomentList';
 
@@ -7,6 +8,7 @@ interface LearningMomentListItemCardProps {
   isDeleting: boolean;
   moment: LearningMomentListItem;
   onDeleteMoment: (dailyLogId: string, learningMomentId: string) => void;
+  onEditMoment: (moment: LearningMomentListItem) => void;
 }
 
 const learningKindLabels: Record<LearningMomentKind, string> = {
@@ -16,14 +18,8 @@ const learningKindLabels: Record<LearningMomentKind, string> = {
   routine: 'Routine'
 };
 
-const formatDisplayDate = (value: string) =>
-  new Intl.DateTimeFormat(undefined, {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  }).format(new Date(`${value}T00:00:00`));
 
-export const LearningMomentListItemCard = ({ isDeleting, moment, onDeleteMoment }: LearningMomentListItemCardProps) => {
+export const LearningMomentListItemCard = ({ isDeleting, moment, onDeleteMoment, onEditMoment }: LearningMomentListItemCardProps) => {
   return (
     <article className="rounded-md border border-brand-border p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -47,16 +43,27 @@ export const LearningMomentListItemCard = ({ isDeleting, moment, onDeleteMoment 
             </div>
           </div>
         </div>
-        <AppIconButton
-          aria-label={`Delete ${moment.title}`}
-          disabled={isDeleting}
-          type="button"
-          onClick={() => {
-            onDeleteMoment(moment.dailyLogId, moment.learningMomentId);
-          }}
-        >
-          <UilTrashAlt aria-hidden="true" className="h-5 w-5" />
-        </AppIconButton>
+        <div className="flex items-center">
+          <AppIconButton
+            aria-label={`Edit ${moment.title}`}
+            className="flex"
+            onClick={() => {
+              onEditMoment(moment);
+            }}
+          >
+            <UilEditAlt aria-hidden="true" className="h-5 w-5" />
+          </AppIconButton>
+          <AppIconButton
+            aria-label={`Delete ${moment.title}`}
+            className="flex text-brand-error hover:bg-brand-primary-soft"
+            disabled={isDeleting}
+            onClick={() => {
+              onDeleteMoment(moment.dailyLogId, moment.learningMomentId);
+            }}
+          >
+            <UilTrashAlt aria-hidden="true" className="h-5 w-5" />
+          </AppIconButton>
+        </div>
       </div>
     </article>
   );

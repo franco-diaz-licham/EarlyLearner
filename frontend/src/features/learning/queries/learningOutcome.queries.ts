@@ -1,6 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
 import { learningOutcomeService } from '../services/learningOutcome.services';
-import type { CreateLearningOutcomeRequest, UpdateLearningOutcomeRequest, UpdateLearningOutcomeStatusRequest } from '../types/learningOutcome.types';
+import type { LearningOutcomeStatus } from '../types/learningOutcome.types';
+
+interface UpdateLearningOutcome {
+  learningOutcomeId: string;
+  form: LearningOutcomeFormModel;
+}
+
+interface UpdateLearningOutcomeStatus {
+  learningOutcomeId: string;
+  status: LearningOutcomeStatus;
+}
 
 export const learningOutcomeKeys = {
   all: ['learningOutcomes'] as const,
@@ -27,7 +38,14 @@ export const useCreateLearningOutcomeMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateLearningOutcomeRequest) => learningOutcomeService.create(request),
+    mutationFn: (form: LearningOutcomeFormModel) =>
+      learningOutcomeService.create({
+        code: form.code,
+        name: form.name,
+        description: form.description,
+        category: form.category,
+        sortOrder: form.sortOrder
+      }),
     onSuccess: (learningOutcome) => {
       void queryClient.invalidateQueries({ queryKey: learningOutcomeKeys.lists() });
       queryClient.setQueryData(learningOutcomeKeys.detail(learningOutcome.learningOutcomeId), learningOutcome);
@@ -39,8 +57,13 @@ export const useUpdateLearningOutcomeMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ learningOutcomeId, request }: { learningOutcomeId: string; request: UpdateLearningOutcomeRequest }) =>
-      learningOutcomeService.update(learningOutcomeId, request),
+    mutationFn: ({ learningOutcomeId, form }: UpdateLearningOutcome) =>
+      learningOutcomeService.update(learningOutcomeId, {
+        name: form.name,
+        description: form.description,
+        category: form.category,
+        sortOrder: form.sortOrder
+      }),
     onSuccess: (learningOutcome) => {
       void queryClient.invalidateQueries({ queryKey: learningOutcomeKeys.lists() });
       queryClient.setQueryData(learningOutcomeKeys.detail(learningOutcome.learningOutcomeId), learningOutcome);
@@ -52,8 +75,7 @@ export const useUpdateLearningOutcomeStatusMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ learningOutcomeId, request }: { learningOutcomeId: string; request: UpdateLearningOutcomeStatusRequest }) =>
-      learningOutcomeService.updateStatus(learningOutcomeId, request),
+    mutationFn: ({ learningOutcomeId, status }: UpdateLearningOutcomeStatus) => learningOutcomeService.updateStatus(learningOutcomeId, { status }),
     onSuccess: (learningOutcome) => {
       void queryClient.invalidateQueries({ queryKey: learningOutcomeKeys.lists() });
       queryClient.setQueryData(learningOutcomeKeys.detail(learningOutcome.learningOutcomeId), learningOutcome);

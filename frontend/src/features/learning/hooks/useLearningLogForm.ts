@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { z } from 'zod';
-import type { LearningLogFormModel } from '../types/dailyLog.types';
+import type { LearningLogFormModel, LearningMomentFeedModel } from '../types/dailyLog.types';
 
 const learningLogSchema = z.object({
   childId: z.string().trim().min(1, 'Child is required.'),
@@ -26,6 +26,15 @@ export const createEmptyLearningLogForm = (childId = ''): LearningLogFormModel =
   title: '',
   notes: '',
   learningOutcomeIds: []
+});
+
+export const getLearningLogForm = (moment: LearningMomentFeedModel): LearningLogFormModel => ({
+  childId: moment.childId,
+  logDate: moment.logDate,
+  kind: moment.kind,
+  title: moment.title,
+  notes: moment.notes,
+  learningOutcomeIds: moment.learningOutcomeIds
 });
 
 const getLearningLogFormErrors = (draft: LearningLogFormModel): LearningLogFormErrors => {

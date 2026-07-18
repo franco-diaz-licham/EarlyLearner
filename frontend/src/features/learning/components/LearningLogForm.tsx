@@ -6,12 +6,13 @@ import { AppInputTextArea } from '../../../shared/ui/AppInputTextArea';
 import { AppMultiCheckboxSelector } from '../../../shared/ui/AppMultiCheckboxSelector';
 import { AppSelect } from '../../../shared/ui/AppSelect';
 import type { ChildModel } from '../../households/types/household.types';
-import { createEmptyLearningLogForm, useLearningLogForm } from '../hooks/useLearningLogForm';
-import type { LearningLogFormModel, LearningMomentKind } from '../types/dailyLog.types';
+import { createEmptyLearningLogForm, getLearningLogForm, useLearningLogForm } from '../hooks/useLearningLogForm';
+import type { LearningLogFormModel, LearningMomentFeedModel, LearningMomentKind } from '../types/dailyLog.types';
 import type { LearningOutcomeModel } from '../types/learningOutcome.types';
 
 interface LearningLogFormProps {
   children: ChildModel[];
+  moment?: LearningMomentFeedModel | null;
   learningOutcomes: LearningOutcomeModel[];
   saving: boolean;
   visible: boolean;
@@ -26,13 +27,12 @@ const learningKindOptions = [
   { label: 'Routine', value: 'routine' }
 ] satisfies { label: string; value: LearningMomentKind }[];
 
-const kindLabel = (kind: LearningMomentKind) => learningKindOptions.find((option) => option.value === kind)?.label ?? kind;
-
-export const LearningLogForm = ({ children, learningOutcomes, saving, visible, onHide, onSave }: LearningLogFormProps) => {
-  const initialDraft = useMemo(() => createEmptyLearningLogForm(children[0]?.id ?? ''), [children]);
+export const LearningLogForm = ({ children, moment, learningOutcomes, saving, visible, onHide, onSave }: LearningLogFormProps) => {
+  const initialDraft = useMemo(() => (moment ? getLearningLogForm(moment) : createEmptyLearningLogForm(children[0]?.id ?? '')), [children, moment]);
   const form = useLearningLogForm(initialDraft);
   const { draft, errors } = form;
   const hasErrors = Object.keys(errors).length > 0;
+  const title = moment ? 'Edit learning log' : 'Add learning log';
 
   const childOptions = useMemo(
     () =>
@@ -59,7 +59,7 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
   };
 
   return (
-    <AppDialog header="Add learning log" visible={visible} onHide={handleCancel}>
+    <AppDialog header={title} visible={visible} onHide={handleCancel}>
       <div className="space-y-4 pt-4">
         <div className="grid gap-4 md:grid-cols-3">
           <AppSelect
@@ -69,7 +69,7 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
             onChange={(value) => {
               form.updateField('childId', value);
             }}
-            disabled={childOptions.length === 0}
+            disabled={childOptions.length === 0 || Boolean(moment)}
             error={errors.childId}
             required
           />
@@ -77,6 +77,7 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
             error={errors.logDate}
             label="Date"
             required
+            disabled={Boolean(moment)}
             type="date"
             value={draft.logDate}
             onChange={(event) => {
@@ -94,7 +95,7 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
           />
         </div>
         <AppInputText
-          autoFocus
+          autoFocus={!moment}
           error={errors.title}
           label="Title"
           placeholder="Butterfly craft"
@@ -139,7 +140,7 @@ export const LearningLogForm = ({ children, learningOutcomes, saving, visible, o
 
         <div className="flex justify-end gap-3 pt-2">
           <AppButton label="Cancel" type="button" variant="secondary" onClick={handleCancel} />
-          <AppButton disabled={saving || !form.isValid || hasErrors} label={saving ? 'Saving...' : `Save ${kindLabel(draft.kind).toLowerCase()}`} type="button" onClick={handleSave} />
+          <AppButton disabled={saving || !form.isValid || hasErrors} label={saving ? 'Saving...' : moment ? 'Save log' : 'Add log'} type="button" onClick={handleSave} />
         </div>
       </div>
     </AppDialog>
