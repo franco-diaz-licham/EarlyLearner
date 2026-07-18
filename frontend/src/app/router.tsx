@@ -4,6 +4,7 @@ import { AppShell } from '../shared/layout/AppShell';
 import { HomePage } from '../features/home/pages/HomePage';
 import { HouseholdsPage } from '../features/households/pages/HouseholdsPage';
 import { LearningPage } from '../features/learning/pages/LearningPage';
+import { LearningOutcomesPage } from '../features/learning/pages/LearningOutcomesPage';
 import { NotFoundPage } from '../shared/pages/NotFoundPage';
 
 export const router = createBrowserRouter([
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
           { path: 'home', element: <HomePage /> },
           { path: 'households', element: <HouseholdsPage /> },
           { path: 'learning', element: <LearningPage /> },
+          { path: 'outcomes', element: <LearningOutcomesPage /> },
           { path: '*', element: <NotFoundPage /> }
         ]
       }

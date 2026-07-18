@@ -21,11 +21,7 @@ vi.mock('../queries/dailyLog.queries', () => ({
 }));
 
 vi.mock('../queries/learningOutcome.queries', () => ({
-  useCreateLearningOutcomeMutation: vi.fn(),
-  useDeleteLearningOutcomeMutation: vi.fn(),
-  useLearningOutcomesQuery: vi.fn(),
-  useUpdateLearningOutcomeMutation: vi.fn(),
-  useUpdateLearningOutcomeStatusMutation: vi.fn()
+  useLearningOutcomesQuery: vi.fn()
 }));
 
 const child = {
@@ -144,28 +140,6 @@ const deleteLearningMomentMutation = {
   mutate: vi.fn()
 };
 
-const createLearningOutcomeMutation = {
-  isPending: false,
-  mutateAsync: vi.fn()
-};
-
-const updateLearningOutcomeMutation = {
-  isPending: false,
-  mutateAsync: vi.fn()
-};
-
-const updateLearningOutcomeStatusMutation = {
-  isPending: false,
-  mutate: vi.fn(),
-  variables: null
-};
-
-const deleteLearningOutcomeMutation = {
-  isPending: false,
-  mutate: vi.fn(),
-  variables: null
-};
-
 const renderPage = () => render(<LearningPage />);
 
 describe('LearningPage', () => {
@@ -179,15 +153,9 @@ describe('LearningPage', () => {
     vi.mocked(dailyLogQueries.useCreateDailyLogMutation).mockReturnValue(createDailyLogMutation as unknown as ReturnType<typeof dailyLogQueries.useCreateDailyLogMutation>);
     vi.mocked(dailyLogQueries.useUpdateLearningMomentMutation).mockReturnValue(updateLearningMomentMutation as unknown as ReturnType<typeof dailyLogQueries.useUpdateLearningMomentMutation>);
     vi.mocked(dailyLogQueries.useDeleteLearningMomentMutation).mockReturnValue(deleteLearningMomentMutation as unknown as ReturnType<typeof dailyLogQueries.useDeleteLearningMomentMutation>);
-    vi.mocked(learningOutcomeQueries.useCreateLearningOutcomeMutation).mockReturnValue(createLearningOutcomeMutation as unknown as ReturnType<typeof learningOutcomeQueries.useCreateLearningOutcomeMutation>);
-    vi.mocked(learningOutcomeQueries.useUpdateLearningOutcomeMutation).mockReturnValue(updateLearningOutcomeMutation as unknown as ReturnType<typeof learningOutcomeQueries.useUpdateLearningOutcomeMutation>);
-    vi.mocked(learningOutcomeQueries.useUpdateLearningOutcomeStatusMutation).mockReturnValue(updateLearningOutcomeStatusMutation as unknown as ReturnType<typeof learningOutcomeQueries.useUpdateLearningOutcomeStatusMutation>);
-    vi.mocked(learningOutcomeQueries.useDeleteLearningOutcomeMutation).mockReturnValue(deleteLearningOutcomeMutation as unknown as ReturnType<typeof learningOutcomeQueries.useDeleteLearningOutcomeMutation>);
 
     createDailyLogMutation.mutateAsync.mockResolvedValue(dailyLog);
     updateLearningMomentMutation.mutateAsync.mockResolvedValue(dailyLog);
-    createLearningOutcomeMutation.mutateAsync.mockResolvedValue(learningOutcome);
-    updateLearningOutcomeMutation.mutateAsync.mockResolvedValue(learningOutcome);
   });
 
   test('renders the learning dashboard from query data', () => {
@@ -200,11 +168,12 @@ describe('LearningPage', () => {
     expect(screen.getByRole('heading', { name: 'Read a story' })).toBeInTheDocument();
     expect(screen.getByText('Mia Rivera')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Today at a Glance' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Children' })).toBeInTheDocument();
+    expect(screen.getByText('Mia')).toBeInTheDocument();
     expect(screen.getByText('Activities')).toBeInTheDocument();
     expect(screen.getAllByText('Reading').length).toBeGreaterThan(0);
     expect(screen.getByText('Routine')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Learning Outcomes' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Listens and responds' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Learning Outcomes' })).not.toBeInTheDocument();
   });
 
   test('opens the add learning log form and submits a log', async () => {
@@ -232,63 +201,6 @@ describe('LearningPage', () => {
       title: 'Paint mixing',
       notes: 'Mixed colours and described the changes.',
       learningOutcomeIds: ['outcome-1']
-    });
-  });
-
-  test('opens the add learning outcome form and submits an outcome', async () => {
-    // Arrange
-    const user = userEvent.setup();
-
-    renderPage();
-
-    // Act
-    await user.click(screen.getByRole('button', { name: 'Add' }));
-    await user.type(screen.getByLabelText(/code/i), 'social-turn-taking');
-    await user.type(screen.getByLabelText(/name/i), 'Takes turns');
-    await user.type(screen.getByLabelText(/category/i), 'Social');
-    await user.clear(screen.getByLabelText(/order/i));
-    await user.type(screen.getByLabelText(/order/i), '20');
-    await user.type(screen.getByLabelText(/description/i), 'Waits, shares, and takes turns with support.');
-    await user.click(screen.getByRole('button', { name: 'Add outcome' }));
-
-    // Assert
-    await waitFor(() => {
-      expect(createLearningOutcomeMutation.mutateAsync).toHaveBeenCalledTimes(1);
-    });
-    expect(createLearningOutcomeMutation.mutateAsync).toHaveBeenCalledWith({
-      code: 'social-turn-taking',
-      name: 'Takes turns',
-      description: 'Waits, shares, and takes turns with support.',
-      category: 'Social',
-      sortOrder: 20
-    });
-  });
-
-  test('edits a learning outcome and submits the update request', async () => {
-    // Arrange
-    const user = userEvent.setup();
-
-    renderPage();
-
-    // Act
-    await user.click(screen.getByRole('button', { name: 'Edit Listens and responds' }));
-    await user.clear(screen.getByLabelText(/name/i));
-    await user.type(screen.getByLabelText(/name/i), 'Updated outcome');
-    await user.click(screen.getByRole('button', { name: 'Save outcome' }));
-
-    // Assert
-    await waitFor(() => {
-      expect(updateLearningOutcomeMutation.mutateAsync).toHaveBeenCalledTimes(1);
-    });
-    expect(updateLearningOutcomeMutation.mutateAsync).toHaveBeenCalledWith({
-      learningOutcomeId: 'outcome-1',
-      form: {
-        code: 'language-listening',
-        name: 'Updated outcome',
-        description: 'Responds to familiar sounds, words, and stories.',
-        category: 'Language',
-        sortOrder: 10
-      }
     });
   });
 
@@ -324,7 +236,8 @@ describe('LearningPage', () => {
       }
     });
   });
-  test('deletes moments and learning outcomes', async () => {
+
+  test('deletes moments', async () => {
     // Arrange
     const user = userEvent.setup();
 
@@ -332,15 +245,32 @@ describe('LearningPage', () => {
 
     // Act
     await user.click(screen.getByRole('button', { name: 'Delete Read a story' }));
-    await user.click(screen.getByRole('button', { name: 'Delete Listens and responds' }));
 
     // Assert
     expect(deleteLearningMomentMutation.mutate).toHaveBeenCalledWith({
       dailyLogId: 'daily-log-1',
       learningMomentId: 'moment-reading'
     });
-    expect(deleteLearningOutcomeMutation.mutate).toHaveBeenCalledWith('outcome-1');
   });
+  test('filters learning moments by selected child', async () => {
+    // Arrange
+    const user = userEvent.setup();
+
+    renderPage();
+
+    // Act
+    await user.click(screen.getByRole('button', { name: /Mia/i }));
+
+    // Assert
+    await waitFor(() => {
+      expect(dailyLogQueries.useLearningMomentFeedQuery).toHaveBeenLastCalledWith({
+        childId: 'child-1',
+        pageSize: 10,
+        searchTerm: null
+      });
+    });
+  });
+
 
   test('updates search term and loads more learning moments', async () => {
     // Arrange
@@ -358,6 +288,7 @@ describe('LearningPage', () => {
 
     // Assert
     expect(dailyLogQueries.useLearningMomentFeedQuery).toHaveBeenLastCalledWith({
+      childId: null,
       pageSize: 10,
       searchTerm: 'story'
     });

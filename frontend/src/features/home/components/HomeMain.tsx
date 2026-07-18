@@ -1,5 +1,4 @@
 import { AppHero } from './AppHero';
-import { HomeLearningGuideCard } from './HomeLearningGuideCard';
 import { HomeQuickActions } from './HomeQuickActions';
 import { LearningOverviewGraph } from './LearningOverviewGraph';
 import { useSessionStore } from '../../../shared/stores/sessionStore';
@@ -21,9 +20,6 @@ export const HomeMain = ({ home, isLoading }: HomeMainProps) => {
       <AppHero childName={childName} currentUserName={currentUserName} />
       <HomeQuickActions />
       <LearningOverviewGraph isLoading={isLoading} outcomeCoverage={outcomeCoverage} recentMoments={recentMoments} />
-      <HomeLearningGuideCard />
     </div>
   );
 };
-
-

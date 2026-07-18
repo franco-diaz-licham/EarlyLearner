@@ -117,13 +117,14 @@ describe('daily log queries', () => {
     dailyLogServiceMock.listLearningMoments.mockResolvedValue(learningMomentPage);
 
     // Act
-    const { result } = renderHookWithClient(() => useLearningMomentFeedQuery({ pageSize: 10, searchTerm: 'story' }));
+    const { result } = renderHookWithClient(() => useLearningMomentFeedQuery({ childId: 'child-1', pageSize: 10, searchTerm: 'story' }));
 
     // Assert
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
     expect(dailyLogServiceMock.listLearningMoments).toHaveBeenCalledWith({
+      childId: 'child-1',
       pageNumber: 1,
       pageSize: 10,
       searchBy: null,

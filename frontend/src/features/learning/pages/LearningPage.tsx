@@ -1,15 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
+import { ChildrenCard } from '../components/ChildrenCard';
 import { useHouseholdQuery } from '../../households/queries/household.queries';
 import type { ChildModel } from '../../households/types/household.types';
+import type { HomeChildModel } from '../../home/types/home.types';
 import { LearningHeader } from '../components/LearningHeader';
 import { LearningLogForm } from '../components/LearningLogForm';
 import { LearningMomentList, type LearningMomentListItem } from '../components/LearningMomentList';
-import { LearningOutcomeForm } from '../components/LearningOutcomeForm';
-import { LearningOutcomeList } from '../components/LearningOutcomeList';
 import { LearningTodaySummaryCard } from '../components/LearningTodaySummaryCard';
-import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
 import { useCreateDailyLogMutation, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery, useUpdateLearningMomentMutation } from '../queries/dailyLog.queries';
-import { useCreateLearningOutcomeMutation, useDeleteLearningOutcomeMutation, useLearningOutcomesQuery, useUpdateLearningOutcomeMutation, useUpdateLearningOutcomeStatusMutation } from '../queries/learningOutcome.queries';
+import { useLearningOutcomesQuery } from '../queries/learningOutcome.queries';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
 
@@ -17,29 +16,33 @@ const formatDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
 const emptyChildren: ChildModel[] = [];
 const emptyLearningOutcomes: LearningOutcomeModel[] = [];
 
+const toHomeChildModel = (child: ChildModel): HomeChildModel => ({
+  avatarStoredFileId: child.avatarStoredFileId,
+  childId: child.id,
+  dateOfBirth: child.dateOfBirth,
+  givenName: child.firstName
+});
+
 export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
   const [editingMoment, setEditingMoment] = useState<LearningMomentListItem | null>(null);
-  const [manageOutcome, setManageOutcome] = useState(false);
-  const [editingOutcome, setEditingOutcome] = useState<LearningOutcomeModel | null>(null);
   const [learningMomentSearchTerm, setLearningMomentSearchTerm] = useState('');
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
   const householdQuery = useHouseholdQuery();
   const learningOutcomesQuery = useLearningOutcomesQuery();
   const dailyLogsQuery = useDailyLogsQuery();
   const learningMomentFeedQuery = useLearningMomentFeedQuery({
+    childId: selectedChildId,
     pageSize: 10,
     searchTerm: learningMomentSearchTerm.trim() || null
   });
   const createDailyLogMutation = useCreateDailyLogMutation();
   const updateLearningMomentMutation = useUpdateLearningMomentMutation();
   const deleteLearningMomentMutation = useDeleteLearningMomentMutation();
-  const createLearningOutcomeMutation = useCreateLearningOutcomeMutation();
-  const updateLearningOutcomeMutation = useUpdateLearningOutcomeMutation();
-  const updateLearningOutcomeStatusMutation = useUpdateLearningOutcomeStatusMutation();
-  const deleteLearningOutcomeMutation = useDeleteLearningOutcomeMutation();
 
   const children = useMemo(() => householdQuery.data?.children ?? emptyChildren, [householdQuery.data?.children]);
+  const childCards = useMemo(() => children.map(toHomeChildModel), [children]);
   const learningOutcomes = learningOutcomesQuery.data ?? emptyLearningOutcomes;
   const activeLearningOutcomes = useMemo(() => learningOutcomes.filter((outcome) => outcome.status === LearningOutcomeStatus.Active), [learningOutcomes]);
   const dailyLogs = dailyLogsQuery.data ?? [];
@@ -81,25 +84,6 @@ export const LearningPage = () => {
     setEditingMoment(null);
   };
 
-  const handleOutcomeSave = async (form: LearningOutcomeFormModel) => {
-    if (editingOutcome) {
-      await updateLearningOutcomeMutation.mutateAsync({
-        learningOutcomeId: editingOutcome.learningOutcomeId,
-        form
-      });
-    } else {
-      await createLearningOutcomeMutation.mutateAsync(form);
-    }
-
-    setEditingOutcome(null);
-    setManageOutcome(false);
-  };
-
-  const handleOutcomeFormHide = () => {
-    setEditingOutcome(null);
-    setManageOutcome(false);
-  };
-
   const handleLoadMoreLearningMoments = useCallback(() => {
     if (learningMomentFeedQuery.hasNextPage && !learningMomentFeedQuery.isFetchingNextPage) {
       void learningMomentFeedQuery.fetchNextPage();
@@ -107,7 +91,6 @@ export const LearningPage = () => {
   }, [learningMomentFeedQuery]);
 
   const logSaving = createDailyLogMutation.isPending || updateLearningMomentMutation.isPending;
-  const outcomeSaving = createLearningOutcomeMutation.isPending || updateLearningOutcomeMutation.isPending;
 
   return (
     <section aria-labelledby="learning-title" className="space-y-5">
@@ -139,28 +122,7 @@ export const LearningPage = () => {
         </div>
         <aside className="flex flex-1 basis-115 flex-col gap-3 xl:max-w-115">
           <LearningTodaySummaryCard activityCount={todayActivityCount} readingCount={todayReadingCount} routineCount={todayRoutineCount} />
-          <LearningOutcomeList
-            deletingId={deleteLearningOutcomeMutation.variables ?? null}
-            outcomes={learningOutcomes}
-            updatingStatusId={updateLearningOutcomeStatusMutation.variables?.learningOutcomeId ?? null}
-            onAddOutcome={() => {
-              setEditingOutcome(null);
-              setManageOutcome(true);
-            }}
-            onDeleteOutcome={(outcome) => {
-              deleteLearningOutcomeMutation.mutate(outcome.learningOutcomeId);
-            }}
-            onEditOutcome={(outcome) => {
-              setEditingOutcome(outcome);
-              setManageOutcome(true);
-            }}
-            onStatusChange={(outcome, status) => {
-              updateLearningOutcomeStatusMutation.mutate({
-                learningOutcomeId: outcome.learningOutcomeId,
-                status
-              });
-            }}
-          />
+          <ChildrenCard children={childCards} selectedChildId={selectedChildId} onChildSelect={setSelectedChildId} />
         </aside>
       </div>
       <LearningLogForm
@@ -173,16 +135,6 @@ export const LearningPage = () => {
         onHide={handleLogFormHide}
         onSave={(form) => {
           void handleSave(form);
-        }}
-      />
-      <LearningOutcomeForm
-        key={editingOutcome?.learningOutcomeId ?? (manageOutcome ? 'add-outcome-open' : 'add-outcome-closed')}
-        outcome={editingOutcome}
-        saving={outcomeSaving}
-        visible={manageOutcome}
-        onHide={handleOutcomeFormHide}
-        onSave={(form) => {
-          void handleOutcomeSave(form);
         }}
       />
     </section>

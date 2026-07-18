@@ -14,20 +14,18 @@ const learningOutcome: LearningOutcomeModel = {
 };
 
 describe('LearningOutcomeList', () => {
-  const onAddOutcome = vi.fn<() => void>();
   const onDeleteOutcome = vi.fn<(outcome: LearningOutcomeModel) => void>();
   const onEditOutcome = vi.fn<(outcome: LearningOutcomeModel) => void>();
   const onStatusChange = vi.fn<(outcome: LearningOutcomeModel, status: LearningOutcomeModel['status']) => void>();
 
   beforeEach(() => {
-    onAddOutcome.mockClear();
     onDeleteOutcome.mockClear();
     onEditOutcome.mockClear();
     onStatusChange.mockClear();
   });
 
   const renderList = (overrides: Partial<Parameters<typeof LearningOutcomeList>[0]> = {}) =>
-    render(<LearningOutcomeList outcomes={[learningOutcome]} onAddOutcome={onAddOutcome} onDeleteOutcome={onDeleteOutcome} onEditOutcome={onEditOutcome} onStatusChange={onStatusChange} {...overrides} />);
+    render(<LearningOutcomeList outcomes={[learningOutcome]} onDeleteOutcome={onDeleteOutcome} onEditOutcome={onEditOutcome} onStatusChange={onStatusChange} {...overrides} />);
 
   test('renders learning outcomes and the configured count', () => {
     // Act
@@ -47,12 +45,10 @@ describe('LearningOutcomeList', () => {
     renderList();
 
     // Act
-    await user.click(screen.getByRole('button', { name: 'Add' }));
     await user.click(screen.getByRole('button', { name: 'Edit Listens and responds' }));
     await user.click(screen.getByRole('button', { name: 'Delete Listens and responds' }));
 
     // Assert
-    expect(onAddOutcome).toHaveBeenCalledTimes(1);
     expect(onEditOutcome).toHaveBeenCalledWith(learningOutcome);
     expect(onDeleteOutcome).toHaveBeenCalledWith(learningOutcome);
   });

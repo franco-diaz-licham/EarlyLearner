@@ -45,9 +45,15 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
             .AsSplitQuery()
             .Where(moment => moment.DailyLog.HouseholdId == householdId);
 
+        moments = ApplyChildFilter(moments, query);
         moments = ApplySearch(moments, query);
 
         return await ApplyPagination(moments, query, cancellationToken);
+    }
+
+    private static IQueryable<LearningMoment> ApplyChildFilter(IQueryable<LearningMoment> moments, ListLearningMomentsQuery query)
+    {
+        return query.ChildId.HasValue ? moments.Where(moment => moment.DailyLog.ChildId == query.ChildId.Value) : moments;
     }
 
     private static IQueryable<LearningMoment> ApplySearch(IQueryable<LearningMoment> moments, ListLearningMomentsQuery query)

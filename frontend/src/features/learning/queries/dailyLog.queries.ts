@@ -15,6 +15,7 @@ interface DeleteLearningMoment {
 }
 
 interface LearningMomentFeedQuery {
+  childId?: string | null;
   pageSize?: number;
   searchBy?: string | null;
   searchTerm?: string | null;
@@ -43,12 +44,13 @@ export const useDailyLogQuery = (dailyLogId: string) =>
     enabled: Boolean(dailyLogId)
   });
 
-export const useLearningMomentFeedQuery = ({ pageSize = 10, searchBy = null, searchTerm = null }: LearningMomentFeedQuery = {}) =>
+export const useLearningMomentFeedQuery = ({ childId = null, pageSize = 10, searchBy = null, searchTerm = null }: LearningMomentFeedQuery = {}) =>
   useInfiniteQuery({
-    queryKey: dailyLogKeys.momentFeed({ pageSize, searchBy, searchTerm }),
+    queryKey: dailyLogKeys.momentFeed({ childId, pageSize, searchBy, searchTerm }),
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       const result = await dailyLogService.listLearningMoments({
+        childId,
         pageNumber: pageParam,
         pageSize,
         searchBy,

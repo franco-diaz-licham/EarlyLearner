@@ -50,7 +50,7 @@ describe('HomeSidebar', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText('Used')).toBeInTheDocument();
     expect(screen.getByText('Not used')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/learning');
+    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/learning/outcomes');
     expect(screen.getByRole('heading', { name: 'Household Pulse' })).toBeInTheDocument();
     expect(screen.getByText('Open invites')).toBeInTheDocument();
     expect(screen.getByText('Invitations waiting for a response.')).toBeInTheDocument();
@@ -75,4 +75,5 @@ describe('HomeSidebar', () => {
     expect(screen.getByText('Add children from the household page to start recording learning.')).toBeInTheDocument();
   });
 });
+
 

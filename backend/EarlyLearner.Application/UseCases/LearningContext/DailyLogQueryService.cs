@@ -35,6 +35,7 @@ public sealed record LearningMomentFeedResponse(
 public sealed record ListLearningMomentsQuery(
     int PageNumber,
     int PageSize,
+    ChildId? ChildId,
     string? SearchTerm);
 
 public interface IDailyLogQueryService

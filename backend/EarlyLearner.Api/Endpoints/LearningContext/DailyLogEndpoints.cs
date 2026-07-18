@@ -42,6 +42,7 @@ public static class DailyLogEndpoints
         var query = new ListLearningMomentsQuery(
             PageNumber: queryParams.PageNumber,
             PageSize: queryParams.PageSize,
+            ChildId: queryParams.ChildId.HasValue ? new ChildId(queryParams.ChildId.Value) : null,
             SearchTerm: queryParams.SearchTerm);
 
         var result = await queryService.ListLearningMomentsAsync(query, cancellationToken);
@@ -161,13 +162,17 @@ public sealed class UpdateLearningMomentRequestValidator : AbstractValidator<Upd
     }
 }
 
-public sealed class ListLearningMomentsQueryParams : BaseQueryParams;
+public sealed class ListLearningMomentsQueryParams : BaseQueryParams
+{
+    public Guid? ChildId { get; init; }
+}
 
 public sealed class ListLearningMomentsQueryParamsValidator : AbstractValidator<ListLearningMomentsQueryParams>
 {
     public ListLearningMomentsQueryParamsValidator()
     {
         Include(new BaseQueryParamsValidator());
+        RuleFor(request => request.ChildId!.Value).NotEmpty().When(request => request.ChildId.HasValue);
     }
 }
 
