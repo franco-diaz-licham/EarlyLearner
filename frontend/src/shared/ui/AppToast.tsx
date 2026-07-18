@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Toast } from 'primereact/toast';
 import type { ToastMessage } from 'primereact/toast';
-import { subscribeToFeedback, type AppFeedbackSeverity } from './feedbackEvents';
+import { subscribeToFeedback, type AppFeedbackSeverity } from '../feedback/feedbackEvents';
 
 const toastMessageOptionsBySeverity: Record<AppFeedbackSeverity, Pick<ToastMessage, 'severity' | 'life'>> = {
   error: { severity: 'error', life: 7000 },
@@ -10,7 +10,7 @@ const toastMessageOptionsBySeverity: Record<AppFeedbackSeverity, Pick<ToastMessa
   warn: { severity: 'warn', life: 4000 }
 };
 
-export const AppErrorToast = () => {
+export const AppToast = () => {
   const toastRef = useRef<Toast>(null);
 
   useEffect(() => {

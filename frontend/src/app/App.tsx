@@ -4,7 +4,7 @@ import { PrimeReactProvider } from 'primereact/api';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthBootstrap } from '../features/auth';
 import { ConfirmProvider } from '../shared/confirm/ConfirmProvider';
-import { AppErrorToast } from '../shared/feedback/AppErrorToast';
+import { AppToast } from '../shared/ui/AppToast';
 import { primeReactConfig } from '../shared/config/primeReactConfig';
 import { queryClient } from '../shared/api/queryClient';
 
@@ -15,7 +15,7 @@ export const App = () => (
         <ConfirmProvider>
           <RouterProvider router={router} />
         </ConfirmProvider>
-        <AppErrorToast />
+        <AppToast />
       </AuthBootstrap>
     </QueryClientProvider>
   </PrimeReactProvider>
