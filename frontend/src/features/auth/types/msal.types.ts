@@ -1,6 +1,6 @@
 import type { Configuration } from '@azure/msal-browser';
 import { appConfig } from '../../../shared/config/appConfig';
-import type { AuthAccount } from './auth.types';
+import type { AuthAccount, AuthSessionResponse } from './auth.types';
 
 /** Allows us to define a redirect so that we can bring the user back from where they logged in from */
 export interface MsalTokenOptions {
@@ -122,7 +122,7 @@ export interface AuthConnector {
    * completed login. The backend may create/update the local user and default
    * household here.
    */
-  ensureSession: () => Promise<void>;
+  ensureSession: () => Promise<AuthSessionResponse | null>;
 
   /**
    * Checks whether an auth error indicates another MSAL interaction is already running.
@@ -147,3 +147,4 @@ export interface AuthConnector {
    */
   isUnsupportedTenantAccessError: (err: unknown) => boolean;
 }
+

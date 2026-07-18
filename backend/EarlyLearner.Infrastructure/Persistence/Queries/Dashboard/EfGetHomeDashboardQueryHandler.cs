@@ -22,7 +22,8 @@ public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentU
             .Select(child => new HomeDashboardChildResponse(
                 ChildId: child.Id.Value,
                 GivenName: child.FirstName,
-                DateOfBirth: child.DateOfBirth))
+                DateOfBirth: child.DateOfBirth,
+                AvatarStoredFileId: child.AvatarStoredFileId.HasValue ? child.AvatarStoredFileId.Value.Value : null))
             .ToListAsync(cancellationToken);
 
         var activeOutcomeCount = await db.LearningOutcomes

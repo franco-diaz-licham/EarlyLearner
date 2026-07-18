@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useSessionStore } from '../../../shared/stores/sessionStore';
 import { authConnector } from '../services/authConnector';
 import type { AuthAccount } from '../types/auth.types';
 
@@ -33,7 +34,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authConnector.initialize();
       await authConnector.handleRedirect();
-      if (authConnector.getCurrentAccount()) await authConnector.ensureSession();
+      if (authConnector.getCurrentAccount()) {
+        const session = await authConnector.ensureSession();
+
+        if (session) {
+          useSessionStore.getState().setCurrentUser({
+            displayName: session.fullName,
+            organisationName: 'Current household',
+            roleLabel: session.status
+          });
+        }
+      }
     } catch (err) {
       if (!authConnector.isUnsupportedTenantAccessError(err)) throw err;
       routeToAccessNotEnabled = true;
@@ -97,3 +108,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   }
 }));
+

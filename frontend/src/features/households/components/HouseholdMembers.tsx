@@ -60,6 +60,7 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
                   {!isOwner ? (
                     <AppIconButton
                       aria-label={`Remove ${carer.firstName} ${carer.lastName}`}
+                      className="flex text-brand-error hover:bg-brand-primary-soft"
                       disabled={isRemovingCarer}
                       icon={<UilTrashAlt aria-hidden="true" className="h-5 w-5" />}
                       onClick={() => {
@@ -98,6 +99,7 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
                     />
                     <AppIconButton
                       aria-label={`Remove ${child.firstName} ${child.lastName}`}
+                      className="flex text-brand-error hover:bg-brand-primary-soft"
                       disabled={isRemovingChild}
                       icon={<UilTrashAlt aria-hidden="true" className="h-5 w-5" />}
                       onClick={() => {
@@ -140,6 +142,7 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
                     {canRevokeInvitation(invitation.status) ? (
                       <AppIconButton
                         aria-label={`Revoke invitation for ${invitationName}`}
+                        className="flex text-brand-error hover:bg-brand-primary-soft"
                         disabled={isRevokingInvitation}
                         icon={<UilTrashAlt aria-hidden="true" className="h-5 w-5" />}
                         onClick={() => {
@@ -157,3 +160,5 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
     </HouseholdSummaryCard>
   );
 };
+
+

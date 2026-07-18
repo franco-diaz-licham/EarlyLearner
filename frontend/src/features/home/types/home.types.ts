@@ -11,6 +11,7 @@ export interface HomeChildResponse {
   childId: string;
   givenName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface HomeMetricResponse {
@@ -63,6 +64,7 @@ export interface HomeChildModel {
   childId: string;
   givenName: string;
   dateOfBirth: string;
+  avatarStoredFileId: string | null;
 }
 
 export interface HomeMetricModel {

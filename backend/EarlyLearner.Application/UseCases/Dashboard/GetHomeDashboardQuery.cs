@@ -16,7 +16,8 @@ public sealed record GetHomeDashboardResponse(
 public sealed record HomeDashboardChildResponse(
     Guid ChildId,
     string GivenName,
-    DateOnly DateOfBirth);
+    DateOnly DateOfBirth,
+    Guid? AvatarStoredFileId);
 
 public sealed record HomeDashboardMetricResponse(
     string Label,

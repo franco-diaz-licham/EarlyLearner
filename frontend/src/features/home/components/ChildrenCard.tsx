@@ -1,9 +1,12 @@
-import { UilBookOpen, UilUsersAlt } from '@iconscout/react-unicons';
+import { UilUsersAlt } from '@iconscout/react-unicons';
+import { AppAvatar } from '../../../shared/ui/AppAvatar';
 import type { HomeChildModel } from '../types/home.types';
 
 interface ChildrenCardProps {
   children: HomeChildModel[];
 }
+
+const getChildInitials = (givenName: string): string => givenName.slice(0, 2);
 
 const formatAge = (dateOfBirth: string) => {
   const birthDate = new Date(dateOfBirth);
@@ -33,9 +36,7 @@ export const ChildrenCard = ({ children }: ChildrenCardProps) => {
         ) : (
           children.map((child) => (
             <div className="flex items-center gap-3 rounded-md bg-brand-surface-soft p-3" key={child.childId}>
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-brand-primary">
-                <UilBookOpen aria-hidden="true" size={18} />
-              </div>
+              <AppAvatar alt={child.givenName} className="shrink-0 [&>div:first-child]:h-9 [&>div:first-child]:w-9" initials={getChildInitials(child.givenName)} readOnly size="sm" storedFileId={child.avatarStoredFileId} />
               <div>
                 <p className="text-sm font-bold text-brand-heading">{child.givenName}</p>
                 <p className="text-xs text-brand-muted">{formatAge(child.dateOfBirth)}</p>

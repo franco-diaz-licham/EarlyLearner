@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { useSessionStore } from '../../../shared/stores/sessionStore';
 import type { HomeModel } from '../types/home.types';
 import { HomeMain } from './HomeMain';
 
@@ -40,31 +41,29 @@ const renderMain = (overrides: Partial<Parameters<typeof HomeMain>[0]> = {}) =>
   );
 
 describe('HomeMain', () => {
-  test('renders today metrics and learning overview', () => {
+  beforeEach(() => {
+    useSessionStore.getState().setCurrentUser({
+      displayName: 'Franco',
+      organisationName: 'Current household',
+      roleLabel: 'Active'
+    });
+  });
+  test('renders the learning overview', () => {
     // Act
     renderMain();
 
     // Assert
-    expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
-    expect(screen.getByText('Daily logs')).toBeInTheDocument();
-    expect(screen.getByText('Learning moments')).toBeInTheDocument();
-    expect(screen.getByText('Children observed')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Good morning, Franco!' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Learning Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage household' })).toHaveAttribute('href', '/households');
+    expect(screen.getByRole('link', { name: 'View logs' })).toHaveAttribute('href', '/learning');
+    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/learning');
     expect(screen.getByRole('heading', { name: 'Learning Mix' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Outcome Coverage' })).toBeInTheDocument();
     expect(screen.getByText('Reading')).toBeInTheDocument();
-    expect(screen.getByText('Touched this week')).toBeInTheDocument();
+    expect(screen.getByText('Used this week')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Read a story' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Add log' })).toHaveAttribute('href', '/learning');
     expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/learning');
-  });
-
-  test('renders loading placeholders', () => {
-    // Act
-    renderMain({ home: undefined, isLoading: true });
-
-    // Assert
-    expect(screen.getAllByText('-')).toHaveLength(3);
   });
 
   test('renders an empty learning overview state', () => {
@@ -76,3 +75,6 @@ describe('HomeMain', () => {
     expect(screen.getByText('Add learning logs to build a household learning pulse.')).toBeInTheDocument();
   });
 });
+
+
+

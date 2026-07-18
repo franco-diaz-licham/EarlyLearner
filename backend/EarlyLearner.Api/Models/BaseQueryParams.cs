@@ -23,7 +23,6 @@ public class BaseQueryParams
         set => _pageSize = value;
     }
 
-    public virtual string? SearchBy { get; set; }
     public string? SearchTerm { get; set; }
 }
 

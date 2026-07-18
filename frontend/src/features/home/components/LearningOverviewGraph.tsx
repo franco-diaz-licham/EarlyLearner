@@ -85,11 +85,11 @@ export const LearningOverviewGraph = ({ isLoading, outcomeCoverage, recentMoment
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-md bg-brand-mint-50 p-3">
                 <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (outcomeCoverage?.touchedThisWeekCount ?? 0)}</p>
-                <p className="mt-1 text-xs font-semibold text-brand-muted">Touched this week</p>
+                <p className="mt-1 text-xs font-semibold text-brand-muted">Used this week</p>
               </div>
               <div className="rounded-md bg-brand-yellow-50 p-3">
                 <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (outcomeCoverage?.untouchedActiveOutcomeCount ?? 0)}</p>
-                <p className="mt-1 text-xs font-semibold text-brand-muted">Still open</p>
+                <p className="mt-1 text-xs font-semibold text-brand-muted">Not used</p>
               </div>
             </div>
             <div className="mt-4 overflow-hidden rounded-full bg-brand-surface-muted">
@@ -105,3 +105,4 @@ export const LearningOverviewGraph = ({ isLoading, outcomeCoverage, recentMoment
     </div>
   );
 };
+

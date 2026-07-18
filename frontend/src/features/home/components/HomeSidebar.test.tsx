@@ -8,7 +8,8 @@ const home: HomeModel = {
     {
       childId: 'child-1',
       givenName: 'Mia',
-      dateOfBirth: '2021-04-15'
+      dateOfBirth: '2021-04-15',
+      avatarStoredFileId: null
     }
   ],
   metrics: [
@@ -47,8 +48,8 @@ describe('HomeSidebar', () => {
     // Assert
     expect(screen.getByRole('heading', { name: 'Learning Coverage' })).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
-    expect(screen.getByText('Touched')).toBeInTheDocument();
-    expect(screen.getByText('Untouched')).toBeInTheDocument();
+    expect(screen.getByText('Used')).toBeInTheDocument();
+    expect(screen.getByText('Not used')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/learning');
     expect(screen.getByRole('heading', { name: 'Household Pulse' })).toBeInTheDocument();
     expect(screen.getByText('Open invites')).toBeInTheDocument();
@@ -74,3 +75,4 @@ describe('HomeSidebar', () => {
     expect(screen.getByText('Add children from the household page to start recording learning.')).toBeInTheDocument();
   });
 });
+

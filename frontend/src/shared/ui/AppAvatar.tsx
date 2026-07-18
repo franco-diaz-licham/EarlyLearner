@@ -97,7 +97,7 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
           {previewUrl ? (
             <Button
               aria-label="Remove selected image"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-brand-surface text-brand-heading transition hover:bg-brand-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border-0 bg-transparent p-0 text-brand-error transition hover:bg-brand-primary-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-60"
               disabled={disabled}
               icon={<UilTrashAlt aria-hidden="true" className="h-5 w-5" />}
               title="Remove selected image"
@@ -110,3 +110,4 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
     </div>
   );
 };
+

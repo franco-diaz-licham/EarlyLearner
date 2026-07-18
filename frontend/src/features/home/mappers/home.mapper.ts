@@ -18,7 +18,8 @@ import type {
 export const mapHomeChildResponseToModel = (response: HomeChildResponse): HomeChildModel => ({
   childId: response.childId,
   givenName: response.givenName,
-  dateOfBirth: response.dateOfBirth
+  dateOfBirth: response.dateOfBirth,
+  avatarStoredFileId: response.avatarStoredFileId
 });
 
 export const mapHomeMetricResponseToModel = (response: HomeMetricResponse): HomeMetricModel => ({

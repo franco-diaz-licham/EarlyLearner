@@ -27,11 +27,11 @@ export const LearningCoverageCard = ({ coverage, isLoading }: LearningCoverageCa
         </div>
         <div className="rounded-md bg-brand-mint-50 p-3 text-center">
           <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (coverage?.touchedThisWeekCount ?? 0)}</p>
-          <p className="mt-1 text-xs font-semibold text-brand-muted">Touched</p>
+          <p className="mt-1 text-xs font-semibold text-brand-muted">Used</p>
         </div>
         <div className="rounded-md bg-brand-yellow-50 p-3 text-center">
           <p className="text-2xl font-bold text-brand-heading">{isLoading ? '-' : (coverage?.untouchedActiveOutcomeCount ?? 0)}</p>
-          <p className="mt-1 text-xs font-semibold text-brand-muted">Untouched</p>
+          <p className="mt-1 text-xs font-semibold text-brand-muted">Not used</p>
         </div>
       </div>
 
@@ -41,3 +41,4 @@ export const LearningCoverageCard = ({ coverage, isLoading }: LearningCoverageCa
     </div>
   );
 };
+

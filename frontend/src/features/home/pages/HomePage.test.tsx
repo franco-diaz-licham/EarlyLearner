@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { useSessionStore } from '../../../shared/stores/sessionStore';
 import * as homeQueries from '../queries/home.queries';
 import type { HomeModel } from '../types/home.types';
 import { HomePage } from './HomePage';
@@ -13,7 +14,8 @@ const home: HomeModel = {
     {
       childId: 'child-1',
       givenName: 'Mia',
-      dateOfBirth: '2021-04-15'
+      dateOfBirth: '2021-04-15',
+      avatarStoredFileId: null
     }
   ],
   metrics: [
@@ -65,6 +67,11 @@ describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(homeQueries.useHomeQuery).mockReturnValue(homeQuery as ReturnType<typeof homeQueries.useHomeQuery>);
+    useSessionStore.getState().setCurrentUser({
+      displayName: 'Franco',
+      organisationName: 'Current household',
+      roleLabel: 'Active'
+    });
   });
 
   test('renders the learning-aware home dashboard', () => {
@@ -73,7 +80,6 @@ describe('HomePage', () => {
 
     // Assert
     expect(screen.getByRole('heading', { name: 'Good morning, Franco!' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Learning Overview' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Learning Mix' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Outcome Coverage' })).toBeInTheDocument();
@@ -82,3 +88,4 @@ describe('HomePage', () => {
     expect(screen.getByText('Open invites')).toBeInTheDocument();
   });
 });
+

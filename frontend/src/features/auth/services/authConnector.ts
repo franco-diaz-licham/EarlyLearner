@@ -93,13 +93,13 @@ export const authConnector: AuthConnector = {
     }
   },
 
-  async ensureSession(): Promise<void> {
+  async ensureSession() {
     const token = await authConnector.getAccessToken({
       allowRedirect: false
     });
 
-    if (!token) return;
-    await authService.ensureSession(token);
+    if (!token) return null;
+    return authService.ensureSession(token);
   },
 
   isInteractionInProgressError(err: unknown): boolean {
@@ -111,3 +111,5 @@ export const authConnector: AuthConnector = {
     return text.includes('aadsts650052') || (text.includes('invalid_client') && text.includes('lacks a service principal'));
   }
 };
+
+

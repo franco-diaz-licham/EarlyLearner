@@ -14,7 +14,8 @@ const homeResponse: HomeResponse = {
     {
       childId: 'child-1',
       givenName: 'Mia',
-      dateOfBirth: '2021-04-15'
+      dateOfBirth: '2021-04-15',
+      avatarStoredFileId: 'stored-file-1'
     }
   ],
   metrics: [
