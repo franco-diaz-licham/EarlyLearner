@@ -63,7 +63,7 @@ export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moment
       {moments.length === 0 ? (
         <p className="text-sm text-brand-muted">No learning moments recorded yet.</p>
       ) : (
-        <div className="max-h-[calc(100vh-23rem)] space-y-3 overflow-y-auto pr-1" onScroll={handleScroll}>
+        <div className="space-y-3 max-h-[calc(100vh-28rem)] overflow-y-auto pr-1" onScroll={handleScroll}>
           {moments.map((moment) => (
             <article className="rounded-md border border-brand-border p-4" key={moment.learningMomentId}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

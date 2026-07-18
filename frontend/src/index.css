@@ -93,10 +93,12 @@
   box-sizing: border-box;
 }
 
+html,
 body,
 #root {
   margin: 0;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 .app-account-menu-panel::before,

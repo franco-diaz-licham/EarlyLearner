@@ -41,7 +41,7 @@ export const LearningOutcomeList = ({ deletingId, outcomes, updatingStatusId, on
         <AppButton icon={<UilPlus aria-hidden="true" className="h-4 w-4" />} label="Add" type="button" onClick={onAddOutcome} />
       </div>
 
-      <div className="mt-5 max-h-[calc(100vh-36rem)] space-y-3 overflow-y-auto pr-1">
+      <div className="mt-5 max-h-[calc(100vh-38rem)] space-y-3 overflow-y-auto pr-1">
         {outcomes.length === 0 ? (
           <p className="text-sm text-brand-muted">No learning outcomes configured yet.</p>
         ) : (

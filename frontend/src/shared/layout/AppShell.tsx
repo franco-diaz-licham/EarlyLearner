@@ -11,7 +11,7 @@ export const AppShell = () => {
 
   return (
     <div className="min-h-screen bg-brand-background ">
-      <main className="mx-auto w-full max-w-355 px-4 py-4 sm:px-6 lg:px-8 space-y-4">
+      <main className="mx-auto w-full max-w-355 px-4 pt-4 sm:px-6 lg:px-8 space-y-4">
         <AppTopBar onLogout={handleLogout} />
         <Outlet />
       </main>
