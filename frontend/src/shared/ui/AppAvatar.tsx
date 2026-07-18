@@ -72,7 +72,7 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
   return (
     <div className={mergeClassNames('inline-flex items-center gap-4', className)}>
       <div className={mergeClassNames('flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-border bg-brand-surface-muted text-brand-heading', sizeClasses[size])}>
-        {hasImage ? <img alt={alt} className="h-full w-full object-cover" src={imageSrc ?? undefined} /> : null}
+        {imageSrc ? <img alt={alt} className="h-full w-full object-cover" src={imageSrc} /> : null}
         {!imageSrc && storedFileId ? <StoredFileAvatarImage alt={alt} storedFileId={storedFileId} /> : null}
         {!hasImage && visibleInitials ? <span className="text-lg font-bold">{visibleInitials}</span> : null}
         {!hasImage && !visibleInitials ? <UilUsersAlt aria-hidden="true" className={mergeClassNames('text-brand-muted', iconSizeClasses[size])} /> : null}

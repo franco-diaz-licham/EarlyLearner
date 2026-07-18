@@ -190,6 +190,7 @@ describe('LearningPage', () => {
     expect(screen.getByRole('heading', { name: 'Capture the small moments' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Recent Learning' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Read a story' })).toBeInTheDocument();
+    expect(screen.getByText('Mia Rivera')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Today at a Glance' })).toBeInTheDocument();
     expect(screen.getByText('Activities')).toBeInTheDocument();
     expect(screen.getAllByText('Reading').length).toBeGreaterThan(0);

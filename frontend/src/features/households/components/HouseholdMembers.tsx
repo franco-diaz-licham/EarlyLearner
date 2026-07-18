@@ -28,7 +28,7 @@ const canRevokeInvitation = (status: string): boolean => {
   return normalizedStatus === 'pending' || normalizedStatus === 'invited';
 };
 
-const getChildInitials = (firstName: string, lastName: string): string => `${firstName[0] ?? ''}${lastName[0] ?? ''}`;
+const getChildInitials = (firstName: string, lastName: string): string => `${firstName[0]} ${lastName[0]}`;
 
 export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, isRemovingChild, isRevokingInvitation, onEditChild, onRemoveCarer, onRemoveChild, onRevokeInvitation }: HouseholdMembersProps) => {
   const hasMembers = household.carers.length > 0 || household.children.length > 0 || household.invitations.length > 0;

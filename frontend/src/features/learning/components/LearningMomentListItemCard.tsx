@@ -1,6 +1,5 @@
-import { UilBookOpen, UilCalendarAlt, UilTrashAlt } from '@iconscout/react-unicons';
+import { UilBookOpen, UilCalendarAlt, UilTrashAlt, UilUsersAlt } from '@iconscout/react-unicons';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
-import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 import type { LearningMomentKind } from '../types/dailyLog.types';
 import type { LearningMomentListItem } from './LearningMomentList';
 
@@ -36,7 +35,14 @@ export const LearningMomentListItemCard = ({ isDeleting, moment, onDeleteMoment 
             <h2 className="font-bold text-brand-heading">{moment.title}</h2>
             <p className="mt-2 text-sm leading-6 text-brand-muted">{moment.notes}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <AppStatusBadge>{learningKindLabels[moment.kind]}</AppStatusBadge>
+              <span className="inline-flex items-center gap-1 rounded-md bg-brand-surface-muted px-2 py-1 text-xs font-semibold text-brand-text">
+                {moment.kind === 'reading' ? <UilBookOpen aria-hidden="true" className="h-3.5 w-3.5" /> : <UilCalendarAlt aria-hidden="true" className="h-3.5 w-3.5" />}
+                {learningKindLabels[moment.kind]}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-brand-sky-50 px-2 py-1 text-xs font-semibold text-brand-muted">
+                <UilUsersAlt aria-hidden="true" className="h-3.5 w-3.5" />
+                {moment.childName}
+              </span>
               <span className="text-xs font-semibold text-brand-muted">{formatDisplayDate(moment.logDate)}</span>
             </div>
           </div>

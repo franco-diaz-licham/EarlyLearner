@@ -7,6 +7,7 @@ const learningMoment: LearningMomentListItem = {
   learningMomentId: 'moment-1',
   dailyLogId: 'daily-log-1',
   childId: 'child-1',
+  childName: 'Mia Rivera',
   logDate: '2026-07-16',
   kind: 'reading',
   title: 'Read a story',
@@ -37,6 +38,7 @@ describe('LearningMomentList', () => {
     expect(screen.getByRole('heading', { name: 'Read a story' })).toBeInTheDocument();
     expect(screen.getByText('Read a picture book and named familiar animals.')).toBeInTheDocument();
     expect(screen.getByText('Reading')).toBeInTheDocument();
+    expect(screen.getByText('Mia Rivera')).toBeInTheDocument();
   });
 
   test('calls handlers for search and delete', async () => {

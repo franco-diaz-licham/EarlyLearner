@@ -7,6 +7,7 @@ export interface LearningMomentListItem {
   learningMomentId: string;
   dailyLogId: string;
   childId: string;
+  childName: string;
   logDate: string;
   kind: LearningMomentKind;
   title: string;

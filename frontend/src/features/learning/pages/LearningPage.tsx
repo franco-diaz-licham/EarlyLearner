@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useHouseholdQuery } from '../../households/queries/household.queries';
+import type { ChildModel } from '../../households/types/household.types';
 import { LearningHeader } from '../components/LearningHeader';
 import { LearningLogForm } from '../components/LearningLogForm';
 import { LearningMomentList } from '../components/LearningMomentList';
@@ -13,7 +14,8 @@ import type { LearningLogFormModel } from '../types/dailyLog.types';
 import { LearningOutcomeStatus, type LearningOutcomeModel } from '../types/learningOutcome.types';
 
 const formatDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
-const EMPTY_LEARNING_OUTCOMES: LearningOutcomeModel[] = [];
+const emptyChildren: ChildModel[] = [];
+const emptyLearningOutcomes: LearningOutcomeModel[] = [];
 
 export const LearningPage = () => {
   const [addLog, setAddLog] = useState(false);
@@ -35,13 +37,23 @@ export const LearningPage = () => {
   const updateLearningOutcomeStatusMutation = useUpdateLearningOutcomeStatusMutation();
   const deleteLearningOutcomeMutation = useDeleteLearningOutcomeMutation();
 
-  const children = householdQuery.data?.children ?? [];
-  const learningOutcomes = learningOutcomesQuery.data ?? EMPTY_LEARNING_OUTCOMES;
+  const children = useMemo(() => householdQuery.data?.children ?? emptyChildren, [householdQuery.data?.children]);
+  const learningOutcomes = learningOutcomesQuery.data ?? emptyLearningOutcomes;
   const activeLearningOutcomes = useMemo(() => learningOutcomes.filter((outcome) => outcome.status === LearningOutcomeStatus.Active), [learningOutcomes]);
   const dailyLogs = dailyLogsQuery.data ?? [];
   const today = formatDateInputValue(new Date());
 
-  const latestMoments = learningMomentFeedQuery.data?.pages.flatMap((page) => page.items) ?? [];
+  const childNamesById = useMemo(() => new Map(children.map((child) => [child.id, `${child.firstName} ${child.lastName}`])), [children]);
+  const latestMoments = useMemo(
+    () =>
+      learningMomentFeedQuery.data?.pages.flatMap((page) =>
+        page.items.map((moment) => ({
+          ...moment,
+          childName: childNamesById.get(moment.childId) ?? 'Unknown child'
+        }))
+      ) ?? [],
+    [childNamesById, learningMomentFeedQuery.data?.pages]
+  );
 
   const todayLogs = dailyLogs.filter((log) => log.logDate === today);
   const todayActivityCount = todayLogs.flatMap((log) => log.learningMoments).filter((moment) => moment.kind === 'activity' || moment.kind === 'observation').length;
