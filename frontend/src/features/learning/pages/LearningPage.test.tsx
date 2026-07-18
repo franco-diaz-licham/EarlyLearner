@@ -16,6 +16,7 @@ vi.mock('../queries/dailyLog.queries', () => ({
   useCreateDailyLogMutation: vi.fn(),
   useDailyLogsQuery: vi.fn(),
   useDeleteLearningMomentMutation: vi.fn(),
+  useUpdateLearningMomentMutation: vi.fn(),
   useLearningMomentFeedQuery: vi.fn()
 }));
 
@@ -133,6 +134,11 @@ const createDailyLogMutation = {
   mutateAsync: vi.fn()
 };
 
+const updateLearningMomentMutation = {
+  isPending: false,
+  mutateAsync: vi.fn()
+};
+
 const deleteLearningMomentMutation = {
   isPending: false,
   mutate: vi.fn()
@@ -171,6 +177,7 @@ describe('LearningPage', () => {
     vi.mocked(dailyLogQueries.useDailyLogsQuery).mockReturnValue(dailyLogsQuery as ReturnType<typeof dailyLogQueries.useDailyLogsQuery>);
     vi.mocked(dailyLogQueries.useLearningMomentFeedQuery).mockReturnValue(learningMomentFeedQuery as unknown as ReturnType<typeof dailyLogQueries.useLearningMomentFeedQuery>);
     vi.mocked(dailyLogQueries.useCreateDailyLogMutation).mockReturnValue(createDailyLogMutation as unknown as ReturnType<typeof dailyLogQueries.useCreateDailyLogMutation>);
+    vi.mocked(dailyLogQueries.useUpdateLearningMomentMutation).mockReturnValue(updateLearningMomentMutation as unknown as ReturnType<typeof dailyLogQueries.useUpdateLearningMomentMutation>);
     vi.mocked(dailyLogQueries.useDeleteLearningMomentMutation).mockReturnValue(deleteLearningMomentMutation as unknown as ReturnType<typeof dailyLogQueries.useDeleteLearningMomentMutation>);
     vi.mocked(learningOutcomeQueries.useCreateLearningOutcomeMutation).mockReturnValue(createLearningOutcomeMutation as unknown as ReturnType<typeof learningOutcomeQueries.useCreateLearningOutcomeMutation>);
     vi.mocked(learningOutcomeQueries.useUpdateLearningOutcomeMutation).mockReturnValue(updateLearningOutcomeMutation as unknown as ReturnType<typeof learningOutcomeQueries.useUpdateLearningOutcomeMutation>);
@@ -178,6 +185,7 @@ describe('LearningPage', () => {
     vi.mocked(learningOutcomeQueries.useDeleteLearningOutcomeMutation).mockReturnValue(deleteLearningOutcomeMutation as unknown as ReturnType<typeof learningOutcomeQueries.useDeleteLearningOutcomeMutation>);
 
     createDailyLogMutation.mutateAsync.mockResolvedValue(dailyLog);
+    updateLearningMomentMutation.mutateAsync.mockResolvedValue(dailyLog);
     createLearningOutcomeMutation.mutateAsync.mockResolvedValue(learningOutcome);
     updateLearningOutcomeMutation.mutateAsync.mockResolvedValue(learningOutcome);
   });
@@ -211,7 +219,7 @@ describe('LearningPage', () => {
     await user.type(screen.getByLabelText(/title/i), 'Paint mixing');
     await user.type(screen.getByLabelText(/notes/i), 'Mixed colours and described the changes.');
     await user.click(within(dialog).getByLabelText(/listens and responds/i));
-    await user.click(within(dialog).getByRole('button', { name: 'Save activity' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Add log' }));
 
     // Assert
     await waitFor(() => {
@@ -274,7 +282,8 @@ describe('LearningPage', () => {
     });
     expect(updateLearningOutcomeMutation.mutateAsync).toHaveBeenCalledWith({
       learningOutcomeId: 'outcome-1',
-      request: {
+      form: {
+        code: 'language-listening',
         name: 'Updated outcome',
         description: 'Responds to familiar sounds, words, and stories.',
         category: 'Language',
@@ -283,6 +292,38 @@ describe('LearningPage', () => {
     });
   });
 
+  test('opens the edit learning log form and submits an update', async () => {
+    // Arrange
+    const user = userEvent.setup();
+
+    renderPage();
+
+    // Act
+    await user.click(screen.getByRole('button', { name: 'Edit Read a story' }));
+    const dialog = screen.getByRole('dialog', { name: 'Edit learning log' });
+    await user.clear(within(dialog).getByLabelText(/title/i));
+    await user.type(within(dialog).getByLabelText(/title/i), 'Updated story');
+    await user.clear(within(dialog).getByLabelText(/notes/i));
+    await user.type(within(dialog).getByLabelText(/notes/i), 'Updated notes.');
+    await user.click(within(dialog).getByRole('button', { name: 'Save log' }));
+
+    // Assert
+    await waitFor(() => {
+      expect(updateLearningMomentMutation.mutateAsync).toHaveBeenCalledTimes(1);
+    });
+    expect(updateLearningMomentMutation.mutateAsync).toHaveBeenCalledWith({
+      dailyLogId: 'daily-log-1',
+      learningMomentId: 'moment-reading',
+      form: {
+        childId: 'child-1',
+        logDate: dailyLog.logDate,
+        kind: 'reading',
+        title: 'Updated story',
+        notes: 'Updated notes.',
+        learningOutcomeIds: ['outcome-1']
+      }
+    });
+  });
   test('deletes moments and learning outcomes', async () => {
     // Arrange
     const user = userEvent.setup();

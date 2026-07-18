@@ -44,7 +44,34 @@ describe('LearningLogForm', () => {
     expect(screen.getByLabelText(/title/i)).toHaveValue('');
     expect(screen.getByLabelText(/notes/i)).toHaveValue('');
     expect(screen.getByLabelText(/listens and responds/i)).not.toBeChecked();
-    expect(screen.getByRole('button', { name: 'Save activity' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add log' })).toBeDisabled();
+  });
+
+  test('renders the edit learning log form', () => {
+    // Arrange
+    const initialDraft: LearningLogFormModel = {
+      childId: 'child-1',
+      logDate: '2026-07-16',
+      kind: 'reading',
+      title: 'Read a story',
+      notes: 'Read a picture book and named familiar animals.',
+      learningOutcomeIds: ['outcome-1']
+    };
+
+    // Act
+    render(<LearningLogForm children={[child]} moment={{ ...initialDraft, dailyLogId: 'daily-log-1', householdId: 'household-1', learningMomentId: 'moment-1' }} learningOutcomes={[learningOutcome]} saving={false} visible onHide={onHide} onSave={onSave} />);
+
+    // Assert
+    expect(screen.getByRole('dialog', { name: 'Edit learning log' })).toBeInTheDocument();
+    expect(screen.getByLabelText(/child/i)).toBeDisabled();
+    expect(screen.getByLabelText(/child/i)).toHaveValue('Mia Rivera');
+    expect(screen.getByLabelText(/date/i)).toBeDisabled();
+    expect(screen.getByLabelText(/date/i)).toHaveValue('2026-07-16');
+    expect(screen.getByLabelText(/type/i)).toHaveValue('Reading');
+    expect(screen.getByLabelText(/title/i)).toHaveValue('Read a story');
+    expect(screen.getByLabelText(/notes/i)).toHaveValue('Read a picture book and named familiar animals.');
+    expect(screen.getByLabelText(/listens and responds/i)).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Save log' })).toBeEnabled();
   });
 
   test('shows validation messages when invalid fields are touched', async () => {
@@ -63,7 +90,7 @@ describe('LearningLogForm', () => {
     // Assert
     expect(screen.getByText('Title is required.')).toBeInTheDocument();
     expect(screen.getByText('Notes are required.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save activity' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add log' })).toBeDisabled();
     expect(onSave).not.toHaveBeenCalled();
   });
 
@@ -77,7 +104,7 @@ describe('LearningLogForm', () => {
     await user.type(screen.getByLabelText(/title/i), 'Paint mixing');
     await user.type(screen.getByLabelText(/notes/i), 'Mixed colours and described the changes.');
     await user.click(screen.getByLabelText(/listens and responds/i));
-    await user.click(screen.getByRole('button', { name: 'Save activity' }));
+    await user.click(screen.getByRole('button', { name: 'Add log' }));
 
     // Assert
     expect(onSave).toHaveBeenCalledTimes(1);

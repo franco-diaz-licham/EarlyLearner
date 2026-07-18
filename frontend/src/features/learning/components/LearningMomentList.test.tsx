@@ -6,6 +6,7 @@ import { LearningMomentList } from './LearningMomentList';
 const learningMoment: LearningMomentListItem = {
   learningMomentId: 'moment-1',
   dailyLogId: 'daily-log-1',
+  householdId: 'household-1',
   childId: 'child-1',
   childName: 'Mia Rivera',
   logDate: '2026-07-16',
@@ -17,17 +18,19 @@ const learningMoment: LearningMomentListItem = {
 
 describe('LearningMomentList', () => {
   const onDeleteMoment = vi.fn<(dailyLogId: string, learningMomentId: string) => void>();
+  const onEditMoment = vi.fn<(moment: LearningMomentListItem) => void>();
   const onLoadMore = vi.fn<() => void>();
   const onSearchTermChange = vi.fn<(searchTerm: string) => void>();
 
   beforeEach(() => {
     onDeleteMoment.mockClear();
+    onEditMoment.mockClear();
     onLoadMore.mockClear();
     onSearchTermChange.mockClear();
   });
 
   const renderList = (overrides: Partial<Parameters<typeof LearningMomentList>[0]> = {}) =>
-    render(<LearningMomentList hasMore={false} isDeleting={false} isFetchingMore={false} moments={[learningMoment]} searchTerm="" onDeleteMoment={onDeleteMoment} onLoadMore={onLoadMore} onSearchTermChange={onSearchTermChange} {...overrides} />);
+    render(<LearningMomentList hasMore={false} isDeleting={false} isFetchingMore={false} moments={[learningMoment]} searchTerm="" onDeleteMoment={onDeleteMoment} onEditMoment={onEditMoment} onLoadMore={onLoadMore} onSearchTermChange={onSearchTermChange} {...overrides} />);
 
   test('renders learning moments', () => {
     // Act
@@ -41,17 +44,20 @@ describe('LearningMomentList', () => {
     expect(screen.getByText('Mia Rivera')).toBeInTheDocument();
   });
 
-  test('calls handlers for search and delete', async () => {
+  test('calls handlers for search, edit, and delete', async () => {
     // Arrange
     const user = userEvent.setup();
     renderList();
 
     // Act
     fireEvent.change(screen.getByLabelText('Search recent learning'), { target: { value: 'story' } });
+    await user.click(screen.getByRole('button', { name: 'Edit Read a story' }));
     await user.click(screen.getByRole('button', { name: 'Delete Read a story' }));
 
     // Assert
     expect(onSearchTermChange).toHaveBeenLastCalledWith('story');
+    expect(onEditMoment).toHaveBeenCalledTimes(1);
+    expect(onEditMoment).toHaveBeenCalledWith(learningMoment);
     expect(onDeleteMoment).toHaveBeenCalledTimes(1);
     expect(onDeleteMoment).toHaveBeenCalledWith('daily-log-1', 'moment-1');
   });

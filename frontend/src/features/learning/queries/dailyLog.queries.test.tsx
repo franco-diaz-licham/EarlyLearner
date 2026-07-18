@@ -3,8 +3,8 @@ import type { Mock } from 'vitest';
 import type { PaginatedResult } from '../../../shared/api/api.types';
 import { renderHookWithClient } from '../../../testUtils/testQueryClientHelpers';
 import { dailyLogService } from '../services/dailyLog.services';
-import type { CreateDailyLogRequest, DailyLogModel, LearningMomentFeedModel } from '../types/dailyLog.types';
-import { dailyLogKeys, useCreateDailyLogMutation, useDailyLogQuery, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery } from './dailyLog.queries';
+import type { CreateDailyLogRequest, DailyLogModel, LearningLogFormModel, LearningMomentFeedModel } from '../types/dailyLog.types';
+import { dailyLogKeys, useCreateDailyLogMutation, useDailyLogQuery, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery, useUpdateLearningMomentMutation } from './dailyLog.queries';
 
 vi.mock('../services/dailyLog.services', () => ({
   dailyLogService: {
@@ -12,6 +12,7 @@ vi.mock('../services/dailyLog.services', () => ({
     get: vi.fn(),
     listLearningMoments: vi.fn(),
     create: vi.fn(),
+    updateLearningMoment: vi.fn(),
     deleteLearningMoment: vi.fn()
   }
 }));
@@ -21,6 +22,7 @@ interface DailyLogServiceMock {
   get: Mock;
   listLearningMoments: Mock;
   create: Mock;
+  updateLearningMoment: Mock;
   deleteLearningMoment: Mock;
 }
 
@@ -153,6 +155,39 @@ describe('daily log queries', () => {
 
     // Assert
     expect(dailyLogServiceMock.create).toHaveBeenCalledWith(request);
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: dailyLogKeys.lists() });
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: dailyLogKeys.momentFeeds() });
+    expect(queryClient.getQueryData(dailyLogKeys.detail('daily-log-1'))).toEqual(dailyLog);
+  });
+
+  test('updates a learning moment and refreshes daily log query data', async () => {
+    // Arrange
+    const form: LearningLogFormModel = {
+      childId: 'child-1',
+      logDate: '2026-07-16',
+      kind: 'reading',
+      title: 'Updated story',
+      notes: 'Updated notes.',
+      learningOutcomeIds: ['outcome-1']
+    };
+
+    dailyLogServiceMock.updateLearningMoment.mockResolvedValue(dailyLog);
+
+    const { queryClient, result } = renderHookWithClient(() => useUpdateLearningMomentMutation());
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
+
+    // Act
+    await act(async () => {
+      await result.current.mutateAsync({ dailyLogId: 'daily-log-1', learningMomentId: 'moment-1', form });
+    });
+
+    // Assert
+    expect(dailyLogServiceMock.updateLearningMoment).toHaveBeenCalledWith('daily-log-1', 'moment-1', {
+      kind: form.kind,
+      title: form.title,
+      notes: form.notes,
+      learningOutcomeIds: form.learningOutcomeIds
+    });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: dailyLogKeys.lists() });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: dailyLogKeys.momentFeeds() });
     expect(queryClient.getQueryData(dailyLogKeys.detail('daily-log-1'))).toEqual(dailyLog);

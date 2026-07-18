@@ -2,7 +2,8 @@ import { act, waitFor } from '@testing-library/react';
 import type { Mock } from 'vitest';
 import { renderHookWithClient } from '../../../testUtils/testQueryClientHelpers';
 import { learningOutcomeService } from '../services/learningOutcome.services';
-import type { CreateLearningOutcomeRequest, LearningOutcomeModel, UpdateLearningOutcomeRequest, UpdateLearningOutcomeStatusRequest } from '../types/learningOutcome.types';
+import type { LearningOutcomeModel } from '../types/learningOutcome.types';
+import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
 import { LearningOutcomeStatus } from '../types/learningOutcome.types';
 import {
   learningOutcomeKeys,
@@ -98,7 +99,7 @@ describe('learning outcome queries', () => {
 
   test('creates a learning outcome and refreshes learning outcome query data', async () => {
     // Arrange
-    const request: CreateLearningOutcomeRequest = {
+    const form: LearningOutcomeFormModel = {
       code: 'language-listening',
       name: 'Listens and responds',
       description: 'Responds to familiar sounds, words, and stories.',
@@ -113,18 +114,25 @@ describe('learning outcome queries', () => {
 
     // Act
     await act(async () => {
-      await result.current.mutateAsync(request);
+      await result.current.mutateAsync(form);
     });
 
     // Assert
-    expect(learningOutcomeServiceMock.create).toHaveBeenCalledWith(request);
+    expect(learningOutcomeServiceMock.create).toHaveBeenCalledWith({
+      code: form.code,
+      name: form.name,
+      description: form.description,
+      category: form.category,
+      sortOrder: form.sortOrder
+    });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: learningOutcomeKeys.lists() });
     expect(queryClient.getQueryData(learningOutcomeKeys.detail('outcome-1'))).toEqual(learningOutcome);
   });
 
   test('updates a learning outcome and refreshes learning outcome query data', async () => {
     // Arrange
-    const request: UpdateLearningOutcomeRequest = {
+    const form: LearningOutcomeFormModel = {
+      code: 'language-listening',
       name: 'Updated outcome',
       description: 'Updated description.',
       category: 'Language',
@@ -138,20 +146,23 @@ describe('learning outcome queries', () => {
 
     // Act
     await act(async () => {
-      await result.current.mutateAsync({ learningOutcomeId: 'outcome-1', request });
+      await result.current.mutateAsync({ learningOutcomeId: 'outcome-1', form });
     });
 
     // Assert
-    expect(learningOutcomeServiceMock.update).toHaveBeenCalledWith('outcome-1', request);
+    expect(learningOutcomeServiceMock.update).toHaveBeenCalledWith('outcome-1', {
+      name: form.name,
+      description: form.description,
+      category: form.category,
+      sortOrder: form.sortOrder
+    });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: learningOutcomeKeys.lists() });
     expect(queryClient.getQueryData(learningOutcomeKeys.detail('outcome-1'))).toEqual(updatedLearningOutcome);
   });
 
   test('updates a learning outcome status and refreshes learning outcome query data', async () => {
     // Arrange
-    const request: UpdateLearningOutcomeStatusRequest = {
-      status: LearningOutcomeStatus.Inactive
-    };
+    const status = LearningOutcomeStatus.Inactive;
 
     learningOutcomeServiceMock.updateStatus.mockResolvedValue(updatedLearningOutcome);
 
@@ -160,11 +171,11 @@ describe('learning outcome queries', () => {
 
     // Act
     await act(async () => {
-      await result.current.mutateAsync({ learningOutcomeId: 'outcome-1', request });
+      await result.current.mutateAsync({ learningOutcomeId: 'outcome-1', form });
     });
 
     // Assert
-    expect(learningOutcomeServiceMock.updateStatus).toHaveBeenCalledWith('outcome-1', request);
+    expect(learningOutcomeServiceMock.updateStatus).toHaveBeenCalledWith('outcome-1', { status });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: learningOutcomeKeys.lists() });
     expect(queryClient.getQueryData(learningOutcomeKeys.detail('outcome-1'))).toEqual(updatedLearningOutcome);
   });

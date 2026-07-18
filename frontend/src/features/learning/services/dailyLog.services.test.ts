@@ -1,7 +1,7 @@
 import type { Mock } from 'vitest';
 import { apiClient } from '../../../shared/api/apiClient';
 import type { PaginatedResult } from '../../../shared/api/api.types';
-import type { CreateDailyLogRequest, DailyLogResponse, LearningMomentFeedResponse } from '../types/dailyLog.types';
+import type { CreateDailyLogRequest, DailyLogResponse, LearningMomentFeedResponse, UpdateLearningMomentRequest } from '../types/dailyLog.types';
 import { dailyLogService } from './dailyLog.services';
 
 vi.mock('../../../shared/api/apiClient', () => ({
@@ -10,6 +10,7 @@ vi.mock('../../../shared/api/apiClient', () => ({
     getSingle: vi.fn(),
     getPaginatedList: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
     delete: vi.fn()
   }
 }));
@@ -19,6 +20,7 @@ const apiClientMock = apiClient as unknown as {
   getSingle: Mock;
   getPaginatedList: Mock;
   post: Mock;
+  put: Mock;
   delete: Mock;
 };
 
@@ -126,6 +128,26 @@ describe('dailyLogService', () => {
     expect(result).toEqual(dailyLogResponse);
     expect(apiClientMock.post).toHaveBeenCalledTimes(1);
     expect(apiClientMock.post).toHaveBeenCalledWith('/daily-logs/', request);
+  });
+
+  test('updates a learning moment', async () => {
+    // Arrange
+    const request: UpdateLearningMomentRequest = {
+      kind: 'reading',
+      title: 'Updated story',
+      notes: 'Updated notes.',
+      learningOutcomeIds: ['outcome-1']
+    };
+
+    apiClientMock.put.mockResolvedValue(dailyLogResponse);
+
+    // Act
+    const result = await dailyLogService.updateLearningMoment('daily-log-1', 'moment-1', request);
+
+    // Assert
+    expect(result).toEqual(dailyLogResponse);
+    expect(apiClientMock.put).toHaveBeenCalledTimes(1);
+    expect(apiClientMock.put).toHaveBeenCalledWith('/daily-logs/daily-log-1/learning-moments/moment-1', request);
   });
 
   test('deletes a learning moment', async () => {
