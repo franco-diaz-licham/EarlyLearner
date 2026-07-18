@@ -74,9 +74,11 @@ describe('HomePage', () => {
     // Assert
     expect(screen.getByRole('heading', { name: 'Good morning, Franco!' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Recent Learning' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Learning Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Learning Mix' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Outcome Coverage' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Learning Coverage' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Read a story' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Read a story' })).not.toBeInTheDocument();
     expect(screen.getByText('Open invites')).toBeInTheDocument();
   });
 });

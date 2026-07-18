@@ -40,7 +40,7 @@ const renderMain = (overrides: Partial<Parameters<typeof HomeMain>[0]> = {}) =>
   );
 
 describe('HomeMain', () => {
-  test('renders today metrics and recent moments', () => {
+  test('renders today metrics and learning overview', () => {
     // Act
     renderMain();
 
@@ -49,9 +49,12 @@ describe('HomeMain', () => {
     expect(screen.getByText('Daily logs')).toBeInTheDocument();
     expect(screen.getByText('Learning moments')).toBeInTheDocument();
     expect(screen.getByText('Children observed')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Recent Learning' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Read a story' })).toBeInTheDocument();
-    expect(screen.getByText('Listens and responds')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Learning Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Learning Mix' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Outcome Coverage' })).toBeInTheDocument();
+    expect(screen.getByText('Reading')).toBeInTheDocument();
+    expect(screen.getByText('Touched this week')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Read a story' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Add log' })).toHaveAttribute('href', '/learning');
     expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/learning');
   });
@@ -64,12 +67,12 @@ describe('HomeMain', () => {
     expect(screen.getAllByText('-')).toHaveLength(3);
   });
 
-  test('renders an empty recent learning state', () => {
+  test('renders an empty learning overview state', () => {
     // Act
     renderMain({ home: { ...home, recentMoments: [] } });
 
     // Assert
-    expect(screen.getByRole('heading', { name: 'No learning moments yet' })).toBeInTheDocument();
-    expect(screen.getByText('Add the first learning log when something worth remembering happens.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'No learning overview yet' })).toBeInTheDocument();
+    expect(screen.getByText('Add learning logs to build a household learning pulse.')).toBeInTheDocument();
   });
 });
