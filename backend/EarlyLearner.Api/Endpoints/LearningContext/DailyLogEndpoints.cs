@@ -18,6 +18,7 @@ public static class DailyLogEndpoints
         dailyLogs.MapGet("/learning-moments", ListLearningMoments).WithName(nameof(ListLearningMoments));
         dailyLogs.MapGet("/{dailyLogId:guid}", GetDailyLog).WithName(nameof(GetDailyLog));
         dailyLogs.MapPost("/", CreateDailyLog).WithName(nameof(CreateDailyLog));
+        dailyLogs.MapPut("/{dailyLogId:guid}/learning-moments/{learningMomentId:guid}", UpdateLearningMoment).WithName(nameof(UpdateLearningMoment));
         dailyLogs.MapDelete("/{dailyLogId:guid}/learning-moments/{learningMomentId:guid}", DeleteLearningMoment).WithName(nameof(DeleteLearningMoment));
 
         return endpoints;
@@ -84,6 +85,37 @@ public static class DailyLogEndpoints
         return result.ToApiResult(locationUrl);
     }
 
+    public static async Task<IResult> UpdateLearningMoment(
+        Guid dailyLogId,
+        Guid learningMomentId,
+        UpdateLearningMomentRequest request,
+        IValidator<UpdateLearningMomentRequest> validator,
+        IDailyLogCommandService commandService,
+        CancellationToken cancellationToken = default)
+    {
+        if (dailyLogId == Guid.Empty) {
+            return Result<DailyLogResponse>.Fail("Daily log id is required.", ResultTypeEnum.Invalid).ToApiResult();
+        }
+
+        if (learningMomentId == Guid.Empty) {
+            return Result<DailyLogResponse>.Fail("Learning moment id is required.", ResultTypeEnum.Invalid).ToApiResult();
+        }
+
+        var validation = validator.Validate(request).ToResult();
+        if (!validation.IsSuccess) return validation.ToApiResult();
+
+        var command = new UpdateLearningMomentCommand(
+            DailyLogId: new DailyLogId(dailyLogId),
+            LearningMomentId: new LearningMomentId(learningMomentId),
+            Kind: request.Kind,
+            Title: request.Title,
+            Notes: request.Notes,
+            LearningOutcomeIds: request.LearningOutcomeIds.Select(id => new LearningOutcomeId(id)).ToList());
+
+        var result = await commandService.UpdateLearningMomentAsync(command, cancellationToken);
+        return result.ToApiResult();
+    }
+
     public static async Task<IResult> DeleteLearningMoment(
         Guid dailyLogId,
         Guid learningMomentId,
@@ -110,6 +142,24 @@ public sealed record CreateDailyLogRequest(
     string Title,
     string Notes,
     IReadOnlyList<Guid> LearningOutcomeIds);
+
+public sealed record UpdateLearningMomentRequest(
+    LearningMomentKindEnum Kind,
+    string Title,
+    string Notes,
+    IReadOnlyList<Guid> LearningOutcomeIds);
+
+public sealed class UpdateLearningMomentRequestValidator : AbstractValidator<UpdateLearningMomentRequest>
+{
+    public UpdateLearningMomentRequestValidator()
+    {
+        RuleFor(request => request.Kind).IsInEnum();
+        RuleFor(request => request.Title).NotEmpty().MaximumLength(220);
+        RuleFor(request => request.Notes).NotEmpty().MaximumLength(2000);
+        RuleFor(request => request.LearningOutcomeIds).NotEmpty();
+        RuleForEach(request => request.LearningOutcomeIds).NotEmpty();
+    }
+}
 
 public sealed class ListLearningMomentsQueryParams : BaseQueryParams;
 

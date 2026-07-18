@@ -42,17 +42,17 @@ public sealed class LearningMoment : Entity<LearningMomentId>
     /// Broad category for the moment, such as an activity, observation, reading,
     /// or routine.
     /// </summary>
-    public LearningMomentKindEnum Kind { get; }
+    public LearningMomentKindEnum Kind { get; private set; }
 
     /// <summary>
     /// Parent-facing name of the captured learning moment.
     /// </summary>
-    public string Title { get; } = default!;
+    public string Title { get; private set; } = default!;
 
     /// <summary>
     /// Parent notes explaining what happened and why the moment matters.
     /// </summary>
-    public string Notes { get; } = default!;
+    public string Notes { get; private set; } = default!;
 
     /// <summary>
     /// Learning outcomes this moment practised or demonstrated.
@@ -67,6 +67,23 @@ public sealed class LearningMoment : Entity<LearningMomentId>
     public IReadOnlyCollection<StoredFile> StoredFiles => _storedFiles.AsReadOnly();
 
     #endregion
+
+    public void Update(
+        LearningMomentKindEnum kind,
+        string title,
+        string notes,
+        IEnumerable<LearningOutcome> learningOutcomes)
+    {
+        var requiredLearningOutcomes = learningOutcomes.DistinctBy(outcome => outcome.Id).ToArray();
+        if (requiredLearningOutcomes.Length == 0) throw new DomainException("Learning moment must target at least one learning outcome.");
+
+        Kind = kind;
+        Title = Required(title, nameof(title));
+        Notes = Required(notes, nameof(notes));
+        _learningOutcomes.Clear();
+        _learningOutcomes.AddRange(requiredLearningOutcomes);
+        SetUpdatedOn();
+    }
 
     public void AttachStoredFile(StoredFile storedFile)
     {

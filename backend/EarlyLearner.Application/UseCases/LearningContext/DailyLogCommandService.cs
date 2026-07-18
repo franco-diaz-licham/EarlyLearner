@@ -15,9 +15,18 @@ public sealed record CreateDailyLogCommand(
     string Notes,
     IReadOnlyList<LearningOutcomeId> LearningOutcomeIds);
 
+public sealed record UpdateLearningMomentCommand(
+    DailyLogId DailyLogId,
+    LearningMomentId LearningMomentId,
+    LearningMomentKindEnum Kind,
+    string Title,
+    string Notes,
+    IReadOnlyList<LearningOutcomeId> LearningOutcomeIds);
+
 public interface IDailyLogCommandService
 {
     Task<Result<DailyLogResponse>> CreateAsync(CreateDailyLogCommand command, CancellationToken cancellationToken);
+    Task<Result<DailyLogResponse>> UpdateLearningMomentAsync(UpdateLearningMomentCommand command, CancellationToken cancellationToken);
     Task<Result> DeleteLearningMomentAsync(DailyLogId dailyLogId, LearningMomentId learningMomentId, CancellationToken cancellationToken);
 }
 
@@ -59,6 +68,27 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
         var result = await dailyLogRepo.GetResponseAsync(log.Id, cancellationToken);
         if (result is null) return Result<DailyLogResponse>.Fail("Daily log could not be retrieved after creation.", ResultTypeEnum.Invalid);
         return Result<DailyLogResponse>.Success(result, ResultTypeEnum.Created);
+    }
+
+    public async Task<Result<DailyLogResponse>> UpdateLearningMomentAsync(UpdateLearningMomentCommand command, CancellationToken cancellationToken)
+    {
+        var log = await dailyLogRepo.GetAsync(command.DailyLogId, cancellationToken);
+        if (log is null) return Result<DailyLogResponse>.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
+        if (log.HouseholdId != currentUser.HouseholdId) return Result<DailyLogResponse>.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
+
+        var learningOutcomes = await dailyLogRepo.GetLearningOutcomesAsync(command.LearningOutcomeIds, cancellationToken);
+        if (learningOutcomes.Count != command.LearningOutcomeIds.Distinct().Count()) {
+            return Result<DailyLogResponse>.Fail("One or more learning outcomes were not found.", ResultTypeEnum.NotFound);
+        }
+
+        log.UpdateLearningMoment(command.LearningMomentId, command.Kind, command.Title, command.Notes, learningOutcomes);
+
+        var saved = await uow.SaveChangesAsync(cancellationToken) > 0;
+        if (!saved) return Result<DailyLogResponse>.Fail("Learning moment could not be updated.", ResultTypeEnum.Invalid);
+
+        var result = await dailyLogRepo.GetResponseAsync(log.Id, cancellationToken);
+        if (result is null) return Result<DailyLogResponse>.Fail("Daily log could not be retrieved after update.", ResultTypeEnum.Invalid);
+        return Result<DailyLogResponse>.Success(result, ResultTypeEnum.Success);
     }
 
     public async Task<Result> DeleteLearningMomentAsync(DailyLogId dailyLogId, LearningMomentId learningMomentId, CancellationToken cancellationToken)

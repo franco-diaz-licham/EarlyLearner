@@ -86,6 +86,7 @@ public static class ApiAppServices
         services.AddScoped<IValidator<AddHouseholdChildRequest>, AddHouseholdChildRequestValidator>();
         services.AddScoped<IValidator<UpdateHouseholdChildRequest>, UpdateHouseholdChildRequestValidator>();
         services.AddScoped<IValidator<CreateDailyLogRequest>, CreateDailyLogRequestValidator>();
+        services.AddScoped<IValidator<UpdateLearningMomentRequest>, UpdateLearningMomentRequestValidator>();
         services.AddScoped<IValidator<CreateLearningOutcomeRequest>, CreateLearningOutcomeRequestValidator>();
         services.AddScoped<IValidator<UpdateLearningOutcomeRequest>, UpdateLearningOutcomeRequestValidator>();
         services.AddScoped<IValidator<UpdateLearningOutcomeStatusRequest>, UpdateLearningOutcomeStatusRequestValidator>();
