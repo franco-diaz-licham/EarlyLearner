@@ -93,20 +93,22 @@ export const LearningPage = () => {
         }}
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_460px]">
-        <LearningMomentList
-          hasMore={learningMomentFeedQuery.hasNextPage}
-          isDeleting={deleteLearningMomentMutation.isPending}
-          isFetchingMore={learningMomentFeedQuery.isFetchingNextPage}
-          moments={latestMoments}
-          searchTerm={learningMomentSearchTerm}
-          onDeleteMoment={(dailyLogId, learningMomentId) => {
-            deleteLearningMomentMutation.mutate({ dailyLogId, learningMomentId });
-          }}
-          onLoadMore={handleLoadMoreLearningMoments}
-          onSearchTermChange={setLearningMomentSearchTerm}
-        />
-        <aside className="space-y-5">
+      <div className="flex flex-wrap gap-5">
+        <div className="flex-1 basis-150">
+          <LearningMomentList
+            hasMore={learningMomentFeedQuery.hasNextPage}
+            isDeleting={deleteLearningMomentMutation.isPending}
+            isFetchingMore={learningMomentFeedQuery.isFetchingNextPage}
+            moments={latestMoments}
+            searchTerm={learningMomentSearchTerm}
+            onDeleteMoment={(dailyLogId, learningMomentId) => {
+              deleteLearningMomentMutation.mutate({ dailyLogId, learningMomentId });
+            }}
+            onLoadMore={handleLoadMoreLearningMoments}
+            onSearchTermChange={setLearningMomentSearchTerm}
+          />
+        </div>
+        <aside className="flex flex-1 basis-115 flex-col gap-3 xl:max-w-115">
           <LearningTodaySummaryCard activityCount={todayActivityCount} readingCount={todayReadingCount} routineCount={todayRoutineCount} />
           <LearningOutcomeList
             deletingId={deleteLearningOutcomeMutation.variables ?? null}

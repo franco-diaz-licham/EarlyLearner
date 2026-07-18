@@ -10,10 +10,12 @@ export const AppShell = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-background ">
-      <main className="mx-auto w-full max-w-355 px-4 pt-4 sm:px-6 lg:px-8 space-y-4">
+    <div className="h-dvh bg-brand-background">
+      <main className="mx-auto flex h-full w-full max-w-355 flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <AppTopBar onLogout={handleLogout} />
-        <Outlet />
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

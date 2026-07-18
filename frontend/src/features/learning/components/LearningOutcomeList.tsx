@@ -32,8 +32,8 @@ const learningOutcomeStatusOptions = [
 
 export const LearningOutcomeList = ({ deletingId, outcomes, updatingStatusId, onAddOutcome, onDeleteOutcome, onEditOutcome, onStatusChange }: LearningOutcomeListProps) => {
   return (
-    <AppCard>
-      <div className="flex items-start justify-between gap-3">
+    <AppCard className="max-h-[calc(100dvh-31rem)]" fillHeight>
+      <div className="flex items-start justify-between">
         <div>
           <h2 className="text-base font-bold text-brand-heading">Learning Outcomes</h2>
           <p className="mt-1 text-sm text-brand-muted">{outcomes.length} configured</p>
@@ -41,21 +41,20 @@ export const LearningOutcomeList = ({ deletingId, outcomes, updatingStatusId, on
         <AppButton icon={<UilPlus aria-hidden="true" className="h-4 w-4" />} label="Add" type="button" onClick={onAddOutcome} />
       </div>
 
-      <div className="mt-5 max-h-[calc(100vh-38rem)] space-y-3 overflow-y-auto pr-1">
+      <div className="mt-5 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
         {outcomes.length === 0 ? (
           <p className="text-sm text-brand-muted">No learning outcomes configured yet.</p>
         ) : (
           outcomes.map((outcome) => (
             <div className="rounded-md border border-brand-border bg-white p-3" key={outcome.learningOutcomeId}>
               <div className="min-w-0">
-                <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex flex-wrap items-start justify-between">
                   <h3 className="min-w-0 text-base font-semibold leading-6 text-brand-heading">{outcome.name}</h3>
                   <AppStatusBadge tone={getStatusTone(outcome.status)}>{getStatusLabel(outcome.status)}</AppStatusBadge>
                 </div>
                 <p className="mt-1 text-xs font-semibold text-brand-muted">{outcome.category}</p>
                 <p className="mt-2 text-sm leading-6 text-brand-muted">{outcome.description}</p>
               </div>
-
               <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-brand-border/70 pt-3">
                 <AppSelect
                   aria-label={`Status for ${outcome.name}`}

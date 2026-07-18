@@ -33,7 +33,7 @@ export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moment
   };
 
   return (
-    <AppCard title="Recent Learning">
+    <AppCard className="max-h-[calc(100dvh-20rem)]" fillHeight title="Recent Learning">
       <div className="mb-4">
         <AppInputText
           aria-label="Search recent learning"
@@ -47,7 +47,7 @@ export const LearningMomentList = ({ hasMore, isDeleting, isFetchingMore, moment
       {moments.length === 0 ? (
         <p className="text-sm text-brand-muted">No learning moments recorded yet.</p>
       ) : (
-        <div className="space-y-3 max-h-[calc(100vh-30rem)] overflow-y-auto pr-1" onScroll={handleScroll}>
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1" onScroll={handleScroll}>
           {moments.map((moment) => (
             <LearningMomentListItemCard isDeleting={isDeleting} key={moment.learningMomentId} moment={moment} onDeleteMoment={onDeleteMoment} />
           ))}
