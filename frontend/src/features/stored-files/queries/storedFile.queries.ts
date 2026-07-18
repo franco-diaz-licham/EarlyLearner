@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { mapStoredFileResponseToModel, mapStoredFileResponsesToModels } from '../mappers/storedFile.mapper';
 import { storedFileService } from '../services/storedFile.services';
 import type { CreateStoredFileRequest, StoredFileStatus } from '../types/storedFile.types';
 
@@ -18,13 +19,13 @@ export const storedFileKeys = {
 export const useStoredFilesQuery = () =>
   useQuery({
     queryKey: storedFileKeys.list(),
-    queryFn: () => storedFileService.list()
+    queryFn: async () => mapStoredFileResponsesToModels(await storedFileService.list())
   });
 
 export const useStoredFileQuery = (storedFileId: string) =>
   useQuery({
     queryKey: storedFileKeys.detail(storedFileId),
-    queryFn: () => storedFileService.get(storedFileId),
+    queryFn: async () => mapStoredFileResponseToModel(await storedFileService.get(storedFileId)),
     enabled: Boolean(storedFileId)
   });
 
@@ -32,7 +33,7 @@ export const useCreateStoredFileMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateStoredFileRequest) => storedFileService.create(request),
+    mutationFn: async (request: CreateStoredFileRequest) => mapStoredFileResponseToModel(await storedFileService.create(request)),
     onSuccess: (storedFile) => {
       void queryClient.invalidateQueries({ queryKey: storedFileKeys.lists() });
       queryClient.setQueryData(storedFileKeys.detail(storedFile.storedFileId), storedFile);
@@ -44,7 +45,7 @@ export const useUpdateStoredFileStatusMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ storedFileId, status }: UpdateStoredFileStatus) => storedFileService.updateStatus(storedFileId, { status }),
+    mutationFn: async ({ storedFileId, status }: UpdateStoredFileStatus) => mapStoredFileResponseToModel(await storedFileService.updateStatus(storedFileId, { status })),
     onSuccess: (storedFile) => {
       void queryClient.invalidateQueries({ queryKey: storedFileKeys.lists() });
       queryClient.setQueryData(storedFileKeys.detail(storedFile.storedFileId), storedFile);

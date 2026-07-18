@@ -1,40 +1,31 @@
 import { apiClient } from '../../../shared/api/apiClient';
 import type { ApiQueryParams, PaginatedResult } from '../../../shared/api/api.types';
-import { mapDailyLogResponseToModel, mapDailyLogResponsesToModels, mapLearningMomentFeedResponseToModel } from '../mappers/dailyLog.mapper';
-import type { CreateDailyLogRequest, DailyLogModel, DailyLogResponse, LearningMomentFeedModel, LearningMomentFeedResponse, UpdateLearningMomentRequest } from '../types/dailyLog.types';
+import type { CreateDailyLogRequest, DailyLogResponse, LearningMomentFeedResponse, UpdateLearningMomentRequest } from '../types/dailyLog.types';
 
 const DAILY_LOGS_URL = '/daily-logs';
 
 export const dailyLogService = {
-  async list(): Promise<DailyLogModel[]> {
-    const dailyLogs = await apiClient.getList<DailyLogResponse>(`${DAILY_LOGS_URL}/`);
-    return mapDailyLogResponsesToModels(dailyLogs);
+  list(): Promise<DailyLogResponse[]> {
+    return apiClient.getList<DailyLogResponse>(`${DAILY_LOGS_URL}/`);
   },
 
-  async get(dailyLogId: string): Promise<DailyLogModel> {
-    const dailyLog = await apiClient.getSingle<DailyLogResponse>(`${DAILY_LOGS_URL}/${dailyLogId}`);
-    return mapDailyLogResponseToModel(dailyLog);
+  get(dailyLogId: string): Promise<DailyLogResponse> {
+    return apiClient.getSingle<DailyLogResponse>(`${DAILY_LOGS_URL}/${dailyLogId}`);
   },
 
-  async listLearningMoments(params: ApiQueryParams): Promise<PaginatedResult<LearningMomentFeedModel>> {
-    const result = await apiClient.getPaginatedList<LearningMomentFeedResponse>(`${DAILY_LOGS_URL}/learning-moments`, params);
-    return {
-      items: result.items.map(mapLearningMomentFeedResponseToModel),
-      pagination: result.pagination
-    };
+  listLearningMoments(params: ApiQueryParams): Promise<PaginatedResult<LearningMomentFeedResponse>> {
+    return apiClient.getPaginatedList<LearningMomentFeedResponse>(`${DAILY_LOGS_URL}/learning-moments`, params);
   },
 
-  async create(request: CreateDailyLogRequest): Promise<DailyLogModel> {
-    const dailyLog = await apiClient.post<DailyLogResponse>(`${DAILY_LOGS_URL}/`, request);
-    return mapDailyLogResponseToModel(dailyLog);
+  create(request: CreateDailyLogRequest): Promise<DailyLogResponse> {
+    return apiClient.post<DailyLogResponse>(`${DAILY_LOGS_URL}/`, request);
   },
 
-  async updateLearningMoment(dailyLogId: string, learningMomentId: string, request: UpdateLearningMomentRequest): Promise<DailyLogModel> {
-    const dailyLog = await apiClient.put<DailyLogResponse>(`${DAILY_LOGS_URL}/${dailyLogId}/learning-moments/${learningMomentId}`, request);
-    return mapDailyLogResponseToModel(dailyLog);
+  updateLearningMoment(dailyLogId: string, learningMomentId: string, request: UpdateLearningMomentRequest): Promise<DailyLogResponse> {
+    return apiClient.put<DailyLogResponse>(`${DAILY_LOGS_URL}/${dailyLogId}/learning-moments/${learningMomentId}`, request);
   },
 
-  async deleteLearningMoment(dailyLogId: string, learningMomentId: string): Promise<void> {
+  deleteLearningMoment(dailyLogId: string, learningMomentId: string): Promise<void> {
     return apiClient.delete(`${DAILY_LOGS_URL}/${dailyLogId}/learning-moments/${learningMomentId}`);
   }
 };

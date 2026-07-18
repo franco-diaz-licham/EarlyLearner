@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { mapHomeResponseToModel } from '../mappers/home.mapper';
 import { homeService } from '../services/home.services';
 import type { GetHomeParams } from '../types/home.types';
 
@@ -10,5 +11,5 @@ export const homeKeys = {
 export const useHomeQuery = (params: GetHomeParams) =>
   useQuery({
     queryKey: homeKeys.current(params),
-    queryFn: () => homeService.getHome(params)
+    queryFn: async () => mapHomeResponseToModel(await homeService.getHome(params))
   });

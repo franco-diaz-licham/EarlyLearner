@@ -1,4 +1,5 @@
-import type { LearningOutcomeModel, LearningOutcomeResponse } from '../types/learningOutcome.types';
+import type { LearningOutcomeFormModel } from '../hooks/useLearningOutcomeForm';
+import type { CreateLearningOutcomeRequest, LearningOutcomeModel, LearningOutcomeResponse, UpdateLearningOutcomeRequest } from '../types/learningOutcome.types';
 
 export const mapLearningOutcomeResponseToModel = (response: LearningOutcomeResponse): LearningOutcomeModel => ({
   learningOutcomeId: response.learningOutcomeId,
@@ -11,3 +12,18 @@ export const mapLearningOutcomeResponseToModel = (response: LearningOutcomeRespo
 });
 
 export const mapLearningOutcomeResponsesToModels = (responses: LearningOutcomeResponse[]): LearningOutcomeModel[] => responses.map(mapLearningOutcomeResponseToModel);
+
+export const mapLearningOutcomeFormToCreateLearningOutcomeRequest = (form: LearningOutcomeFormModel): CreateLearningOutcomeRequest => ({
+  code: form.code,
+  name: form.name,
+  description: form.description,
+  category: form.category,
+  sortOrder: form.sortOrder
+});
+
+export const mapLearningOutcomeFormToUpdateLearningOutcomeRequest = (form: LearningOutcomeFormModel): UpdateLearningOutcomeRequest => ({
+  name: form.name,
+  description: form.description,
+  category: form.category,
+  sortOrder: form.sortOrder
+});

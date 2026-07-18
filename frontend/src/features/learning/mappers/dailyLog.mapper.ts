@@ -1,4 +1,4 @@
-import type { DailyLogModel, DailyLogResponse, LearningMomentFeedModel, LearningMomentFeedResponse } from '../types/dailyLog.types';
+import type { CreateDailyLogRequest, DailyLogModel, DailyLogResponse, LearningLogFormModel, LearningMomentFeedModel, LearningMomentFeedResponse, UpdateLearningMomentRequest } from '../types/dailyLog.types';
 
 export const mapDailyLogResponseToModel = (response: DailyLogResponse): DailyLogModel => ({
   dailyLogId: response.dailyLogId,
@@ -27,4 +27,20 @@ export const mapLearningMomentFeedResponseToModel = (response: LearningMomentFee
   title: response.title,
   notes: response.notes,
   learningOutcomeIds: response.learningOutcomeIds
+});
+
+export const mapLearningLogFormToCreateDailyLogRequest = (form: LearningLogFormModel): CreateDailyLogRequest => ({
+  childId: form.childId,
+  logDate: form.logDate,
+  kind: form.kind,
+  title: form.title,
+  notes: form.notes,
+  learningOutcomeIds: form.learningOutcomeIds
+});
+
+export const mapLearningLogFormToUpdateLearningMomentRequest = (form: LearningLogFormModel): UpdateLearningMomentRequest => ({
+  kind: form.kind,
+  title: form.title,
+  notes: form.notes,
+  learningOutcomeIds: form.learningOutcomeIds
 });

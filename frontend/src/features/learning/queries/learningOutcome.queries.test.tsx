@@ -171,7 +171,7 @@ describe('learning outcome queries', () => {
 
     // Act
     await act(async () => {
-      await result.current.mutateAsync({ learningOutcomeId: 'outcome-1', form });
+      await result.current.mutateAsync({ learningOutcomeId: 'outcome-1', status });
     });
 
     // Assert

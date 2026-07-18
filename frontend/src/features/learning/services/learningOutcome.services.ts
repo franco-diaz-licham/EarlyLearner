@@ -1,33 +1,27 @@
 import { apiClient } from '../../../shared/api/apiClient';
-import { mapLearningOutcomeResponseToModel, mapLearningOutcomeResponsesToModels } from '../mappers/learningOutcome.mapper';
-import type { CreateLearningOutcomeRequest, LearningOutcomeModel, LearningOutcomeResponse, UpdateLearningOutcomeRequest, UpdateLearningOutcomeStatusRequest } from '../types/learningOutcome.types';
+import type { CreateLearningOutcomeRequest, LearningOutcomeResponse, UpdateLearningOutcomeRequest, UpdateLearningOutcomeStatusRequest } from '../types/learningOutcome.types';
 
 const LEARNING_OUTCOMES_URL = '/learning-outcomes';
 
 export const learningOutcomeService = {
-  async list(): Promise<LearningOutcomeModel[]> {
-    const learningOutcomes = await apiClient.getList<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/`);
-    return mapLearningOutcomeResponsesToModels(learningOutcomes);
+  list(): Promise<LearningOutcomeResponse[]> {
+    return apiClient.getList<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/`);
   },
 
-  async get(learningOutcomeId: string): Promise<LearningOutcomeModel> {
-    const learningOutcome = await apiClient.getSingle<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}`);
-    return mapLearningOutcomeResponseToModel(learningOutcome);
+  get(learningOutcomeId: string): Promise<LearningOutcomeResponse> {
+    return apiClient.getSingle<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}`);
   },
 
-  async create(request: CreateLearningOutcomeRequest): Promise<LearningOutcomeModel> {
-    const learningOutcome = await apiClient.post<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/`, request);
-    return mapLearningOutcomeResponseToModel(learningOutcome);
+  create(request: CreateLearningOutcomeRequest): Promise<LearningOutcomeResponse> {
+    return apiClient.post<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/`, request);
   },
 
-  async update(learningOutcomeId: string, request: UpdateLearningOutcomeRequest): Promise<LearningOutcomeModel> {
-    const learningOutcome = await apiClient.put<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}`, request);
-    return mapLearningOutcomeResponseToModel(learningOutcome);
+  update(learningOutcomeId: string, request: UpdateLearningOutcomeRequest): Promise<LearningOutcomeResponse> {
+    return apiClient.put<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}`, request);
   },
 
-  async updateStatus(learningOutcomeId: string, request: UpdateLearningOutcomeStatusRequest): Promise<LearningOutcomeModel> {
-    const learningOutcome = await apiClient.patch<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}/status`, request);
-    return mapLearningOutcomeResponseToModel(learningOutcome);
+  updateStatus(learningOutcomeId: string, request: UpdateLearningOutcomeStatusRequest): Promise<LearningOutcomeResponse> {
+    return apiClient.patch<LearningOutcomeResponse>(`${LEARNING_OUTCOMES_URL}/${learningOutcomeId}/status`, request);
   },
 
   delete(learningOutcomeId: string): Promise<void> {

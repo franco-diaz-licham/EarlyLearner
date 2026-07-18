@@ -3,7 +3,7 @@ import type { Mock } from 'vitest';
 import type { PaginatedResult } from '../../../shared/api/api.types';
 import { renderHookWithClient } from '../../../testUtils/testQueryClientHelpers';
 import { dailyLogService } from '../services/dailyLog.services';
-import type { CreateDailyLogRequest, DailyLogModel, LearningLogFormModel, LearningMomentFeedModel } from '../types/dailyLog.types';
+import type { DailyLogModel, LearningLogFormModel, LearningMomentFeedModel } from '../types/dailyLog.types';
 import { dailyLogKeys, useCreateDailyLogMutation, useDailyLogQuery, useDailyLogsQuery, useDeleteLearningMomentMutation, useLearningMomentFeedQuery, useUpdateLearningMomentMutation } from './dailyLog.queries';
 
 vi.mock('../services/dailyLog.services', () => ({
@@ -134,7 +134,7 @@ describe('daily log queries', () => {
 
   test('creates a daily log and refreshes daily log query data', async () => {
     // Arrange
-    const request: CreateDailyLogRequest = {
+    const form: LearningLogFormModel = {
       childId: 'child-1',
       logDate: '2026-07-16',
       kind: 'activity',
@@ -150,11 +150,18 @@ describe('daily log queries', () => {
 
     // Act
     await act(async () => {
-      await result.current.mutateAsync(request);
+      await result.current.mutateAsync(form);
     });
 
     // Assert
-    expect(dailyLogServiceMock.create).toHaveBeenCalledWith(request);
+    expect(dailyLogServiceMock.create).toHaveBeenCalledWith({
+      childId: form.childId,
+      logDate: form.logDate,
+      kind: form.kind,
+      title: form.title,
+      notes: form.notes,
+      learningOutcomeIds: form.learningOutcomeIds
+    });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: dailyLogKeys.lists() });
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: dailyLogKeys.momentFeeds() });
     expect(queryClient.getQueryData(dailyLogKeys.detail('daily-log-1'))).toEqual(dailyLog);

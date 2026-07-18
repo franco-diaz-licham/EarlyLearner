@@ -1,28 +1,23 @@
 import { apiClient } from '../../../shared/api/apiClient';
-import { mapStoredFileResponseToModel, mapStoredFileResponsesToModels } from '../mappers/storedFile.mapper';
-import type { CreateStoredFileRequest, StoredFileModel, StoredFileResponse, UpdateStoredFileStatusRequest } from '../types/storedFile.types';
+import type { CreateStoredFileRequest, StoredFileResponse, UpdateStoredFileStatusRequest } from '../types/storedFile.types';
 
 const STORED_FILES_URL = '/stored-files';
 
 export const storedFileService = {
-  async list(): Promise<StoredFileModel[]> {
-    const storedFiles = await apiClient.getList<StoredFileResponse>(`${STORED_FILES_URL}/`);
-    return mapStoredFileResponsesToModels(storedFiles);
+  list(): Promise<StoredFileResponse[]> {
+    return apiClient.getList<StoredFileResponse>(`${STORED_FILES_URL}/`);
   },
 
-  async get(storedFileId: string): Promise<StoredFileModel> {
-    const storedFile = await apiClient.getSingle<StoredFileResponse>(`${STORED_FILES_URL}/${storedFileId}`);
-    return mapStoredFileResponseToModel(storedFile);
+  get(storedFileId: string): Promise<StoredFileResponse> {
+    return apiClient.getSingle<StoredFileResponse>(`${STORED_FILES_URL}/${storedFileId}`);
   },
 
-  async create(request: CreateStoredFileRequest): Promise<StoredFileModel> {
-    const storedFile = await apiClient.post<StoredFileResponse>(`${STORED_FILES_URL}/`, request);
-    return mapStoredFileResponseToModel(storedFile);
+  create(request: CreateStoredFileRequest): Promise<StoredFileResponse> {
+    return apiClient.post<StoredFileResponse>(`${STORED_FILES_URL}/`, request);
   },
 
-  async updateStatus(storedFileId: string, request: UpdateStoredFileStatusRequest): Promise<StoredFileModel> {
-    const storedFile = await apiClient.put<StoredFileResponse>(`${STORED_FILES_URL}/${storedFileId}/status`, request);
-    return mapStoredFileResponseToModel(storedFile);
+  updateStatus(storedFileId: string, request: UpdateStoredFileStatusRequest): Promise<StoredFileResponse> {
+    return apiClient.put<StoredFileResponse>(`${STORED_FILES_URL}/${storedFileId}/status`, request);
   },
 
   delete(storedFileId: string): Promise<void> {

@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { mapDailyLogResponseToModel, mapDailyLogResponsesToModels, mapLearningLogFormToCreateDailyLogRequest, mapLearningLogFormToUpdateLearningMomentRequest, mapLearningMomentFeedResponseToModel } from '../mappers/dailyLog.mapper';
 import { dailyLogService } from '../services/dailyLog.services';
-import type { CreateDailyLogRequest, LearningLogFormModel } from '../types/dailyLog.types';
+import type { LearningLogFormModel } from '../types/dailyLog.types';
 
 interface UpdateLearningMoment {
   dailyLogId: string;
@@ -32,13 +33,13 @@ export const dailyLogKeys = {
 export const useDailyLogsQuery = () =>
   useQuery({
     queryKey: dailyLogKeys.list(),
-    queryFn: () => dailyLogService.list()
+    queryFn: async () => mapDailyLogResponsesToModels(await dailyLogService.list())
   });
 
 export const useDailyLogQuery = (dailyLogId: string) =>
   useQuery({
     queryKey: dailyLogKeys.detail(dailyLogId),
-    queryFn: () => dailyLogService.get(dailyLogId),
+    queryFn: async () => mapDailyLogResponseToModel(await dailyLogService.get(dailyLogId)),
     enabled: Boolean(dailyLogId)
   });
 
@@ -46,13 +47,19 @@ export const useLearningMomentFeedQuery = ({ pageSize = 10, searchBy = null, sea
   useInfiniteQuery({
     queryKey: dailyLogKeys.momentFeed({ pageSize, searchBy, searchTerm }),
     initialPageParam: 1,
-    queryFn: ({ pageParam }) =>
-      dailyLogService.listLearningMoments({
+    queryFn: async ({ pageParam }) => {
+      const result = await dailyLogService.listLearningMoments({
         pageNumber: pageParam,
         pageSize,
         searchBy,
         searchTerm
-      }),
+      });
+
+      return {
+        items: result.items.map(mapLearningMomentFeedResponseToModel),
+        pagination: result.pagination
+      };
+    },
     getNextPageParam: (lastPage) => {
       const { pageNumber, totalPages } = lastPage.pagination;
       return pageNumber < totalPages ? pageNumber + 1 : undefined;
@@ -63,7 +70,7 @@ export const useCreateDailyLogMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateDailyLogRequest) => dailyLogService.create(request),
+    mutationFn: async (form: LearningLogFormModel) => mapDailyLogResponseToModel(await dailyLogService.create(mapLearningLogFormToCreateDailyLogRequest(form))),
     onSuccess: (dailyLog) => {
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.momentFeeds() });
@@ -76,13 +83,8 @@ export const useUpdateLearningMomentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ dailyLogId, learningMomentId, form }: UpdateLearningMoment) =>
-      dailyLogService.updateLearningMoment(dailyLogId, learningMomentId, {
-        kind: form.kind,
-        title: form.title,
-        notes: form.notes,
-        learningOutcomeIds: form.learningOutcomeIds
-      }),
+    mutationFn: async ({ dailyLogId, learningMomentId, form }: UpdateLearningMoment) =>
+      mapDailyLogResponseToModel(await dailyLogService.updateLearningMoment(dailyLogId, learningMomentId, mapLearningLogFormToUpdateLearningMomentRequest(form))),
     onSuccess: (dailyLog) => {
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.momentFeeds() });
