@@ -1,4 +1,5 @@
-import { UilBookOpen, UilCalendarAlt, UilEditAlt, UilTrashAlt, UilUserPlus, UilUsersAlt } from '@iconscout/react-unicons';
+import { UilCalendarAlt, UilEditAlt, UilTrashAlt, UilUserPlus, UilUsersAlt } from '@iconscout/react-unicons';
+import { AppAvatar } from '../../../shared/ui/AppAvatar';
 import { AppIconButton } from '../../../shared/ui/AppIconButton';
 import { AppStatusBadge } from '../../../shared/ui/AppStatusBadge';
 import { formatShortDate } from '../../../shared/utils/dateFormat';
@@ -26,6 +27,8 @@ const canRevokeInvitation = (status: string): boolean => {
   const normalizedStatus = status.toLowerCase();
   return normalizedStatus === 'pending' || normalizedStatus === 'invited';
 };
+
+const getChildInitials = (firstName: string, lastName: string): string => `${firstName[0] ?? ''}${lastName[0] ?? ''}`;
 
 export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, isRemovingChild, isRevokingInvitation, onEditChild, onRemoveCarer, onRemoveChild, onRevokeInvitation }: HouseholdMembersProps) => {
   const hasMembers = household.carers.length > 0 || household.children.length > 0 || household.invitations.length > 0;
@@ -77,9 +80,7 @@ export const HouseholdMembers = ({ household, getStatusTone, isRemovingCarer, is
               <div className="rounded-md border border-brand-border p-4" key={child.id}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-brand-primary-soft text-brand-primary">
-                      <UilBookOpen aria-hidden="true" className="h-6 w-6" />
-                    </div>
+                    <AppAvatar alt={`${child.firstName} ${child.lastName}`} className="shrink-0" initials={getChildInitials(child.firstName, child.lastName)} readOnly size="sm" storedFileId={child.avatarStoredFileId} />
                     <div className="min-w-0">
                       <h2 className="font-bold text-brand-heading">
                         {child.firstName} {child.lastName}

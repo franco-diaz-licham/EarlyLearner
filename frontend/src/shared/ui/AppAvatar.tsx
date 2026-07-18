@@ -13,6 +13,7 @@ interface AppAvatarProps {
   className?: string;
   disabled?: boolean;
   initials?: string;
+  readOnly?: boolean;
   src?: string | null;
   storedFileId?: string | null;
   size?: AppAvatarSize;
@@ -31,14 +32,19 @@ const iconSizeClasses: Record<AppAvatarSize, string> = {
   lg: 'h-10 w-10'
 };
 
-export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false, initials, src, storedFileId, size = 'md', onFileChange }: AppAvatarProps) => {
+const StoredFileAvatarImage = ({ alt, storedFileId }: { alt: string; storedFileId: string }) => {
+  const storedFileContentQuery = useStoredFileContentQuery(storedFileId);
+  const storedFileUrl = useMemo(() => (storedFileContentQuery.data ? URL.createObjectURL(storedFileContentQuery.data) : null), [storedFileContentQuery.data]);
+
+  return storedFileUrl ? <img alt={alt} className="h-full w-full object-cover" src={storedFileUrl} /> : null;
+};
+
+export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false, initials, readOnly = false, src, storedFileId, size = 'md', onFileChange }: AppAvatarProps) => {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const storedFileContentQuery = useStoredFileContentQuery(storedFileId);
-  const storedFileUrl = useMemo(() => (storedFileContentQuery.data ? URL.createObjectURL(storedFileContentQuery.data) : null), [storedFileContentQuery.data]);
-  const imageSrc = previewUrl ?? storedFileUrl ?? src;
-  const hasImage = Boolean(imageSrc);
+  const imageSrc = previewUrl ?? src;
+  const hasImage = Boolean(imageSrc ?? storedFileId);
   const visibleInitials = initials?.trim().slice(0, 2).toUpperCase();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -67,37 +73,40 @@ export const AppAvatar = ({ accept = 'image/*', alt, className, disabled = false
     <div className={mergeClassNames('inline-flex items-center gap-4', className)}>
       <div className={mergeClassNames('flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-border bg-brand-surface-muted text-brand-heading', sizeClasses[size])}>
         {hasImage ? <img alt={alt} className="h-full w-full object-cover" src={imageSrc ?? undefined} /> : null}
+        {!imageSrc && storedFileId ? <StoredFileAvatarImage alt={alt} storedFileId={storedFileId} /> : null}
         {!hasImage && visibleInitials ? <span className="text-lg font-bold">{visibleInitials}</span> : null}
         {!hasImage && !visibleInitials ? <UilUsersAlt aria-hidden="true" className={mergeClassNames('text-brand-muted', iconSizeClasses[size])} /> : null}
       </div>
 
-      <div className="flex items-center gap-2">
-        <input ref={inputRef} accept={accept} className="sr-only" disabled={disabled} id={inputId} type="file" onChange={handleFileChange} />
-        <label
-          className={mergeClassNames(
-            'inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-brand-border bg-brand-surface text-brand-heading transition',
-            'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-primary hover:bg-brand-surface-muted',
-            disabled && 'pointer-events-none cursor-not-allowed opacity-60'
-          )}
-          htmlFor={inputId}
-          title="Upload image"
-        >
-          <UilEditAlt aria-hidden="true" className="h-5 w-5" />
-          <span className="sr-only">Upload image</span>
-        </label>
+      {!readOnly ? (
+        <div className="flex items-center gap-2">
+          <input ref={inputRef} accept={accept} className="sr-only" disabled={disabled} id={inputId} type="file" onChange={handleFileChange} />
+          <label
+            className={mergeClassNames(
+              'inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-brand-border bg-brand-surface text-brand-heading transition',
+              'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-primary hover:bg-brand-surface-muted',
+              disabled && 'pointer-events-none cursor-not-allowed opacity-60'
+            )}
+            htmlFor={inputId}
+            title="Upload image"
+          >
+            <UilEditAlt aria-hidden="true" className="h-5 w-5" />
+            <span className="sr-only">Upload image</span>
+          </label>
 
-        {previewUrl ? (
-          <Button
-            aria-label="Remove selected image"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-brand-surface text-brand-heading transition hover:bg-brand-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={disabled}
-            icon={<UilTrashAlt aria-hidden="true" className="h-5 w-5" />}
-            title="Remove selected image"
-            type="button"
-            onClick={handleClear}
-          />
-        ) : null}
-      </div>
+          {previewUrl ? (
+            <Button
+              aria-label="Remove selected image"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-brand-border bg-brand-surface text-brand-heading transition hover:bg-brand-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={disabled}
+              icon={<UilTrashAlt aria-hidden="true" className="h-5 w-5" />}
+              title="Remove selected image"
+              type="button"
+              onClick={handleClear}
+            />
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 };
