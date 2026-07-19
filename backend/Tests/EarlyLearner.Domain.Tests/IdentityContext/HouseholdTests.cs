@@ -220,6 +220,64 @@ public sealed class HouseholdTests
         exception.Message.ShouldBe("Child does not belong to this household.");
     }
 
+    [Test]
+    public void AddChild_ShouldThrow_WhenFirstNameIsMissing()
+    {
+        // Arrange
+        var household = CreateHousehold();
+
+        // Act
+        var exception = Should.Throw<DomainException>(() => household.AddChild(" ", "Taylor", new DateOnly(2021, 3, 14), avatarStoredFileId: null));
+
+        // Assert
+        exception.Message.ShouldBe("firstName is required.");
+    }
+
+    [Test]
+    public void ArchiveChild_ShouldThrow_WhenChildDoesNotBelongToHousehold()
+    {
+        // Arrange
+        var household = CreateHousehold();
+        var unknownChildId = new ChildId(Guid.NewGuid());
+
+        // Act
+        var exception = Should.Throw<DomainException>(() => household.ArchiveChild(unknownChildId));
+
+        // Assert
+        exception.Message.ShouldBe("Child does not belong to this household.");
+    }
+
+    [Test]
+    public void RevokeInvitation_ShouldRevokeExistingInvitationAndRaiseTraceEvent()
+    {
+        // Arrange
+        var household = CreateHousehold();
+        var invitation = household.InviteNewCarer("caregiver@example.com", HouseholdRoleEnum.Caregiver, OwnerUserId, DateTimeOffset.UtcNow.AddDays(7));
+        household.ClearDomainEvents();
+
+        // Act
+        household.RevokeInvitation(invitation.Id);
+
+        // Assert
+        invitation.Status.ShouldBe(HouseholdInvitationStatusEnum.Revoked);
+        invitation.UpdatedOn.ShouldNotBeNull();
+        household.UpdatedOn.ShouldNotBeNull();
+        household.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("HouseholdCarerInvitationRevoked");
+    }
+
+    [Test]
+    public void RevokeInvitation_ShouldThrow_WhenInvitationDoesNotBelongToHousehold()
+    {
+        // Arrange
+        var household = CreateHousehold();
+        var unknownInvitationId = new HouseholdInvitationId(Guid.NewGuid());
+
+        // Act
+        var exception = Should.Throw<DomainException>(() => household.RevokeInvitation(unknownInvitationId));
+
+        // Assert
+        exception.Message.ShouldBe("Invitation does not belong to this household.");
+    }
     private static Household CreateHousehold()
     {
         return Household.Create("Taylor Household", OwnerUserId);
