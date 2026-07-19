@@ -7,9 +7,17 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 
-EarlyLearner is a full-stack early childhood learning record application. It helps carers manage households and children, capture daily learning moments, attach evidence, and tag progress against learning outcomes.
+EarlyLearner is a distributed early childhood learning record and school-readiness planning system. It helps carers manage households and children, capture daily learning moments, attach evidence, and tag progress against learning outcomes.
 
-The project is built as a cloud-native, event-driven .NET system using a modular API, background worker, Azure-managed services, and a React frontend.
+The project is built as a cloud-native, event-driven .NET system using a modular API, background worker microservice, Azure-managed services, asynchronous messaging, durable storage, and a React frontend.
+
+---
+
+## 🧭 System Design
+
+EarlyLearner is split across separately deployable application services and managed cloud resources. The API handles HTTP workflows, the worker processes integration events, PostgreSQL stores relational application data, Cosmos DB supports document-style state, Azure Storage keeps uploaded evidence, and Azure Service Bus connects the distributed workflow boundaries.
+
+![EarlyLearner system design](docs/systemDesign.png)
 
 ---
 
