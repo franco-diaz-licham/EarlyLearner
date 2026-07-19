@@ -19,11 +19,11 @@ public static class DashboardEndpoints
 
     private static async Task<IResult> GetHomeDashboardAsync(
         DateOnly? today,
-        IGetHomeDashboardQueryHandler handler,
+        IHomeDashboardRepository repository,
         CancellationToken cancellationToken)
     {
         var query = new GetHomeDashboardQuery(today ?? DateOnly.FromDateTime(DateTime.UtcNow));
-        var dashboard = await handler.HandleAsync(query, cancellationToken);
+        var dashboard = await repository.GetAsync(query, cancellationToken);
         return dashboard.ToApiResult();
     }
 }

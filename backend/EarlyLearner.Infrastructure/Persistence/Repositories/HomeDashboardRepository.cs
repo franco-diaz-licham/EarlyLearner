@@ -6,11 +6,11 @@ using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Shared.Utilities;
 using Microsoft.EntityFrameworkCore;
 
-namespace EarlyLearner.Infrastructure.Persistence.Queries.Dashboard;
+namespace EarlyLearner.Infrastructure.Persistence.Repositories;
 
-public sealed class EfGetHomeDashboardQueryHandler(DatabaseContext db, ICurrentUser currentUser) : IGetHomeDashboardQueryHandler
+public sealed class HomeDashboardRepository(DatabaseContext db, ICurrentUser currentUser) : IHomeDashboardRepository
 {
-    public async Task<Result<GetHomeDashboardResponse>> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken)
+    public async Task<Result<GetHomeDashboardResponse>> GetAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken)
     {
         var householdId = currentUser.HouseholdId;
         var weekStart = query.Today.AddDays(-6);

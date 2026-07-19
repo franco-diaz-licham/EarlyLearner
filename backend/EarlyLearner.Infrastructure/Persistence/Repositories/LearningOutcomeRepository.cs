@@ -1,7 +1,6 @@
 using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
-using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Persistence.Repositories;

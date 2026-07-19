@@ -1,17 +1,17 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Application.UseCases.Dashboard;
 using EarlyLearner.Domain.LearningContext;
-using EarlyLearner.Infrastructure.Persistence.Queries.Dashboard;
+using EarlyLearner.Infrastructure.Persistence.Repositories;
 using EarlyLearner.Shared.Tests;
 using EarlyLearner.Shared.Tests.Seeders;
 using EarlyLearner.Shared.Utilities;
 using Moq;
 using Shouldly;
 
-namespace EarlyLearner.Infrastructure.Tests.Persistence.Queries.Dashboard;
+namespace EarlyLearner.Infrastructure.Tests.Persistence;
 
 [TestFixture]
-public sealed class EfGetHomeDashboardQueryHandlerTests : BaseDatabaseSetup
+public sealed class HomeDashboardRepositoryTests : BaseDatabaseSetup
 {
     private Mock<ICurrentUser> _currentUser = default!;
 
@@ -22,7 +22,7 @@ public sealed class EfGetHomeDashboardQueryHandlerTests : BaseDatabaseSetup
     }
 
     [Test]
-    public async Task HandleAsync_Should_ReturnDashboardForCurrentHousehold()
+    public async Task GetAsync_Should_ReturnDashboardForCurrentHousehold()
     {
         // Arrange
         var today = new DateOnly(2026, 7, 19);
@@ -46,10 +46,10 @@ public sealed class EfGetHomeDashboardQueryHandlerTests : BaseDatabaseSetup
         _currentUser
             .SetupGet(user => user.HouseholdId)
             .Returns(seed.Household.Id);
-        var sut = new EfGetHomeDashboardQueryHandler(Db, _currentUser.Object);
+        var sut = new HomeDashboardRepository(Db, _currentUser.Object);
 
         // Act
-        var result = await sut.HandleAsync(new GetHomeDashboardQuery(today), CancellationToken.None);
+        var result = await sut.GetAsync(new GetHomeDashboardQuery(today), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

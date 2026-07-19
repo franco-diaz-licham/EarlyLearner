@@ -7,7 +7,7 @@ using EarlyLearner.Application.UseCases.Dashboard;
 using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.UseCases.LearningContext;
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Infrastructure.Persistence.Queries.Dashboard;
+using EarlyLearner.Infrastructure.Persistence.Repositories;
 using EarlyLearner.Shared.DocumentStoreService;
 using FluentValidation;
 
@@ -49,7 +49,7 @@ public static class ApiAppServices
 
     public static IServiceCollection AddUseCaseServices(this IServiceCollection services)
     {
-        services.AddScoped<IGetHomeDashboardQueryHandler, EfGetHomeDashboardQueryHandler>();
+        services.AddScoped<IHomeDashboardRepository, HomeDashboardRepository>();
         services.AddScoped<IStoredFileQueryService, StoredFileQueryService>();
         services.AddScoped<IStoredFileCommandService, StoredFileCommandService>();
         services.AddScoped<IHouseholdQueryService, HouseholdQueryService>();

@@ -51,7 +51,7 @@ public sealed record HomeDashboardRecentMomentResponse(
     string Notes,
     IReadOnlyList<string> OutcomeNames);
 
-public interface IGetHomeDashboardQueryHandler
+public interface IHomeDashboardRepository
 {
-    Task<Result<GetHomeDashboardResponse>> HandleAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken);
+    Task<Result<GetHomeDashboardResponse>> GetAsync(GetHomeDashboardQuery query, CancellationToken cancellationToken);
 }

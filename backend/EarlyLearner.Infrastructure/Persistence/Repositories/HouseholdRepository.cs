@@ -2,7 +2,6 @@ using EarlyLearner.Application.UseCases.IdentityContext;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
-using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace EarlyLearner.Infrastructure.Persistence.Repositories;
