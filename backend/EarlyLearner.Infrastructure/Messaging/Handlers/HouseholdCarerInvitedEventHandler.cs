@@ -5,14 +5,14 @@ using EarlyLearner.Shared.Messaging;
 
 namespace EarlyLearner.Infrastructure.Messaging.Handlers;
 
-public sealed class HouseholdCarerInvitedHandler(IIntegrationEventPublisher integrationEventPublisher) : IDomainEventHandler
+public sealed class HouseholdCarerInvitedEventHandler(IIntegrationEventPublisher integrationEventPublisher) : IDomainEventHandler
 {
-    public Type EventType => typeof(HouseholdCarerInvited);
+    public Type EventType => typeof(HouseholdCarerInvitedEvent);
 
     public async Task HandleAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
-        if (domainEvent is not HouseholdCarerInvited carerInvited) {
-            throw new InvalidOperationException($"{nameof(HouseholdCarerInvitedHandler)} cannot handle {domainEvent.GetType().Name}.");
+        if (domainEvent is not HouseholdCarerInvitedEvent carerInvited) {
+            throw new InvalidOperationException($"{nameof(HouseholdCarerInvitedEventHandler)} cannot handle {domainEvent.GetType().Name}.");
         }
 
         await integrationEventPublisher.PublishAsync(new HouseholdInvitationEmailRequestedEvent(

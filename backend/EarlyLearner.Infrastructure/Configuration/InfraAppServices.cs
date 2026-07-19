@@ -172,7 +172,7 @@ public static class InfraAppServices
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IDomainEventHandler, EntityTraceAuditTrailHandler>();
-        services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedHandler>();
+        services.AddScoped<IDomainEventHandler, HouseholdCarerInvitedEventHandler>();
         services.AddScoped<IIntegrationEventPublisher, IntegrationEventPublisher>();
 
         services.AddMassTransit(configurator => {

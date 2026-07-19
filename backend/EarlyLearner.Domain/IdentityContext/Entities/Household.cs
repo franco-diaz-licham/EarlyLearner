@@ -158,7 +158,7 @@ public sealed class Household : Entity<HouseholdId>
     {
         var occurredAt = DateTimeOffset.UtcNow;
 
-        RaiseDomainEvent(new HouseholdCarerInvited(
+        RaiseDomainEvent(new HouseholdCarerInvitedEvent(
             Id,
             invitation.Id,
             Name,
@@ -220,7 +220,7 @@ public sealed class Household : Entity<HouseholdId>
         var child = new Child(new ChildId(Guid.NewGuid()), Id, firstName, lastName, dateOfBirth, avatarStoredFileId);
         _children.Add(child);
         var occurredAt = DateTimeOffset.UtcNow;
-        RaiseDomainEvent(new ChildCreated(Id, child.Id, occurredAt));
+        RaiseDomainEvent(new ChildCreatedEvent(Id, child.Id, occurredAt));
         RaiseTraceEvent(
             entityName: nameof(Child),
             entityId: child.Id.Value.ToString(),

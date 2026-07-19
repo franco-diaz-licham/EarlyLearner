@@ -63,8 +63,8 @@ public sealed class HouseholdTests
         household.Carers.ShouldContain(carer);
         carer.UserId.ShouldBe(SecondUserId);
         carer.Role.ShouldBe(HouseholdRoleEnum.Caregiver);
-        household.DomainEvents.OfType<EntityTraceRecorded>().ShouldContain(trace => trace.Action == "HouseholdCarerAdded");
-        household.DomainEvents.OfType<EntityTraceRecorded>().ShouldContain(trace => trace.Action == "HouseholdCarerInvitationAccepted");
+        household.DomainEvents.OfType<EntityTraceRecordedEvent>().ShouldContain(trace => trace.Action == "HouseholdCarerAdded");
+        household.DomainEvents.OfType<EntityTraceRecordedEvent>().ShouldContain(trace => trace.Action == "HouseholdCarerInvitationAccepted");
         household.UpdatedOn.ShouldNotBeNull();
     }
 
@@ -128,8 +128,8 @@ public sealed class HouseholdTests
         invitation.Status.ShouldBe(HouseholdInvitationStatusEnum.Pending);
         invitation.ExpiresAt.ShouldBe(expiresAt);
         household.Invitations.ShouldContain(invitation);
-        household.DomainEvents.OfType<HouseholdCarerInvited>().Single().InvitationId.ShouldBe(invitation.Id);
-        household.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("HouseholdCarerInvited");
+        household.DomainEvents.OfType<HouseholdCarerInvitedEvent>().Single().InvitationId.ShouldBe(invitation.Id);
+        household.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("HouseholdCarerInvited");
     }
 
     [Test]
@@ -148,7 +148,7 @@ public sealed class HouseholdTests
         resent.ShouldBeSameAs(original);
         household.Invitations.Count.ShouldBe(1);
         resent.ExpiresAt.ShouldBe(newExpiry);
-        household.DomainEvents.OfType<HouseholdCarerInvited>().Single().InvitationId.ShouldBe(original.Id);
+        household.DomainEvents.OfType<HouseholdCarerInvitedEvent>().Single().InvitationId.ShouldBe(original.Id);
     }
 
     [Test]
@@ -168,8 +168,8 @@ public sealed class HouseholdTests
         child.DateOfBirth.ShouldBe(dateOfBirth);
         child.AvatarStoredFileId.ShouldBe(avatarStoredFileId);
         household.Children.ShouldContain(child);
-        household.DomainEvents.OfType<ChildCreated>().Single().ChildId.ShouldBe(child.Id);
-        household.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("ChildCreated");
+        household.DomainEvents.OfType<ChildCreatedEvent>().Single().ChildId.ShouldBe(child.Id);
+        household.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("ChildCreated");
     }
 
     [Test]
@@ -262,7 +262,7 @@ public sealed class HouseholdTests
         invitation.Status.ShouldBe(HouseholdInvitationStatusEnum.Revoked);
         invitation.UpdatedOn.ShouldNotBeNull();
         household.UpdatedOn.ShouldNotBeNull();
-        household.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("HouseholdCarerInvitationRevoked");
+        household.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("HouseholdCarerInvitationRevoked");
     }
 
     [Test]

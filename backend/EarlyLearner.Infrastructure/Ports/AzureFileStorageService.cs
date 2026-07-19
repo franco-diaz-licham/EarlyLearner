@@ -11,9 +11,9 @@ public sealed class AzureFileStorageService(BlobContainerClient containerClient)
 
     public async Task<string> UploadAsync(string key, ContentType contentType, Stream stream, CancellationToken cancellationToken)
     {
-        if (key == null) throw new ArgumentNullException(nameof(key));
-        if (contentType is null) throw new ArgumentNullException(nameof(contentType));
-        if (stream == null) throw new ArgumentNullException(nameof(stream));
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(contentType);
+        ArgumentNullException.ThrowIfNull(stream);
         if (!stream.CanRead) throw new ArgumentException("Stream must be readable.", nameof(stream));
 
         if (stream.CanSeek) stream.Position = 0;

@@ -28,7 +28,7 @@ public sealed class DailyLogTests
         dailyLog.ChildId.ShouldBe(childId);
         dailyLog.LogDate.ShouldBe(logDate);
         dailyLog.CreatedOn.ShouldNotBe(default);
-        dailyLog.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("DailyLogCreated");
+        dailyLog.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("DailyLogCreated");
     }
 
     [Test]
@@ -48,8 +48,8 @@ public sealed class DailyLogTests
         moment.LearningOutcomes.Single().ShouldBe(outcome);
         dailyLog.LearningMoments.Single().ShouldBe(moment);
         dailyLog.UpdatedOn.ShouldNotBeNull();
-        dailyLog.DomainEvents.OfType<LearningMomentRecorded>().Single().LearningMomentId.ShouldBe(moment.Id);
-        dailyLog.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("LearningMomentRecorded");
+        dailyLog.DomainEvents.OfType<LearningMomentRecordedEvent>().Single().LearningMomentId.ShouldBe(moment.Id);
+        dailyLog.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("LearningMomentRecorded");
     }
 
     [Test]
@@ -85,7 +85,7 @@ public sealed class DailyLogTests
         moment.LearningOutcomes.Single().ShouldBe(updatedOutcome);
         moment.UpdatedOn.ShouldNotBeNull();
         dailyLog.UpdatedOn.ShouldNotBeNull();
-        dailyLog.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("LearningMomentUpdated");
+        dailyLog.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("LearningMomentUpdated");
     }
 
     [Test]
@@ -133,7 +133,7 @@ public sealed class DailyLogTests
         removedMoment.ShouldBe(moment);
         dailyLog.LearningMoments.ShouldBeEmpty();
         dailyLog.UpdatedOn.ShouldNotBeNull();
-        dailyLog.DomainEvents.OfType<EntityTraceRecorded>().Single().Action.ShouldBe("LearningMomentDeleted");
+        dailyLog.DomainEvents.OfType<EntityTraceRecordedEvent>().Single().Action.ShouldBe("LearningMomentDeleted");
     }
 
     [Test]

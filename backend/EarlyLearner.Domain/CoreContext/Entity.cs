@@ -31,7 +31,7 @@ public abstract class Entity
 
     public void RaiseTraceEvent(string entityName, string entityId, string action, string summary, string? details, Guid householdId, DateTimeOffset occurredAt)
     {
-        RaiseDomainEvent(new EntityTraceRecorded(
+        RaiseDomainEvent(new EntityTraceRecordedEvent(
             EntityName: entityName,
             EntityId: entityId,
             Action: action,
@@ -52,7 +52,7 @@ public abstract class Entity<TId> : Entity where TId : notnull
     public TId Id { get; protected set; } = default!;
 }
 
-public sealed record EntityTraceRecorded(
+public sealed record EntityTraceRecordedEvent(
     string EntityName,
     string EntityId,
     string Action,

@@ -76,7 +76,7 @@ public sealed class DailyLog : Entity<DailyLogId>
         var moment = new LearningMoment(new LearningMomentId(Guid.NewGuid()), Id, kind, title, notes, learningOutcomes);
         _learningMoments.Add(moment);
         var occurredAt = DateTimeOffset.UtcNow;
-        RaiseDomainEvent(new LearningMomentRecorded(Id, moment.Id, ChildId, occurredAt));
+        RaiseDomainEvent(new LearningMomentRecordedEvent(Id, moment.Id, ChildId, occurredAt));
         RaiseTraceEvent(
             entityName: nameof(LearningMoment),
             entityId: moment.Id.Value.ToString(),
