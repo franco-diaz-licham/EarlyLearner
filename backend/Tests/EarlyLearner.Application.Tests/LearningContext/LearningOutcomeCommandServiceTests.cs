@@ -1,0 +1,152 @@
+using EarlyLearner.Application.Ports;
+using EarlyLearner.Application.UseCases.LearningContext;
+using EarlyLearner.Domain.LearningContext;
+using EarlyLearner.Domain.LearningContext.Entities;
+using EarlyLearner.Domain.LearningContext.ValueObjects;
+using EarlyLearner.Shared.Utilities;
+using Moq;
+using Shouldly;
+
+namespace EarlyLearner.Application.Tests.LearningContext;
+
+[TestFixture]
+public sealed class LearningOutcomeCommandServiceTests
+{
+    private Mock<ILearningOutcomeCommandRepository> _learningOutcomeRepo = default!;
+    private Mock<IUnitOfWork> _uow = default!;
+    private LearningOutcomeCommandService _sut = default!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _learningOutcomeRepo = new Mock<ILearningOutcomeCommandRepository>(MockBehavior.Strict);
+        _uow = new Mock<IUnitOfWork>(MockBehavior.Strict);
+
+        _sut = new LearningOutcomeCommandService(_learningOutcomeRepo.Object, _uow.Object);
+    }
+
+    [Test]
+    public async Task CreateAsync_Should_ReturnCreatedResult_On_ValidCommand()
+    {
+        // Arrange
+        var command = new CreateLearningOutcomeCommand("language-listening", "Listens and responds", "Listens to short instructions.", "Language", 10);
+        LearningOutcome? addedOutcome = null;
+
+        _learningOutcomeRepo
+            .Setup(repo => repo.Add(It.IsAny<LearningOutcome>()))
+            .Callback<LearningOutcome>(outcome => addedOutcome = outcome);
+        _uow
+            .Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+        _learningOutcomeRepo
+            .Setup(repo => repo.GetResponseAsync(It.IsAny<LearningOutcomeId>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => CreateResponse(addedOutcome!));
+
+        // Act
+        var result = await _sut.CreateAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Type.ShouldBe(ResultTypeEnum.Created);
+        result.Value.Name.ShouldBe(command.Name);
+        result.Value.Status.ShouldBe(LearningOutcomeStatusEnum.Active);
+        addedOutcome.ShouldNotBeNull();
+        addedOutcome.Code.ShouldBe(command.Code);
+        _learningOutcomeRepo.Verify(repo => repo.Add(It.IsAny<LearningOutcome>()), Times.Once);
+        _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.Verify(repo => repo.GetResponseAsync(addedOutcome.Id, It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.VerifyNoOtherCalls();
+        _uow.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateAsync_Should_ReturnNotFound_On_MissingLearningOutcome()
+    {
+        // Arrange
+        var command = new UpdateLearningOutcomeCommand(new LearningOutcomeId(Guid.NewGuid()), "Name", "Description", "Language", 20);
+
+        _learningOutcomeRepo
+            .Setup(repo => repo.GetAsync(command.LearningOutcomeId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((LearningOutcome?)null);
+
+        // Act
+        var result = await _sut.UpdateAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.Type.ShouldBe(ResultTypeEnum.NotFound);
+        result.Error!.Message.ShouldBe("Learning outcome was not found.");
+        _learningOutcomeRepo.Verify(repo => repo.GetAsync(command.LearningOutcomeId, It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.VerifyNoOtherCalls();
+        _uow.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateStatusAsync_Should_ReturnUpdatedResult_On_ValidStatus()
+    {
+        // Arrange
+        var outcome = CreateLearningOutcome();
+        var command = new UpdateLearningOutcomeStatusCommand(outcome.Id, LearningOutcomeStatusEnum.Inactive);
+        var response = CreateResponse(outcome) with { Status = LearningOutcomeStatusEnum.Inactive };
+
+        _learningOutcomeRepo
+            .Setup(repo => repo.GetAsync(command.LearningOutcomeId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(outcome);
+        _uow
+            .Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+        _learningOutcomeRepo
+            .Setup(repo => repo.GetResponseAsync(outcome.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _sut.UpdateStatusAsync(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Type.ShouldBe(ResultTypeEnum.Updated);
+        result.Value.ShouldBe(response);
+        outcome.Status.ShouldBe(LearningOutcomeStatusEnum.Inactive);
+        _learningOutcomeRepo.Verify(repo => repo.GetAsync(command.LearningOutcomeId, It.IsAny<CancellationToken>()), Times.Once);
+        _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.Verify(repo => repo.GetResponseAsync(outcome.Id, It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.VerifyNoOtherCalls();
+        _uow.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DeleteAsync_Should_ReturnConflict_On_UsedLearningOutcome()
+    {
+        // Arrange
+        var outcome = CreateLearningOutcome();
+
+        _learningOutcomeRepo
+            .Setup(repo => repo.GetAsync(outcome.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(outcome);
+        _learningOutcomeRepo
+            .Setup(repo => repo.IsUsedByLearningMomentAsync(outcome.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        // Act
+        var result = await _sut.DeleteAsync(outcome.Id, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeFalse();
+        result.Type.ShouldBe(ResultTypeEnum.Conflict);
+        result.Error!.Message.ShouldBe("Learning outcome is already used by learning moments. Archive it instead of deleting it.");
+        _learningOutcomeRepo.Verify(repo => repo.GetAsync(outcome.Id, It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.Verify(repo => repo.IsUsedByLearningMomentAsync(outcome.Id, It.IsAny<CancellationToken>()), Times.Once);
+        _learningOutcomeRepo.VerifyNoOtherCalls();
+        _uow.VerifyNoOtherCalls();
+    }
+
+    private static LearningOutcome CreateLearningOutcome()
+    {
+        return LearningOutcome.Create("language-listening", "Listens and responds", "Listens to short instructions.", "Language", 10);
+    }
+
+    private static LearningOutcomeResponse CreateResponse(LearningOutcome outcome)
+    {
+        return new LearningOutcomeResponse(outcome.Id.Value, outcome.Code, outcome.Name, outcome.Description, outcome.Category, outcome.SortOrder, outcome.Status);
+    }
+}
