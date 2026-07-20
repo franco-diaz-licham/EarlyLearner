@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\EarlyLearner.Worker\EarlyLearner.Worker.csproj" />
+    <ProjectReference Include="..\EarlyLearner.Shared.Tests\EarlyLearner.Shared.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>
