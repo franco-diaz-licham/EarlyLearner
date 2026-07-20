@@ -6,10 +6,11 @@ using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using NUnit.Framework;
 
-namespace EarlyLearner.Infrastructure.Tests.Messaging.Integration;
+namespace EarlyLearner.Shared.Tests.Fixtures;
 
-public abstract class InfrastructureConsumerTestHostFixture
+public abstract class InfrastructureConsumerFixture
 {
     protected ITestHarness _harness = default!;
     protected InMemoryDocumentStore _documentStore = default!;
@@ -48,4 +49,8 @@ public abstract class InfrastructureConsumerTestHostFixture
         });
     }
 }
+
+
+
+
 

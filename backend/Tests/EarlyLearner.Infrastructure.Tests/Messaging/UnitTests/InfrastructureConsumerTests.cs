@@ -1,14 +1,14 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
-using MassTransit;
 using Moq;
 using Shouldly;
+using EarlyLearner.Shared.Tests.Fixtures;
 
-namespace EarlyLearner.Infrastructure.Tests.Messaging.Integration;
+namespace EarlyLearner.Infrastructure.Tests.Messaging.Harness;
 
 [TestFixture]
-public sealed class InfrastructureConsumerIntegrationTests : InfrastructureConsumerTestHostFixture
+public sealed class InfrastructureConsumerTests : InfrastructureConsumerFixture
 {
     [Test]
     public async Task HouseholdInvitationEmailSentEvent_Should_BeConsumedAndPublishNotification()
@@ -100,4 +100,8 @@ public sealed class InfrastructureConsumerIntegrationTests : InfrastructureConsu
             OccurredAt: DateTimeOffset.UtcNow);
     }
 }
+
+
+
+
 

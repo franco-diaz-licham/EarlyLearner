@@ -1,3 +1,4 @@
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
 using EarlyLearner.Worker.Messaging;
@@ -6,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shouldly;
 
-namespace EarlyLearner.Worker.Tests.Messaging.Integration;
+namespace EarlyLearner.Worker.Tests.Messaging.Harness;
 
 [TestFixture]
-public sealed class WorkerConsumerIntegrationTests : WorkerConsumerTestHostFixture
+public sealed class WorkerConsumerTests : WorkerConsumerFixture
 {
     [Test]
     public async Task HouseholdInvitationEmailRequestedEvent_Should_BeConsumedAndPublishSentEvent()
@@ -110,3 +111,7 @@ public sealed class WorkerConsumerIntegrationTests : WorkerConsumerTestHostFixtu
             OccurredAt: DateTimeOffset.UtcNow);
     }
 }
+
+
+
+

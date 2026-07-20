@@ -11,17 +11,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
+using NUnit.Framework;
 
-namespace EarlyLearner.Worker.Tests.Messaging.Integration;
+namespace EarlyLearner.Shared.Tests.Fixtures;
 
 /// <summary>
 /// Provides an isolated in-process worker host for consumer integration testing.
 /// Creates a fresh host and scoped service provider for each test, registers worker-consumer test doubles,
 /// and starts the MassTransit test harness using the same lifecycle every time.
 /// </summary>
-public abstract class WorkerConsumerTestHostFixture
+public abstract class WorkerConsumerFixture
 {
     protected ITestHarness _harness = default!;
     protected Mock<IEmailSender> _emailSender = default!;
@@ -93,7 +93,7 @@ public abstract class WorkerConsumerTestHostFixture
 
         services.AddSingleton(_emailSender.Object);
         services.AddSingleton<IDocumentStore>(_documentStore);
-        services.AddSingleton(Options.Create(new EarlyLearnerOptions { Url = new Uri("https://earlylearner.test") }));
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(new EarlyLearnerOptions { Url = new Uri("https://earlylearner.test") }));
         services.AddDbContext<AuditDbContext>(options => options.UseInMemoryDatabase(databaseName));
         services.AddMassTransitTestHarness(configurator => {
             configurator.AddConsumer<HouseholdInvitationEmailRequestedConsumer>();
@@ -101,3 +101,7 @@ public abstract class WorkerConsumerTestHostFixture
         });
     }
 }
+
+
+
+
