@@ -15,7 +15,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
     public async Task Consume_Should_SendEmailUpsertNotificationAndPublishSentEvent()
     {
         // Arrange
-        var message = CreateRequestedEvent();
+        var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
         var sut = CreateHouseholdInvitationEmailRequestedConsumer();
         var context = CreateContext(message);
         HouseholdInvitationEmailSentEvent? publishedEvent = null;
@@ -54,7 +54,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
     public async Task Consume_Should_UpsertNotificationAndPublishFailedEvent_WhenEmailSenderThrows()
     {
         // Arrange
-        var message = CreateRequestedEvent();
+        var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
         var sut = CreateHouseholdInvitationEmailRequestedConsumer();
         var context = CreateContext(message);
         HouseholdInvitationEmailFailedEvent? publishedEvent = null;
@@ -86,22 +86,4 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
         _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
         _emailSender.VerifyNoOtherCalls();
     }
-
-
-
-    private static HouseholdInvitationEmailRequestedEvent CreateRequestedEvent()
-    {
-        return new HouseholdInvitationEmailRequestedEvent(
-            Id: Guid.NewGuid(),
-            HouseholdId: Guid.NewGuid(),
-            InvitationId: Guid.NewGuid(),
-            HouseholdName: "Early Learner Household",
-            Email: "carer@example.com",
-            FirstName: "Casey",
-            LastName: "Carer",
-            ExpiresAt: DateTimeOffset.UtcNow.AddDays(7),
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
 }
-
-

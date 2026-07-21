@@ -1,9 +1,6 @@
-using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Worker.Persistence;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using Shouldly;
 
 namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
@@ -15,7 +12,7 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
     public async Task Consume_Should_RecordAuditTrailEntry_WhenEntryDoesNotExist()
     {
         // Arrange
-        var message = CreateEvent();
+        var message = TestData.CreateAuditTrailEntryRecordedEvent();
         var db = ResolveService<AuditDbContext>();
         var sut = CreateAuditTrailEntryRecordedConsumer();
         var context = CreateContext(message);
@@ -38,7 +35,7 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
     public async Task Consume_Should_NotCreateDuplicateAuditTrailEntry_WhenEntryAlreadyExists()
     {
         // Arrange
-        var message = CreateEvent();
+        var message = TestData.CreateAuditTrailEntryRecordedEvent();
         var db = ResolveService<AuditDbContext>();
         var sut = CreateAuditTrailEntryRecordedConsumer();
         db.AuditTrailEntries.Add(new AuditTrailEntry {
@@ -61,19 +58,4 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
         entries.Count.ShouldBe(1);
         entries.Single().Id.ShouldBe(message.Id);
     }
-
-
-    private static AuditTrailEntryRecordedEvent CreateEvent()
-    {
-        return new AuditTrailEntryRecordedEvent(
-            Id: Guid.NewGuid(),
-            HouseholdId: Guid.NewGuid(),
-            Action: "HouseholdCarerInvited",
-            Summary: "A household invitation was created.",
-            Details: "carer@example.com",
-            ActionedAt: DateTimeOffset.UtcNow.AddMinutes(-1),
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
 }
-
-

@@ -16,7 +16,7 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
     public async Task HouseholdInvitationEmailRequestedEvent_Should_BeConsumedAndPublishSentEvent()
     {
         // Arrange
-        var message = CreateEmailRequestedEvent();
+        var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
         _emailSender
             .Setup(sender => sender.SendAsync(It.Is<EmailMessageModel>(email => email.To == message.Email), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -41,7 +41,7 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
     public async Task HouseholdInvitationEmailRequestedEvent_Should_BeConsumedAndPublishFailedEvent_WhenEmailSenderThrows()
     {
         // Arrange
-        var message = CreateEmailRequestedEvent();
+        var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
         _emailSender
             .Setup(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Email service is unavailable."));
@@ -67,7 +67,7 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
     public async Task AuditTrailEntryRecordedEvent_Should_BeConsumedAndStored()
     {
         // Arrange
-        var message = CreateAuditTrailEntryRecordedEvent();
+        var message = TestData.CreateAuditTrailEntryRecordedEvent();
 
         // Act
         await _harness.Bus.Publish(message);
@@ -84,34 +84,4 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         entry.Details.ShouldBe(message.Details);
         entry.ActionedAt.ShouldBe(message.ActionedAt);
     }
-
-    private static HouseholdInvitationEmailRequestedEvent CreateEmailRequestedEvent()
-    {
-        return new HouseholdInvitationEmailRequestedEvent(
-            Id: Guid.NewGuid(),
-            HouseholdId: Guid.NewGuid(),
-            InvitationId: Guid.NewGuid(),
-            HouseholdName: "Early Learner Household",
-            Email: "carer@example.com",
-            FirstName: "Casey",
-            LastName: "Carer",
-            ExpiresAt: DateTimeOffset.UtcNow.AddDays(7),
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
-
-    private static AuditTrailEntryRecordedEvent CreateAuditTrailEntryRecordedEvent()
-    {
-        return new AuditTrailEntryRecordedEvent(
-            Id: Guid.NewGuid(),
-            HouseholdId: Guid.NewGuid(),
-            Action: "HouseholdCarerInvited",
-            Summary: "A household invitation was created.",
-            Details: "carer@example.com",
-            ActionedAt: DateTimeOffset.UtcNow.AddMinutes(-1),
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
 }
-
-
-
-

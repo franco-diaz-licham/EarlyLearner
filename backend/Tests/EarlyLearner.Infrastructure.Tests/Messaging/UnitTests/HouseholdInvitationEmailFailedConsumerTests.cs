@@ -1,3 +1,4 @@
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Messaging.Consumers;
 using EarlyLearner.Shared.DocumentStoreService;
@@ -33,8 +34,8 @@ public sealed class HouseholdInvitationEmailFailedConsumerTests
     public async Task Consume_Should_PublishNotification_WhenNotificationDocumentExists()
     {
         // Arrange
-        var message = CreateEvent();
-        var notification = CreateNotification(message.HouseholdId, message.InvitationId);
+        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
+        var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId);
         var context = CreateContext(message);
         NotificationResponse? publishedNotification = null;
 
@@ -71,7 +72,7 @@ public sealed class HouseholdInvitationEmailFailedConsumerTests
     public async Task Consume_Should_NotPublishNotification_WhenNotificationDocumentIsMissing()
     {
         // Arrange
-        var message = CreateEvent();
+        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
         var context = CreateContext(message);
 
         _documentStore
@@ -104,28 +105,5 @@ public sealed class HouseholdInvitationEmailFailedConsumerTests
         return context;
     }
 
-    private static HouseholdInvitationEmailFailedEvent CreateEvent()
-    {
-        return new HouseholdInvitationEmailFailedEvent(
-            Id: Guid.NewGuid(),
-            HouseholdId: Guid.NewGuid(),
-            InvitationId: Guid.NewGuid(),
-            Email: "carer@example.com",
-            Reason: "Email service is unavailable.",
-            FailedAt: DateTimeOffset.UtcNow,
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
-
-    private static NotificationDocument CreateNotification(Guid householdId, Guid invitationId)
-    {
-        return new NotificationDocument(
-            Id: NotificationDocument.BuildId(invitationId),
-            HouseholdId: householdId,
-            InvitationId: invitationId,
-            Type: "householdInvitationEmailFailed",
-            Title: "Invitation email failed",
-            Message: "Invitation email failed.",
-            Status: NotificationDeliveryStatus.Failed,
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
 }
+

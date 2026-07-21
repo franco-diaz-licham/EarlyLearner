@@ -1,3 +1,4 @@
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Infrastructure.Messaging.Consumers;
 using EarlyLearner.Shared.DocumentStoreService;
@@ -33,8 +34,8 @@ public sealed class HouseholdInvitationEmailSentConsumerTests
     public async Task Consume_Should_PublishNotification_WhenNotificationDocumentExists()
     {
         // Arrange
-        var message = CreateEvent();
-        var notification = CreateNotification(message.HouseholdId, message.InvitationId);
+        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
+        var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId);
         var context = CreateContext(message);
         NotificationResponse? publishedNotification = null;
 
@@ -71,7 +72,7 @@ public sealed class HouseholdInvitationEmailSentConsumerTests
     public async Task Consume_Should_NotPublishNotification_WhenNotificationDocumentIsMissing()
     {
         // Arrange
-        var message = CreateEvent();
+        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
         var context = CreateContext(message);
 
         _documentStore
@@ -102,29 +103,5 @@ public sealed class HouseholdInvitationEmailSentConsumerTests
             .Returns(CancellationToken.None);
 
         return context;
-    }
-
-    private static HouseholdInvitationEmailSentEvent CreateEvent()
-    {
-        return new HouseholdInvitationEmailSentEvent(
-            Id: Guid.NewGuid(),
-            HouseholdId: Guid.NewGuid(),
-            InvitationId: Guid.NewGuid(),
-            Email: "carer@example.com",
-            SentAt: DateTimeOffset.UtcNow,
-            OccurredAt: DateTimeOffset.UtcNow);
-    }
-
-    private static NotificationDocument CreateNotification(Guid householdId, Guid invitationId)
-    {
-        return new NotificationDocument(
-            Id: NotificationDocument.BuildId(invitationId),
-            HouseholdId: householdId,
-            InvitationId: invitationId,
-            Type: "householdInvitationEmailSent",
-            Title: "Invitation email sent",
-            Message: "Invitation email was sent.",
-            Status: NotificationDeliveryStatus.Succeeded,
-            OccurredAt: DateTimeOffset.UtcNow);
     }
 }
