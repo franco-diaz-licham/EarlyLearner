@@ -26,6 +26,8 @@ public abstract class WorkerConsumerFixture
     protected ITestHarness _harness = default!;
     protected Mock<IEmailSender> _emailSender = default!;
     protected InMemoryDocumentStore _documentStore = default!;
+    protected HouseholdInvitationEmailRequestedConsumer _householdInvitationEmailRequestedConsumer = default!;
+    protected AuditTrailEntryRecordedConsumer _auditTrailEntryRecordedConsumer = default!;
 
     private IHost? _host;
     private IServiceScope? _testServiceScope;
@@ -39,6 +41,9 @@ public abstract class WorkerConsumerFixture
         _testServiceScope = _host.Services.CreateScope();
         _harness = ResolveService<ITestHarness>();
         await _harness.Start();
+
+        _householdInvitationEmailRequestedConsumer = CreateHouseholdInvitationEmailRequestedConsumer();
+        _auditTrailEntryRecordedConsumer = CreateAuditTrailEntryRecordedConsumer();
     }
 
     [TearDown]
@@ -125,10 +130,5 @@ public abstract class WorkerConsumerFixture
             .Returns(CancellationToken.None);
 
         return context;
-    }}
-
-
-
-
-
-
+    }
+}

@@ -16,7 +16,6 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
     {
         // Arrange
         var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
-        var sut = CreateHouseholdInvitationEmailRequestedConsumer();
         var context = CreateContext(message);
         HouseholdInvitationEmailSentEvent? publishedEvent = null;
 
@@ -31,7 +30,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
             .Returns(Task.CompletedTask);
 
         // Act
-        await sut.Consume(context.Object);
+        await _householdInvitationEmailRequestedConsumer.Consume(context.Object);
 
         // Assert
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
@@ -55,7 +54,6 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
     {
         // Arrange
         var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
-        var sut = CreateHouseholdInvitationEmailRequestedConsumer();
         var context = CreateContext(message);
         HouseholdInvitationEmailFailedEvent? publishedEvent = null;
 
@@ -68,7 +66,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
             .Returns(Task.CompletedTask);
 
         // Act
-        await sut.Consume(context.Object);
+        await _householdInvitationEmailRequestedConsumer.Consume(context.Object);
 
         // Assert
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);

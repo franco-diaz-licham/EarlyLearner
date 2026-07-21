@@ -14,11 +14,10 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
         // Arrange
         var message = TestData.CreateAuditTrailEntryRecordedEvent();
         var db = ResolveService<AuditDbContext>();
-        var sut = CreateAuditTrailEntryRecordedConsumer();
         var context = CreateContext(message);
 
         // Act
-        await sut.Consume(context.Object);
+        await _auditTrailEntryRecordedConsumer.Consume(context.Object);
 
         // Assert
         var entry = await db.AuditTrailEntries.SingleAsync();
@@ -37,7 +36,6 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
         // Arrange
         var message = TestData.CreateAuditTrailEntryRecordedEvent();
         var db = ResolveService<AuditDbContext>();
-        var sut = CreateAuditTrailEntryRecordedConsumer();
         db.AuditTrailEntries.Add(new AuditTrailEntry {
             Id = message.Id,
             HouseholdId = message.HouseholdId,
@@ -51,7 +49,7 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
         var context = CreateContext(message);
 
         // Act
-        await sut.Consume(context.Object);
+        await _auditTrailEntryRecordedConsumer.Consume(context.Object);
 
         // Assert
         var entries = await db.AuditTrailEntries.ToListAsync();
