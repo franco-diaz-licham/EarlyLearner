@@ -1,5 +1,5 @@
 using EarlyLearner.Shared.Messaging;
-using EarlyLearner.Worker.Messaging.Consumers;
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Worker.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -9,40 +9,22 @@ using Shouldly;
 namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class AuditTrailEntryRecordedConsumerTests
+public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
 {
-    private AuditDbContext _db = default!;
-    private AuditTrailEntryRecordedConsumer _sut = default!;
-
-    [SetUp]
-    public void SetUp()
-    {
-        var options = new DbContextOptionsBuilder<AuditDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        _db = new AuditDbContext(options);
-        _sut = new AuditTrailEntryRecordedConsumer(_db);
-    }
-
-    [TearDown]
-    public async Task TearDown()
-    {
-        await _db.DisposeAsync();
-    }
-
     [Test]
     public async Task Consume_Should_RecordAuditTrailEntry_WhenEntryDoesNotExist()
     {
         // Arrange
         var message = CreateEvent();
+        var db = ResolveService<AuditDbContext>();
+        var sut = CreateAuditTrailEntryRecordedConsumer();
         var context = CreateContext(message);
 
         // Act
-        await _sut.Consume(context.Object);
+        await sut.Consume(context.Object);
 
         // Assert
-        var entry = await _db.AuditTrailEntries.SingleAsync();
+        var entry = await db.AuditTrailEntries.SingleAsync();
         entry.Id.ShouldBe(message.Id);
         entry.HouseholdId.ShouldBe(message.HouseholdId);
         entry.Action.ShouldBe(message.Action);
@@ -57,7 +39,9 @@ public sealed class AuditTrailEntryRecordedConsumerTests
     {
         // Arrange
         var message = CreateEvent();
-        _db.AuditTrailEntries.Add(new AuditTrailEntry {
+        var db = ResolveService<AuditDbContext>();
+        var sut = CreateAuditTrailEntryRecordedConsumer();
+        db.AuditTrailEntries.Add(new AuditTrailEntry {
             Id = message.Id,
             HouseholdId = message.HouseholdId,
             Action = message.Action,
@@ -66,30 +50,18 @@ public sealed class AuditTrailEntryRecordedConsumerTests
             ActionedAt = message.ActionedAt,
             RecordedAt = DateTimeOffset.UtcNow.AddDays(-1)
         });
-        await _db.SaveChangesAsync();
+        await db.SaveChangesAsync();
         var context = CreateContext(message);
 
         // Act
-        await _sut.Consume(context.Object);
+        await sut.Consume(context.Object);
 
         // Assert
-        var entries = await _db.AuditTrailEntries.ToListAsync();
+        var entries = await db.AuditTrailEntries.ToListAsync();
         entries.Count.ShouldBe(1);
         entries.Single().Id.ShouldBe(message.Id);
     }
 
-    private static Mock<ConsumeContext<AuditTrailEntryRecordedEvent>> CreateContext(AuditTrailEntryRecordedEvent message)
-    {
-        var context = new Mock<ConsumeContext<AuditTrailEntryRecordedEvent>>(MockBehavior.Strict);
-        context
-            .SetupGet(consumeContext => consumeContext.Message)
-            .Returns(message);
-        context
-            .SetupGet(consumeContext => consumeContext.CancellationToken)
-            .Returns(CancellationToken.None);
-
-        return context;
-    }
 
     private static AuditTrailEntryRecordedEvent CreateEvent()
     {
@@ -103,3 +75,5 @@ public sealed class AuditTrailEntryRecordedConsumerTests
             OccurredAt: DateTimeOffset.UtcNow);
     }
 }
+
+

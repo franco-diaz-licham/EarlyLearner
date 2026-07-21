@@ -100,7 +100,34 @@ public abstract class WorkerConsumerFixture
             configurator.AddConsumer<AuditTrailEntryRecordedConsumer>();
         });
     }
-}
+
+    protected HouseholdInvitationEmailRequestedConsumer CreateHouseholdInvitationEmailRequestedConsumer()
+    {
+        return new HouseholdInvitationEmailRequestedConsumer(
+            _emailSender.Object,
+            _documentStore,
+            ResolveService<Microsoft.Extensions.Options.IOptions<EarlyLearnerOptions>>());
+    }
+
+    protected AuditTrailEntryRecordedConsumer CreateAuditTrailEntryRecordedConsumer()
+    {
+        return new AuditTrailEntryRecordedConsumer(ResolveService<AuditDbContext>());
+    }
+
+    protected static Mock<ConsumeContext<TMessage>> CreateContext<TMessage>(TMessage message) where TMessage : class
+    {
+        var context = new Mock<ConsumeContext<TMessage>>(MockBehavior.Strict);
+        context
+            .SetupGet(consumeContext => consumeContext.Message)
+            .Returns(message);
+        context
+            .SetupGet(consumeContext => consumeContext.CancellationToken)
+            .Returns(CancellationToken.None);
+
+        return context;
+    }}
+
+
 
 
 

@@ -1,42 +1,23 @@
-using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
-using EarlyLearner.Worker.Configuration.Options;
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Worker.Messaging;
-using EarlyLearner.Worker.Messaging.Consumers;
 using MassTransit;
-using Microsoft.Extensions.Options;
 using Moq;
 using Shouldly;
 
 namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class HouseholdInvitationEmailRequestedConsumerTests
+public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsumerFixture
 {
-    private Mock<IEmailSender> _emailSender = default!;
-    private Mock<IDocumentStore> _documentStore = default!;
-    private HouseholdInvitationEmailRequestedConsumer _sut = default!;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _emailSender = new Mock<IEmailSender>(MockBehavior.Strict);
-        _documentStore = new Mock<IDocumentStore>(MockBehavior.Strict);
-
-        _sut = new HouseholdInvitationEmailRequestedConsumer(
-            _emailSender.Object,
-            _documentStore.Object,
-            Options.Create(new EarlyLearnerOptions { Url = new Uri("https://earlylearner.test") }));
-    }
-
     [Test]
     public async Task Consume_Should_SendEmailUpsertNotificationAndPublishSentEvent()
     {
         // Arrange
         var message = CreateRequestedEvent();
+        var sut = CreateHouseholdInvitationEmailRequestedConsumer();
         var context = CreateContext(message);
-        NotificationDocument? notification = null;
         HouseholdInvitationEmailSentEvent? publishedEvent = null;
 
         _emailSender
@@ -44,23 +25,16 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests
                 It.Is<EmailMessageModel>(email => email.To == message.Email),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        _documentStore
-            .Setup(store => store.UpsertAsync(
-                NotificationDocument.ContainerName,
-                It.IsAny<NotificationDocument>(),
-                NotificationDocument.BuildPartitionKey(message.HouseholdId),
-                It.IsAny<CancellationToken>()))
-            .Callback<string, NotificationDocument, string, CancellationToken>((_, document, _, _) => notification = document)
-            .Returns(Task.CompletedTask);
         context
             .Setup(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailSentEvent>(), It.IsAny<CancellationToken>()))
             .Callback<HouseholdInvitationEmailSentEvent, CancellationToken>((integrationEvent, _) => publishedEvent = integrationEvent)
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.Consume(context.Object);
+        await sut.Consume(context.Object);
 
         // Assert
+        var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
         notification.Id.ShouldBe(NotificationDocument.BuildId(message.InvitationId));
         notification.HouseholdId.ShouldBe(message.HouseholdId);
@@ -72,10 +46,8 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests
         publishedEvent.InvitationId.ShouldBe(message.InvitationId);
         publishedEvent.Email.ShouldBe(message.Email);
         _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
-        _documentStore.Verify(store => store.UpsertAsync(NotificationDocument.ContainerName, It.IsAny<NotificationDocument>(), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
         context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailSentEvent>(), It.IsAny<CancellationToken>()), Times.Once);
         _emailSender.VerifyNoOtherCalls();
-        _documentStore.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -83,30 +55,23 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests
     {
         // Arrange
         var message = CreateRequestedEvent();
+        var sut = CreateHouseholdInvitationEmailRequestedConsumer();
         var context = CreateContext(message);
-        NotificationDocument? notification = null;
         HouseholdInvitationEmailFailedEvent? publishedEvent = null;
 
         _emailSender
             .Setup(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Email service is unavailable."));
-        _documentStore
-            .Setup(store => store.UpsertAsync(
-                NotificationDocument.ContainerName,
-                It.IsAny<NotificationDocument>(),
-                NotificationDocument.BuildPartitionKey(message.HouseholdId),
-                It.IsAny<CancellationToken>()))
-            .Callback<string, NotificationDocument, string, CancellationToken>((_, document, _, _) => notification = document)
-            .Returns(Task.CompletedTask);
         context
             .Setup(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailFailedEvent>(), It.IsAny<CancellationToken>()))
             .Callback<HouseholdInvitationEmailFailedEvent, CancellationToken>((integrationEvent, _) => publishedEvent = integrationEvent)
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.Consume(context.Object);
+        await sut.Consume(context.Object);
 
         // Assert
+        var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
         notification.Type.ShouldBe("householdInvitationEmailFailed");
         notification.Status.ShouldBe(NotificationDeliveryStatus.Failed);
@@ -119,23 +84,10 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests
         context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailFailedEvent>(), It.IsAny<CancellationToken>()), Times.Once);
         context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailSentEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
-        _documentStore.Verify(store => store.UpsertAsync(NotificationDocument.ContainerName, It.IsAny<NotificationDocument>(), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
         _emailSender.VerifyNoOtherCalls();
-        _documentStore.VerifyNoOtherCalls();
     }
 
-    private static Mock<ConsumeContext<HouseholdInvitationEmailRequestedEvent>> CreateContext(HouseholdInvitationEmailRequestedEvent message)
-    {
-        var context = new Mock<ConsumeContext<HouseholdInvitationEmailRequestedEvent>>(MockBehavior.Strict);
-        context
-            .SetupGet(consumeContext => consumeContext.Message)
-            .Returns(message);
-        context
-            .SetupGet(consumeContext => consumeContext.CancellationToken)
-            .Returns(CancellationToken.None);
 
-        return context;
-    }
 
     private static HouseholdInvitationEmailRequestedEvent CreateRequestedEvent()
     {
@@ -151,3 +103,5 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests
             OccurredAt: DateTimeOffset.UtcNow);
     }
 }
+
+
