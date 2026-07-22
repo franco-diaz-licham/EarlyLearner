@@ -3,24 +3,23 @@ using EarlyLearner.Worker.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
-namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
+namespace EarlyLearner.Worker.Tests.Messaging.UnitTests;
 
 [TestFixture]
-public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerIntegrationTestFixture
+public sealed class AuditTrailEntryRecordedConsumerUnitTests : WorkerConsumerUnitTestFixture
 {
     [Test]
     public async Task Consume_Should_RecordAuditTrailEntry_WhenEntryDoesNotExist()
     {
         // Arrange
         var message = TestData.CreateAuditTrailEntryRecordedEvent();
-        var db = ResolveService<AuditDbContext>();
         var context = CreateContext(message);
 
         // Act
         await _auditTrailEntryRecordedConsumer.Consume(context.Object);
 
         // Assert
-        var entry = await db.AuditTrailEntries.SingleAsync();
+        var entry = await _db.AuditTrailEntries.SingleAsync();
         entry.Id.ShouldBe(message.Id);
         entry.HouseholdId.ShouldBe(message.HouseholdId);
         entry.Action.ShouldBe(message.Action);
@@ -35,8 +34,7 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerIntegra
     {
         // Arrange
         var message = TestData.CreateAuditTrailEntryRecordedEvent();
-        var db = ResolveService<AuditDbContext>();
-        db.AuditTrailEntries.Add(new AuditTrailEntry {
+        _db.AuditTrailEntries.Add(new AuditTrailEntry {
             Id = message.Id,
             HouseholdId = message.HouseholdId,
             Action = message.Action,
@@ -45,14 +43,14 @@ public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerIntegra
             ActionedAt = message.ActionedAt,
             RecordedAt = DateTimeOffset.UtcNow.AddDays(-1)
         });
-        await db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
         var context = CreateContext(message);
 
         // Act
         await _auditTrailEntryRecordedConsumer.Consume(context.Object);
 
         // Assert
-        var entries = await db.AuditTrailEntries.ToListAsync();
+        var entries = await _db.AuditTrailEntries.ToListAsync();
         entries.Count.ShouldBe(1);
         entries.Single().Id.ShouldBe(message.Id);
     }

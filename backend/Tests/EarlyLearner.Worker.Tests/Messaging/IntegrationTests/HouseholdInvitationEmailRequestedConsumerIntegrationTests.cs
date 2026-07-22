@@ -1,24 +1,25 @@
-using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Worker.Messaging;
-using EarlyLearner.Worker.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shouldly;
 
-namespace EarlyLearner.Worker.Tests.Messaging.Harness;
+namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class WorkerConsumerTests : WorkerConsumerIntegrationTestFixture
+public sealed class HouseholdInvitationEmailRequestedConsumerIntegrationTests : WorkerConsumerIntegrationTestFixture
 {
     [Test]
-    public async Task HouseholdInvitationEmailRequestedEvent_Should_BeConsumedAndPublishSentEvent()
+    public async Task Consume_Should_SendEmailUpsertNotificationAndPublishSentEvent()
     {
         // Arrange
         var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
+
         _emailSender
-            .Setup(sender => sender.SendAsync(It.Is<EmailMessageModel>(email => email.To == message.Email), It.IsAny<CancellationToken>()))
+            .Setup(sender => sender.SendAsync(
+                It.Is<EmailMessageModel>(email => email.To == message.Email),
+                It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -31,17 +32,19 @@ public sealed class WorkerConsumerTests : WorkerConsumerIntegrationTestFixture
 
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
+        notification.Id.ShouldBe(NotificationDocument.BuildId(message.InvitationId));
+        notification.HouseholdId.ShouldBe(message.HouseholdId);
+        notification.InvitationId.ShouldBe(message.InvitationId);
         notification.Type.ShouldBe("householdInvitationEmailSent");
         notification.Status.ShouldBe(NotificationDeliveryStatus.Succeeded);
-        _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
-        _emailSender.VerifyNoOtherCalls();
     }
 
     [Test]
-    public async Task HouseholdInvitationEmailRequestedEvent_Should_BeConsumedAndPublishFailedEvent_WhenEmailSenderThrows()
+    public async Task Consume_Should_UpsertNotificationAndPublishFailedEvent_WhenEmailSenderThrows()
     {
         // Arrange
         var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
+
         _emailSender
             .Setup(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Email service is unavailable."));
@@ -59,29 +62,5 @@ public sealed class WorkerConsumerTests : WorkerConsumerIntegrationTestFixture
         notification.Type.ShouldBe("householdInvitationEmailFailed");
         notification.Status.ShouldBe(NotificationDeliveryStatus.Failed);
         notification.Message.ShouldContain("Email service is unavailable.");
-        _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
-        _emailSender.VerifyNoOtherCalls();
-    }
-
-    [Test]
-    public async Task AuditTrailEntryRecordedEvent_Should_BeConsumedAndStored()
-    {
-        // Arrange
-        var message = TestData.CreateAuditTrailEntryRecordedEvent();
-
-        // Act
-        await _harness.Bus.Publish(message);
-
-        // Assert
-        (await _harness.Consumed.Any<AuditTrailEntryRecordedEvent>()).ShouldBeTrue();
-
-        var db = ResolveService<AuditDbContext>();
-        var entry = await db.AuditTrailEntries.SingleAsync();
-        entry.Id.ShouldBe(message.Id);
-        entry.HouseholdId.ShouldBe(message.HouseholdId);
-        entry.Action.ShouldBe(message.Action);
-        entry.Summary.ShouldBe(message.Summary);
-        entry.Details.ShouldBe(message.Details);
-        entry.ActionedAt.ShouldBe(message.ActionedAt);
     }
 }

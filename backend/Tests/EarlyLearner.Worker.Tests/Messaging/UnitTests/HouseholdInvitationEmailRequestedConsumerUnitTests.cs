@@ -2,14 +2,13 @@ using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
 using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Worker.Messaging;
-using MassTransit;
 using Moq;
 using Shouldly;
 
-namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
+namespace EarlyLearner.Worker.Tests.Messaging.UnitTests;
 
 [TestFixture]
-public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsumerIntegrationTestFixture
+public sealed class HouseholdInvitationEmailRequestedConsumerUnitTests : WorkerConsumerUnitTestFixture
 {
     [Test]
     public async Task Consume_Should_SendEmailUpsertNotificationAndPublishSentEvent()
@@ -46,6 +45,7 @@ public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsu
         publishedEvent.Email.ShouldBe(message.Email);
         _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
         context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailSentEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+        context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailFailedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
         _emailSender.VerifyNoOtherCalls();
     }
 
