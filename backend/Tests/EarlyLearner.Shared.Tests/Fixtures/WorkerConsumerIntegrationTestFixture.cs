@@ -1,4 +1,5 @@
 using EarlyLearner.Shared.DocumentStoreService;
+using EarlyLearner.Shared.Tests;
 using EarlyLearner.Shared.Tests.Fakes;
 using EarlyLearner.Worker.Configuration.Options;
 using EarlyLearner.Worker.Messaging;
@@ -20,7 +21,7 @@ namespace EarlyLearner.Shared.Tests.Fixtures;
 /// Provides an isolated in-process worker host for consumer integration testing.
 /// Creates a fresh host, scope, test doubles, and MassTransit test harness for each test.
 /// </summary>
-public abstract class WorkerConsumerIntegrationTestFixture
+public abstract class WorkerConsumerIntegrationTestFixture : BaseAuditDatabaseSetup
 {
     protected ITestHarness _harness = default!;
     protected Mock<IEmailSender> _emailSender = default!;
@@ -91,14 +92,13 @@ public abstract class WorkerConsumerIntegrationTestFixture
 
     private void ConfigureHostServices(IServiceCollection services)
     {
-        var databaseName = Guid.NewGuid().ToString();
         _emailSender = new Mock<IEmailSender>(MockBehavior.Strict);
         _documentStore = new InMemoryDocumentStore();
 
         services.AddSingleton(_emailSender.Object);
         services.AddSingleton<IDocumentStore>(_documentStore);
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(new EarlyLearnerOptions { Url = new Uri("https://earlylearner.test") }));
-        services.AddDbContext<AuditDbContext>(options => options.UseInMemoryDatabase(databaseName));
+        services.AddDbContext<AuditDbContext>(options => options.UseNpgsql(ConnectionString).UseSnakeCaseNamingConvention());
         services.AddMassTransitTestHarness(configurator => {
             configurator.AddConsumer<HouseholdInvitationEmailRequestedConsumer>();
             configurator.AddConsumer<AuditTrailEntryRecordedConsumer>();
