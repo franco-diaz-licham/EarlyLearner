@@ -6,7 +6,7 @@ using Shouldly;
 namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerFixture
+public sealed class AuditTrailEntryRecordedConsumerTests : WorkerConsumerIntegrationTestFixture
 {
     [Test]
     public async Task Consume_Should_RecordAuditTrailEntry_WhenEntryDoesNotExist()

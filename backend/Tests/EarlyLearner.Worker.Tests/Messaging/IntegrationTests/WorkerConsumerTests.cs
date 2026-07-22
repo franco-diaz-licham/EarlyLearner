@@ -10,7 +10,7 @@ using Shouldly;
 namespace EarlyLearner.Worker.Tests.Messaging.Harness;
 
 [TestFixture]
-public sealed class WorkerConsumerTests : WorkerConsumerFixture
+public sealed class WorkerConsumerTests : WorkerConsumerIntegrationTestFixture
 {
     [Test]
     public async Task HouseholdInvitationEmailRequestedEvent_Should_BeConsumedAndPublishSentEvent()

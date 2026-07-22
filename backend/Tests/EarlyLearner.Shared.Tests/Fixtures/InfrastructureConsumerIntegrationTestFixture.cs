@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
-public abstract class InfrastructureConsumerFixture
+public abstract class InfrastructureConsumerIntegrationTestFixture
 {
     protected ITestHarness _harness = default!;
     protected InMemoryDocumentStore _documentStore = default!;

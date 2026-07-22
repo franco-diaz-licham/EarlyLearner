@@ -7,7 +7,7 @@ using Shouldly;
 namespace EarlyLearner.Infrastructure.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureConsumerFixture
+public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureConsumerIntegrationTestFixture
 {
     [Test]
     public async Task Consume_Should_PublishNotification_WhenNotificationDocumentExists()

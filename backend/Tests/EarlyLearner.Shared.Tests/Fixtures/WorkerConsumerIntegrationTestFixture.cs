@@ -20,7 +20,7 @@ namespace EarlyLearner.Shared.Tests.Fixtures;
 /// Provides an isolated in-process worker host for consumer integration testing.
 /// Creates a fresh host, scope, test doubles, and MassTransit test harness for each test.
 /// </summary>
-public abstract class WorkerConsumerFixture
+public abstract class WorkerConsumerIntegrationTestFixture
 {
     protected ITestHarness _harness = default!;
     protected Mock<IEmailSender> _emailSender = default!;

@@ -9,7 +9,7 @@ using Shouldly;
 namespace EarlyLearner.Worker.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsumerFixture
+public sealed class HouseholdInvitationEmailRequestedConsumerTests : WorkerConsumerIntegrationTestFixture
 {
     [Test]
     public async Task Consume_Should_SendEmailUpsertNotificationAndPublishSentEvent()
