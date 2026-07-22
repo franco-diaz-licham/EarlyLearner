@@ -11,7 +11,6 @@ using NUnit.Framework;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
-[NonParallelizable]
 public abstract class InfrastructureConsumerFixture
 {
     protected ITestHarness _harness = default!;
@@ -23,8 +22,8 @@ public abstract class InfrastructureConsumerFixture
 
     private ServiceProvider? _serviceProvider;
 
-    [OneTimeSetUp]
-    public async Task StartServiceProviderAsync()
+    [SetUp]
+    public async Task StartHarnessAsync()
     {
         var services = new ServiceCollection();
         ConfigureHostServices(services);
@@ -32,21 +31,13 @@ public abstract class InfrastructureConsumerFixture
         _serviceProvider = services.BuildServiceProvider(true);
         _harness = _serviceProvider.GetRequiredService<ITestHarness>();
         await _harness.Start();
-    }
-
-    [SetUp]
-    public void SetUpTest()
-    {
-        _documentStore.Clear();
-        _documentStoreMock.Reset();
-        _notificationPublisher.Reset();
 
         _householdInvitationEmailSentConsumer = CreateHouseholdInvitationEmailSentConsumer();
         _householdInvitationEmailFailedConsumer = CreateHouseholdInvitationEmailFailedConsumer();
     }
 
-    [OneTimeTearDown]
-    public async Task StopServiceProviderAsync()
+    [TearDown]
+    public async Task StopHarnessAsync()
     {
         if (_harness is not null) await _harness.Stop();
         if (_serviceProvider is not null) await _serviceProvider.DisposeAsync();
@@ -94,14 +85,4 @@ public abstract class InfrastructureConsumerFixture
 
         return context;
     }
-    protected static async Task WaitUntilAsync(Func<Task<bool>> condition)
-    {
-        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-
-        while (!cancellationTokenSource.IsCancellationRequested) {
-            if (await condition()) return;
-            await Task.Delay(50, cancellationTokenSource.Token);
-        }
-
-        throw new TimeoutException("The expected test condition was not met before the timeout elapsed.");
-    }}
+}

@@ -1,5 +1,4 @@
 using EarlyLearner.Application.Ports;
-using EarlyLearner.Shared.DocumentStoreService;
 using EarlyLearner.Shared.NotificationService;
 using EarlyLearner.Shared.Tests.Fixtures;
 using Moq;
@@ -8,13 +7,13 @@ using Shouldly;
 namespace EarlyLearner.Infrastructure.Tests.Messaging.Consumers;
 
 [TestFixture]
-public sealed class HouseholdInvitationEmailFailedConsumerTests : InfrastructureConsumerFixture
+public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureConsumerFixture
 {
     [Test]
     public async Task Consume_Should_PublishNotification_WhenNotificationDocumentExists()
     {
         // Arrange
-        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
+        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
         var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId);
         var context = CreateContext(message);
         NotificationResponse? publishedNotification = null;
@@ -32,7 +31,7 @@ public sealed class HouseholdInvitationEmailFailedConsumerTests : Infrastructure
             .Returns(ValueTask.CompletedTask);
 
         // Act
-        await _householdInvitationEmailFailedConsumer.Consume(context.Object);
+        await _householdInvitationEmailSentConsumer.Consume(context.Object);
 
         // Assert
         publishedNotification.ShouldNotBeNull();
@@ -52,7 +51,7 @@ public sealed class HouseholdInvitationEmailFailedConsumerTests : Infrastructure
     public async Task Consume_Should_NotPublishNotification_WhenNotificationDocumentIsMissing()
     {
         // Arrange
-        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
+        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
         var context = CreateContext(message);
 
         _documentStoreMock
@@ -64,7 +63,7 @@ public sealed class HouseholdInvitationEmailFailedConsumerTests : Infrastructure
             .ReturnsAsync((NotificationDocument?)null);
 
         // Act
-        await _householdInvitationEmailFailedConsumer.Consume(context.Object);
+        await _householdInvitationEmailSentConsumer.Consume(context.Object);
 
         // Assert
         _documentStoreMock.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);

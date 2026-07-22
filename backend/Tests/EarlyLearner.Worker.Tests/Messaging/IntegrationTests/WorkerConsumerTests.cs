@@ -25,7 +25,9 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        await WaitUntilAsync(() => Task.FromResult(_documentStore.GetNotification(message.HouseholdId, message.InvitationId) is not null));
+        (await _harness.Consumed.Any<HouseholdInvitationEmailRequestedEvent>()).ShouldBeTrue();
+        (await _harness.Published.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeTrue();
+        (await _harness.Published.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeFalse();
 
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
@@ -48,7 +50,9 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        await WaitUntilAsync(() => Task.FromResult(_documentStore.GetNotification(message.HouseholdId, message.InvitationId) is not null));
+        (await _harness.Consumed.Any<HouseholdInvitationEmailRequestedEvent>()).ShouldBeTrue();
+        (await _harness.Published.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeTrue();
+        (await _harness.Published.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeFalse();
 
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
@@ -69,9 +73,9 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        var db = ResolveService<AuditDbContext>();
-        await WaitUntilAsync(async () => await db.AuditTrailEntries.AnyAsync(entry => entry.Id == message.Id));
+        (await _harness.Consumed.Any<AuditTrailEntryRecordedEvent>()).ShouldBeTrue();
 
+        var db = ResolveService<AuditDbContext>();
         var entry = await db.AuditTrailEntries.SingleAsync();
         entry.Id.ShouldBe(message.Id);
         entry.HouseholdId.ShouldBe(message.HouseholdId);

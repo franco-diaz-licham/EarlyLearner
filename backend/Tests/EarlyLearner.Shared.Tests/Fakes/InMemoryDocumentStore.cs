@@ -34,11 +34,6 @@ public sealed class InMemoryDocumentStore : IDocumentStore
         return Task.CompletedTask;
     }
 
-    public void Clear()
-    {
-        _documents.Clear();
-    }
-
     public NotificationDocument? GetNotification(Guid householdId, Guid invitationId)
     {
         return _documents.TryGetValue((

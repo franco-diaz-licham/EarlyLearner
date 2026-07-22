@@ -1,9 +1,9 @@
 using EarlyLearner.Application.Ports;
 using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Shared.NotificationService;
+using EarlyLearner.Shared.Tests.Fixtures;
 using Moq;
 using Shouldly;
-using EarlyLearner.Shared.Tests.Fixtures;
 
 namespace EarlyLearner.Infrastructure.Tests.Messaging.Harness;
 
@@ -28,8 +28,7 @@ public sealed class InfrastructureConsumerTests : InfrastructureConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        await WaitUntilAsync(() => Task.FromResult(publishedNotification is not null));
-
+        (await _harness.Consumed.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeTrue();
         publishedNotification.ShouldNotBeNull();
         publishedNotification.Id.ShouldBe(notification.InvitationId);
         publishedNotification.HouseholdId.ShouldBe(notification.HouseholdId);
@@ -56,8 +55,7 @@ public sealed class InfrastructureConsumerTests : InfrastructureConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        await WaitUntilAsync(() => Task.FromResult(publishedNotification is not null));
-
+        (await _harness.Consumed.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeTrue();
         publishedNotification.ShouldNotBeNull();
         publishedNotification.Id.ShouldBe(notification.InvitationId);
         publishedNotification.HouseholdId.ShouldBe(notification.HouseholdId);
