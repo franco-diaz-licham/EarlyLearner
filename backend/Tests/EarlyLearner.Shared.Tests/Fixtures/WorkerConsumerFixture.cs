@@ -18,9 +18,9 @@ namespace EarlyLearner.Shared.Tests.Fixtures;
 
 /// <summary>
 /// Provides an isolated in-process worker host for consumer integration testing.
-/// Creates a fresh host and scoped service provider for each test, registers worker-consumer test doubles,
-/// and starts the MassTransit test harness using the same lifecycle every time.
+/// Builds the worker composition root once, then creates a fresh scope and test state for each test.
 /// </summary>
+[NonParallelizable]
 public abstract class WorkerConsumerFixture
 {
     protected ITestHarness _harness = default!;
@@ -32,28 +32,46 @@ public abstract class WorkerConsumerFixture
     private IHost? _host;
     private IServiceScope? _testServiceScope;
 
-    [SetUp]
+    [OneTimeSetUp]
     public async Task StartHostAsync()
     {
         _host = ConfigureInProcessHost();
         await _host.StartAsync();
 
-        _testServiceScope = _host.Services.CreateScope();
-        _harness = ResolveService<ITestHarness>();
+        _harness = _host.Services.GetRequiredService<ITestHarness>();
         await _harness.Start();
+    }
+
+    [SetUp]
+    public async Task SetUpTestAsync()
+    {
+        _testServiceScope = _host?.Services.CreateScope() ?? throw new InvalidOperationException("Test host is not initialized.");
+
+        _emailSender.Reset();
+        _documentStore.Clear();
+
+        var db = ResolveService<AuditDbContext>();
+        await db.Database.EnsureDeletedAsync();
+        await db.Database.EnsureCreatedAsync();
 
         _householdInvitationEmailRequestedConsumer = CreateHouseholdInvitationEmailRequestedConsumer();
         _auditTrailEntryRecordedConsumer = CreateAuditTrailEntryRecordedConsumer();
     }
 
     [TearDown]
+    public void TearDownTest()
+    {
+        _testServiceScope?.Dispose();
+        _testServiceScope = null;
+    }
+
+    [OneTimeTearDown]
     public async Task TearDownHostAsync()
     {
         if (_harness is not null) await _harness.Stop();
         if (_host is null) return;
 
         try {
-            _testServiceScope?.Dispose();
             await _host.StopAsync();
         } finally {
             _host.Dispose();
@@ -131,4 +149,14 @@ public abstract class WorkerConsumerFixture
 
         return context;
     }
-}
+    protected static async Task WaitUntilAsync(Func<Task<bool>> condition)
+    {
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+        while (!cancellationTokenSource.IsCancellationRequested) {
+            if (await condition()) return;
+            await Task.Delay(50, cancellationTokenSource.Token);
+        }
+
+        throw new TimeoutException("The expected test condition was not met before the timeout elapsed.");
+    }}

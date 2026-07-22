@@ -28,7 +28,8 @@ public sealed class InfrastructureConsumerTests : InfrastructureConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        (await _harness.Consumed.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeTrue();
+        await WaitUntilAsync(() => Task.FromResult(publishedNotification is not null));
+
         publishedNotification.ShouldNotBeNull();
         publishedNotification.Id.ShouldBe(notification.InvitationId);
         publishedNotification.HouseholdId.ShouldBe(notification.HouseholdId);
@@ -55,7 +56,8 @@ public sealed class InfrastructureConsumerTests : InfrastructureConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        (await _harness.Consumed.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeTrue();
+        await WaitUntilAsync(() => Task.FromResult(publishedNotification is not null));
+
         publishedNotification.ShouldNotBeNull();
         publishedNotification.Id.ShouldBe(notification.InvitationId);
         publishedNotification.HouseholdId.ShouldBe(notification.HouseholdId);

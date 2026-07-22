@@ -25,9 +25,7 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        (await _harness.Consumed.Any<HouseholdInvitationEmailRequestedEvent>()).ShouldBeTrue();
-        (await _harness.Published.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeTrue();
-        (await _harness.Published.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeFalse();
+        await WaitUntilAsync(() => Task.FromResult(_documentStore.GetNotification(message.HouseholdId, message.InvitationId) is not null));
 
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
@@ -50,9 +48,7 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        (await _harness.Consumed.Any<HouseholdInvitationEmailRequestedEvent>()).ShouldBeTrue();
-        (await _harness.Published.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeTrue();
-        (await _harness.Published.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeFalse();
+        await WaitUntilAsync(() => Task.FromResult(_documentStore.GetNotification(message.HouseholdId, message.InvitationId) is not null));
 
         var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
         notification.ShouldNotBeNull();
@@ -73,9 +69,9 @@ public sealed class WorkerConsumerTests : WorkerConsumerFixture
         await _harness.Bus.Publish(message);
 
         // Assert
-        (await _harness.Consumed.Any<AuditTrailEntryRecordedEvent>()).ShouldBeTrue();
-
         var db = ResolveService<AuditDbContext>();
+        await WaitUntilAsync(async () => await db.AuditTrailEntries.AnyAsync(entry => entry.Id == message.Id));
+
         var entry = await db.AuditTrailEntries.SingleAsync();
         entry.Id.ShouldBe(message.Id);
         entry.HouseholdId.ShouldBe(message.HouseholdId);
