@@ -4,21 +4,21 @@ using EarlyLearner.Shared.Tests.Fixtures;
 using Moq;
 using Shouldly;
 
-namespace EarlyLearner.Infrastructure.Tests.Messaging.Consumers;
+namespace EarlyLearner.Infrastructure.Tests.Messaging.UnitTests;
 
 [TestFixture]
-public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureConsumerIntegrationTestFixture
+public sealed class HouseholdInvitationEmailFailedConsumerUnitTests : InfrastructureConsumerUnitTestFixture
 {
     [Test]
     public async Task Consume_Should_PublishNotification_WhenNotificationDocumentExists()
     {
         // Arrange
-        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
+        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
         var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId);
         var context = CreateContext(message);
         NotificationResponse? publishedNotification = null;
 
-        _documentStoreMock
+        _documentStore
             .Setup(store => store.GetAsync<NotificationDocument>(
                 NotificationDocument.ContainerName,
                 NotificationDocument.BuildId(message.InvitationId),
@@ -31,7 +31,7 @@ public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureCo
             .Returns(ValueTask.CompletedTask);
 
         // Act
-        await _householdInvitationEmailSentConsumer.Consume(context.Object);
+        await _householdInvitationEmailFailedConsumer.Consume(context.Object);
 
         // Assert
         publishedNotification.ShouldNotBeNull();
@@ -41,9 +41,9 @@ public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureCo
         publishedNotification.Title.ShouldBe(notification.Title);
         publishedNotification.Message.ShouldBe(notification.Message);
         publishedNotification.OccurredAt.ShouldBe(notification.OccurredAt);
-        _documentStoreMock.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
+        _documentStore.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
         _notificationPublisher.Verify(publisher => publisher.PublishAsync(It.IsAny<NotificationResponse>(), It.IsAny<CancellationToken>()), Times.Once);
-        _documentStoreMock.VerifyNoOtherCalls();
+        _documentStore.VerifyNoOtherCalls();
         _notificationPublisher.VerifyNoOtherCalls();
     }
 
@@ -51,10 +51,10 @@ public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureCo
     public async Task Consume_Should_NotPublishNotification_WhenNotificationDocumentIsMissing()
     {
         // Arrange
-        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
+        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
         var context = CreateContext(message);
 
-        _documentStoreMock
+        _documentStore
             .Setup(store => store.GetAsync<NotificationDocument>(
                 NotificationDocument.ContainerName,
                 NotificationDocument.BuildId(message.InvitationId),
@@ -63,11 +63,11 @@ public sealed class HouseholdInvitationEmailSentConsumerTests : InfrastructureCo
             .ReturnsAsync((NotificationDocument?)null);
 
         // Act
-        await _householdInvitationEmailSentConsumer.Consume(context.Object);
+        await _householdInvitationEmailFailedConsumer.Consume(context.Object);
 
         // Assert
-        _documentStoreMock.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
+        _documentStore.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
         _notificationPublisher.VerifyNoOtherCalls();
-        _documentStoreMock.VerifyNoOtherCalls();
+        _documentStore.VerifyNoOtherCalls();
     }
 }
