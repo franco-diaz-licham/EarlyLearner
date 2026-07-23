@@ -1,4 +1,6 @@
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.IdentityContext.Entities;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 
 namespace EarlyLearner.Domain.LearningContext.Entities;
@@ -12,6 +14,7 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
 
     private LearningOutcome(
         LearningOutcomeId id,
+        HouseholdId householdId,
         string code,
         string name,
         string description,
@@ -19,6 +22,7 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
         int sortOrder)
     {
         Id = id;
+        HouseholdId = householdId;
         Code = Required(code, nameof(code)).ToLowerInvariant();
         Name = Required(name, nameof(name));
         Description = Required(description, nameof(description));
@@ -27,6 +31,13 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
         Status = LearningOutcomeStatusEnum.Active;
         SetCreatedOn();
     }
+
+    /// <summary>
+    /// Household that owns this configurable learning outcome.
+    /// </summary>
+    public HouseholdId HouseholdId { get; private set; }
+
+    public Household Household { get; private set; } = null!;
 
     /// <summary>
     /// Stable machine-friendly code used for seed data, imports, and display lookup.
@@ -59,6 +70,7 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
     public LearningOutcomeStatusEnum Status { get; private set; }
 
     public static LearningOutcome Create(
+        HouseholdId householdId,
         string code,
         string name,
         string description,
@@ -67,6 +79,7 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
     {
         return new LearningOutcome(
             new LearningOutcomeId(Guid.NewGuid()),
+            householdId,
             code,
             name,
             description,
@@ -118,10 +131,7 @@ public sealed class LearningOutcome : Entity<LearningOutcomeId>
 
     private static string Required(string value, string name)
     {
-        if (string.IsNullOrWhiteSpace(value)) {
-            throw new DomainException($"{name} is required.");
-        }
-
+        if (string.IsNullOrWhiteSpace(value)) throw new DomainException($"{name} is required.");
         return value.Trim();
     }
 }

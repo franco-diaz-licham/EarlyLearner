@@ -1,3 +1,5 @@
+using EarlyLearner.Domain.IdentityContext.Entities;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
@@ -18,6 +20,14 @@ public sealed class LearningOutcomeConfig : IEntityTypeConfiguration<LearningOut
             .HasConversion(id => id.Value, value => new LearningOutcomeId(value))
             .ValueGeneratedNever();
 
+        builder.Property(outcome => outcome.HouseholdId)
+            .HasConversion(id => id.Value, value => new HouseholdId(value))
+            .IsRequired();
+
+        builder.Property(log => log.HouseholdId)
+            .HasConversion(id => id.Value, value => new HouseholdId(value))
+            .IsRequired();
+
         builder.Property(outcome => outcome.Code).HasMaxLength(80).IsRequired();
         builder.Property(outcome => outcome.Name).HasMaxLength(180).IsRequired();
         builder.Property(outcome => outcome.Description).HasMaxLength(1200).IsRequired();
@@ -28,8 +38,8 @@ public sealed class LearningOutcomeConfig : IEntityTypeConfiguration<LearningOut
             .HasMaxLength(40)
             .IsRequired();
 
-        builder.HasIndex(outcome => outcome.Code).IsUnique();
-        builder.HasIndex(outcome => new { outcome.Category, outcome.SortOrder });
+        builder.HasIndex(outcome => new { outcome.HouseholdId, outcome.Code }).IsUnique();
+        builder.HasIndex(outcome => new { outcome.HouseholdId, outcome.Category, outcome.SortOrder });
         builder.Property(outcome => outcome.CreatedOn).IsRequired();
         builder.Property(outcome => outcome.UpdatedOn).IsRequired(false);
         builder.Ignore(outcome => outcome.DomainEvents);
