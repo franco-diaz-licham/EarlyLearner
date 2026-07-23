@@ -1,3 +1,5 @@
+using EarlyLearner.Application.Ports;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
@@ -14,21 +16,21 @@ public interface ILearningOutcomeQueryService
 
 public interface ILearningOutcomeQueryRepository
 {
-    Task<List<LearningOutcomeResponse>> ListAsync(CancellationToken cancellationToken);
-    Task<LearningOutcomeResponse?> GetResponseAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
+    Task<List<LearningOutcomeResponse>> ListAsync(HouseholdId householdId, CancellationToken cancellationToken);
+    Task<LearningOutcomeResponse?> GetResponseAsync(HouseholdId householdId, LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken);
 }
 
-public sealed class LearningOutcomeQueryService(ILearningOutcomeQueryRepository learningOutcomeRepo) : ILearningOutcomeQueryService
+public sealed class LearningOutcomeQueryService(ILearningOutcomeQueryRepository learningOutcomeRepo, ICurrentUser currentUser) : ILearningOutcomeQueryService
 {
     public async Task<Result<List<LearningOutcomeResponse>>> ListAsync(CancellationToken cancellationToken)
     {
-        var outcomes = await learningOutcomeRepo.ListAsync(cancellationToken);
+        var outcomes = await learningOutcomeRepo.ListAsync(currentUser.HouseholdId, cancellationToken);
         return Result<List<LearningOutcomeResponse>>.Success(outcomes, ResultTypeEnum.Success, outcomes.Count);
     }
 
     public async Task<Result<LearningOutcomeResponse>> GetAsync(LearningOutcomeId learningOutcomeId, CancellationToken cancellationToken)
     {
-        var outcome = await learningOutcomeRepo.GetResponseAsync(learningOutcomeId, cancellationToken);
+        var outcome = await learningOutcomeRepo.GetResponseAsync(currentUser.HouseholdId, learningOutcomeId, cancellationToken);
         return outcome is null
             ? Result<LearningOutcomeResponse>.Fail("Learning outcome was not found.", ResultTypeEnum.NotFound)
             : Result<LearningOutcomeResponse>.Success(outcome, ResultTypeEnum.Success);

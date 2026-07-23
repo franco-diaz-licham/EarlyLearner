@@ -28,7 +28,7 @@ public sealed class HomeDashboardRepository(DatabaseContext db, ICurrentUser cur
 
         var activeOutcomeCount = await db.LearningOutcomes
             .AsNoTracking()
-            .CountAsync(outcome => outcome.Status == LearningOutcomeStatusEnum.Active, cancellationToken);
+            .CountAsync(outcome => outcome.HouseholdId == householdId && outcome.Status == LearningOutcomeStatusEnum.Active, cancellationToken);
 
         var weeklyRecordCount = await db.DailyLogs
             .AsNoTracking()
@@ -66,6 +66,7 @@ public sealed class HomeDashboardRepository(DatabaseContext db, ICurrentUser cur
             .Where(moment => moment.DailyLog.HouseholdId == householdId && moment.DailyLog.LogDate >= weekStart)
             .SelectMany(moment => moment.LearningOutcomes)
             .Where(outcome => outcome.Status == LearningOutcomeStatusEnum.Active)
+            .Where(outcome => outcome.HouseholdId == householdId)
             .Select(outcome => outcome.Id)
             .Distinct()
             .CountAsync(cancellationToken);

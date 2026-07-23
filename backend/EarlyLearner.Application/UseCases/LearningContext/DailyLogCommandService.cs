@@ -33,7 +33,7 @@ public interface IDailyLogCommandService
 public interface IDailyLogCommandRepository
 {
     Task<bool> ChildExistsAsync(HouseholdId householdId, ChildId childId, CancellationToken cancellationToken);
-    Task<List<LearningOutcome>> GetLearningOutcomesAsync(IReadOnlyList<LearningOutcomeId> learningOutcomeIds, CancellationToken cancellationToken);
+    Task<List<LearningOutcome>> GetLearningOutcomesAsync(HouseholdId householdId, IReadOnlyList<LearningOutcomeId> learningOutcomeIds, CancellationToken cancellationToken);
     Task<DailyLog?> GetByChildAndDateAsync(HouseholdId householdId, ChildId childId, DateOnly logDate, CancellationToken cancellationToken);
     Task<DailyLog?> GetAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
     Task<DailyLogResponse?> GetResponseAsync(DailyLogId dailyLogId, CancellationToken cancellationToken);
@@ -46,17 +46,18 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
 {
     public async Task<Result<DailyLogResponse>> CreateAsync(CreateDailyLogCommand command, CancellationToken cancellationToken)
     {
-        var childExists = await dailyLogRepo.ChildExistsAsync(currentUser.HouseholdId, command.ChildId, cancellationToken);
+        var householdId = currentUser.HouseholdId;
+        var childExists = await dailyLogRepo.ChildExistsAsync(householdId, command.ChildId, cancellationToken);
         if (!childExists) return Result<DailyLogResponse>.Fail("Child was not found in this household.", ResultTypeEnum.NotFound);
 
-        var learningOutcomes = await dailyLogRepo.GetLearningOutcomesAsync(command.LearningOutcomeIds, cancellationToken);
+        var learningOutcomes = await dailyLogRepo.GetLearningOutcomesAsync(householdId, command.LearningOutcomeIds, cancellationToken);
         if (learningOutcomes.Count != command.LearningOutcomeIds.Distinct().Count()) {
             return Result<DailyLogResponse>.Fail("One or more learning outcomes were not found.", ResultTypeEnum.NotFound);
         }
 
-        var log = await dailyLogRepo.GetByChildAndDateAsync(currentUser.HouseholdId, command.ChildId, command.LogDate, cancellationToken);
+        var log = await dailyLogRepo.GetByChildAndDateAsync(householdId, command.ChildId, command.LogDate, cancellationToken);
         if (log is null) {
-            log = DailyLog.Create(currentUser.HouseholdId, command.ChildId, command.LogDate);
+            log = DailyLog.Create(householdId, command.ChildId, command.LogDate);
             dailyLogRepo.Add(log);
         }
 
@@ -74,9 +75,10 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
     {
         var log = await dailyLogRepo.GetAsync(command.DailyLogId, cancellationToken);
         if (log is null) return Result<DailyLogResponse>.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
-        if (log.HouseholdId != currentUser.HouseholdId) return Result<DailyLogResponse>.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
+        var householdId = currentUser.HouseholdId;
+        if (log.HouseholdId != householdId) return Result<DailyLogResponse>.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
 
-        var learningOutcomes = await dailyLogRepo.GetLearningOutcomesAsync(command.LearningOutcomeIds, cancellationToken);
+        var learningOutcomes = await dailyLogRepo.GetLearningOutcomesAsync(householdId, command.LearningOutcomeIds, cancellationToken);
         if (learningOutcomes.Count != command.LearningOutcomeIds.Distinct().Count()) {
             return Result<DailyLogResponse>.Fail("One or more learning outcomes were not found.", ResultTypeEnum.NotFound);
         }
@@ -95,7 +97,8 @@ public sealed class DailyLogCommandService(IDailyLogCommandRepository dailyLogRe
     {
         var log = await dailyLogRepo.GetAsync(dailyLogId, cancellationToken);
         if (log is null) return Result.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
-        if (log.HouseholdId != currentUser.HouseholdId) return Result.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
+        var householdId = currentUser.HouseholdId;
+        if (log.HouseholdId != householdId) return Result.Fail("Daily log was not found.", ResultTypeEnum.NotFound);
 
         var moment = log.RemoveLearningMoment(learningMomentId);
         dailyLogRepo.RemoveLearningMoment(moment);
