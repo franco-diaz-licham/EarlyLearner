@@ -33,7 +33,7 @@ public sealed class DailyLogRepositoryTests : BaseDatabaseSetup
         var seed = HouseholdSeeder.CreateHousehold();
         var mia = HouseholdSeeder.AddChild(seed.Household, firstName: "Mia");
         var noah = HouseholdSeeder.AddChild(seed.Household, firstName: "Noah", dateOfBirth: new DateOnly(2020, 9, 8));
-        var outcome = LearningSeeder.CreateOutcome();
+        var outcome = LearningSeeder.CreateOutcome(householdId: seed.Household.Id);
         var miaLog = LearningSeeder.CreateDailyLog(seed.Household, mia, title: "Paint mixing", notes: "Mixed colours with brushes.", outcomes: [outcome]);
         var noahLog = LearningSeeder.CreateDailyLog(seed.Household, noah, kind: LearningMomentKindEnum.Reading, title: "Picture story", notes: "Read quietly.", outcomes: [outcome]);
         await HouseholdSeeder.SeedAsync(Db, seed);
@@ -57,7 +57,7 @@ public sealed class DailyLogRepositoryTests : BaseDatabaseSetup
         // Arrange
         var seed = HouseholdSeeder.CreateHousehold();
         var child = HouseholdSeeder.AddChild(seed.Household);
-        var outcome = LearningSeeder.CreateOutcome();
+        var outcome = LearningSeeder.CreateOutcome(householdId: seed.Household.Id);
         var dailyLog = LearningSeeder.CreateDailyLog(seed.Household, child, outcomes: [outcome]);
         var moment = dailyLog.LearningMoments.Single();
         await HouseholdSeeder.SeedAsync(Db, seed);

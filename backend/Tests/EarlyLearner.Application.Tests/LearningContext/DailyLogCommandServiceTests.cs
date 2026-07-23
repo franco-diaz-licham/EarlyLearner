@@ -34,7 +34,7 @@ public sealed class DailyLogCommandServiceTests
         // Arrange
         var householdId = new HouseholdId(Guid.NewGuid());
         var childId = new ChildId(Guid.NewGuid());
-        var outcome = CreateLearningOutcome("language-listening", "Listens and responds");
+        var outcome = CreateLearningOutcome(householdId, "language-listening", "Listens and responds");
         var command = new CreateDailyLogCommand(childId, new DateOnly(2026, 7, 18), LearningMomentKindEnum.Activity, "Paint mixing", "Mixed colours.", [outcome.Id]);
         DailyLog? addedLog = null;
 
@@ -45,7 +45,7 @@ public sealed class DailyLogCommandServiceTests
             .Setup(repo => repo.ChildExistsAsync(householdId, childId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         _dailyLogRepo
-            .Setup(repo => repo.GetLearningOutcomesAsync(command.LearningOutcomeIds, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetLearningOutcomesAsync(householdId, command.LearningOutcomeIds, It.IsAny<CancellationToken>()))
             .ReturnsAsync([outcome]);
         _dailyLogRepo
             .Setup(repo => repo.GetByChildAndDateAsync(householdId, childId, command.LogDate, It.IsAny<CancellationToken>()))
@@ -72,9 +72,9 @@ public sealed class DailyLogCommandServiceTests
         result.Value.LearningMomentCount.ShouldBe(1);
         addedLog.ShouldNotBeNull();
         addedLog.LearningMoments.Single().Title.ShouldBe(command.Title);
-        _currentUser.VerifyGet(user => user.HouseholdId, Times.Exactly(3));
+        _currentUser.VerifyGet(user => user.HouseholdId, Times.Once);
         _dailyLogRepo.Verify(repo => repo.ChildExistsAsync(householdId, childId, It.IsAny<CancellationToken>()), Times.Once);
-        _dailyLogRepo.Verify(repo => repo.GetLearningOutcomesAsync(command.LearningOutcomeIds, It.IsAny<CancellationToken>()), Times.Once);
+        _dailyLogRepo.Verify(repo => repo.GetLearningOutcomesAsync(householdId, command.LearningOutcomeIds, It.IsAny<CancellationToken>()), Times.Once);
         _dailyLogRepo.Verify(repo => repo.GetByChildAndDateAsync(householdId, childId, command.LogDate, It.IsAny<CancellationToken>()), Times.Once);
         _dailyLogRepo.Verify(repo => repo.Add(It.IsAny<DailyLog>()), Times.Once);
         _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -120,8 +120,8 @@ public sealed class DailyLogCommandServiceTests
         var householdId = new HouseholdId(Guid.NewGuid());
         var childId = new ChildId(Guid.NewGuid());
         var dailyLog = DailyLog.Create(householdId, childId, new DateOnly(2026, 7, 18));
-        var originalOutcome = CreateLearningOutcome("language-listening", "Listens and responds");
-        var updatedOutcome = CreateLearningOutcome("social-turn-taking", "Takes turns with others");
+        var originalOutcome = CreateLearningOutcome(householdId, "language-listening", "Listens and responds");
+        var updatedOutcome = CreateLearningOutcome(householdId, "social-turn-taking", "Takes turns with others");
         var moment = dailyLog.RecordLearningMoment(LearningMomentKindEnum.Activity, "Paint mixing", "Mixed colours.", [originalOutcome]);
         var command = new UpdateLearningMomentCommand(dailyLog.Id, moment.Id, LearningMomentKindEnum.Reading, "Updated story", "Read a picture book.", [updatedOutcome.Id]);
         var response = new DailyLogResponse(
@@ -139,7 +139,7 @@ public sealed class DailyLogCommandServiceTests
             .SetupGet(user => user.HouseholdId)
             .Returns(householdId);
         _dailyLogRepo
-            .Setup(repo => repo.GetLearningOutcomesAsync(command.LearningOutcomeIds, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetLearningOutcomesAsync(householdId, command.LearningOutcomeIds, It.IsAny<CancellationToken>()))
             .ReturnsAsync([updatedOutcome]);
         _uow
             .Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -161,7 +161,7 @@ public sealed class DailyLogCommandServiceTests
         moment.LearningOutcomes.Single().ShouldBe(updatedOutcome);
         _dailyLogRepo.Verify(repo => repo.GetAsync(command.DailyLogId, It.IsAny<CancellationToken>()), Times.Once);
         _currentUser.VerifyGet(user => user.HouseholdId, Times.Once);
-        _dailyLogRepo.Verify(repo => repo.GetLearningOutcomesAsync(command.LearningOutcomeIds, It.IsAny<CancellationToken>()), Times.Once);
+        _dailyLogRepo.Verify(repo => repo.GetLearningOutcomesAsync(householdId, command.LearningOutcomeIds, It.IsAny<CancellationToken>()), Times.Once);
         _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _dailyLogRepo.Verify(repo => repo.GetResponseAsync(dailyLog.Id, It.IsAny<CancellationToken>()), Times.Once);
         _dailyLogRepo.VerifyNoOtherCalls();
@@ -203,7 +203,7 @@ public sealed class DailyLogCommandServiceTests
         // Arrange
         var householdId = new HouseholdId(Guid.NewGuid());
         var dailyLog = DailyLog.Create(householdId, new ChildId(Guid.NewGuid()), new DateOnly(2026, 7, 18));
-        var outcome = CreateLearningOutcome("language-listening", "Listens and responds");
+        var outcome = CreateLearningOutcome(householdId, "language-listening", "Listens and responds");
         var moment = dailyLog.RecordLearningMoment(LearningMomentKindEnum.Activity, "Paint mixing", "Mixed colours.", [outcome]);
 
         _dailyLogRepo
@@ -258,9 +258,8 @@ public sealed class DailyLogCommandServiceTests
         _uow.VerifyNoOtherCalls();
     }
 
-    private static LearningOutcome CreateLearningOutcome(string code, string name)
+    private static LearningOutcome CreateLearningOutcome(HouseholdId householdId, string code, string name)
     {
-        return LearningOutcome.Create(code, name, "Description", "Language", 10);
+        return LearningOutcome.Create(householdId, code, name, "Description", "Language", 10);
     }
 }
-

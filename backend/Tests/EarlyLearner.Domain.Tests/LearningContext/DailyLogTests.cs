@@ -188,6 +188,6 @@ public sealed class DailyLogTests
 
     private static LearningOutcome CreateLearningOutcome(string code, string name)
     {
-        return LearningOutcome.Create(code, name, "Description", "Language", 10);
+        return LearningOutcome.Create(new HouseholdId(Guid.NewGuid()), code, name, "Description", "Language", 10);
     }
 }

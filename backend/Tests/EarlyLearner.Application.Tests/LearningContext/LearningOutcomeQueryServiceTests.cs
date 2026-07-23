@@ -1,4 +1,6 @@
+using EarlyLearner.Application.Ports;
 using EarlyLearner.Application.UseCases.LearningContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.ValueObjects;
 using EarlyLearner.Shared.Utilities;
@@ -11,14 +13,16 @@ namespace EarlyLearner.Application.Tests.LearningContext;
 public sealed class LearningOutcomeQueryServiceTests
 {
     private Mock<ILearningOutcomeQueryRepository> _learningOutcomeRepo = default!;
+    private Mock<ICurrentUser> _currentUser = default!;
     private LearningOutcomeQueryService _sut = default!;
 
     [SetUp]
     public void SetUp()
     {
         _learningOutcomeRepo = new Mock<ILearningOutcomeQueryRepository>(MockBehavior.Strict);
+        _currentUser = new Mock<ICurrentUser>(MockBehavior.Strict);
 
-        _sut = new LearningOutcomeQueryService(_learningOutcomeRepo.Object);
+        _sut = new LearningOutcomeQueryService(_learningOutcomeRepo.Object, _currentUser.Object);
     }
 
     [Test]
@@ -28,9 +32,13 @@ public sealed class LearningOutcomeQueryServiceTests
         var outcomes = new List<LearningOutcomeResponse> {
             CreateResponse()
         };
+        var householdId = new HouseholdId(Guid.NewGuid());
 
+        _currentUser
+            .SetupGet(user => user.HouseholdId)
+            .Returns(householdId);
         _learningOutcomeRepo
-            .Setup(repo => repo.ListAsync(It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.ListAsync(householdId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(outcomes);
 
         // Act
@@ -41,8 +49,10 @@ public sealed class LearningOutcomeQueryServiceTests
         result.Type.ShouldBe(ResultTypeEnum.Success);
         result.Value.ShouldBe(outcomes);
         result.TotalCount.ShouldBe(outcomes.Count);
-        _learningOutcomeRepo.Verify(repo => repo.ListAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _currentUser.VerifyGet(user => user.HouseholdId, Times.Once);
+        _learningOutcomeRepo.Verify(repo => repo.ListAsync(householdId, It.IsAny<CancellationToken>()), Times.Once);
         _learningOutcomeRepo.VerifyNoOtherCalls();
+        _currentUser.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -50,9 +60,13 @@ public sealed class LearningOutcomeQueryServiceTests
     {
         // Arrange
         var learningOutcomeId = new LearningOutcomeId(Guid.NewGuid());
+        var householdId = new HouseholdId(Guid.NewGuid());
 
+        _currentUser
+            .SetupGet(user => user.HouseholdId)
+            .Returns(householdId);
         _learningOutcomeRepo
-            .Setup(repo => repo.GetResponseAsync(learningOutcomeId, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetResponseAsync(householdId, learningOutcomeId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((LearningOutcomeResponse?)null);
 
         // Act
@@ -62,8 +76,10 @@ public sealed class LearningOutcomeQueryServiceTests
         result.IsSuccess.ShouldBeFalse();
         result.Type.ShouldBe(ResultTypeEnum.NotFound);
         result.Error!.Message.ShouldBe("Learning outcome was not found.");
-        _learningOutcomeRepo.Verify(repo => repo.GetResponseAsync(learningOutcomeId, It.IsAny<CancellationToken>()), Times.Once);
+        _currentUser.VerifyGet(user => user.HouseholdId, Times.Once);
+        _learningOutcomeRepo.Verify(repo => repo.GetResponseAsync(householdId, learningOutcomeId, It.IsAny<CancellationToken>()), Times.Once);
         _learningOutcomeRepo.VerifyNoOtherCalls();
+        _currentUser.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -71,10 +87,14 @@ public sealed class LearningOutcomeQueryServiceTests
     {
         // Arrange
         var learningOutcomeId = new LearningOutcomeId(Guid.NewGuid());
+        var householdId = new HouseholdId(Guid.NewGuid());
         var response = CreateResponse() with { LearningOutcomeId = learningOutcomeId.Value };
 
+        _currentUser
+            .SetupGet(user => user.HouseholdId)
+            .Returns(householdId);
         _learningOutcomeRepo
-            .Setup(repo => repo.GetResponseAsync(learningOutcomeId, It.IsAny<CancellationToken>()))
+            .Setup(repo => repo.GetResponseAsync(householdId, learningOutcomeId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
         // Act
@@ -84,8 +104,10 @@ public sealed class LearningOutcomeQueryServiceTests
         result.IsSuccess.ShouldBeTrue();
         result.Type.ShouldBe(ResultTypeEnum.Success);
         result.Value.ShouldBe(response);
-        _learningOutcomeRepo.Verify(repo => repo.GetResponseAsync(learningOutcomeId, It.IsAny<CancellationToken>()), Times.Once);
+        _currentUser.VerifyGet(user => user.HouseholdId, Times.Once);
+        _learningOutcomeRepo.Verify(repo => repo.GetResponseAsync(householdId, learningOutcomeId, It.IsAny<CancellationToken>()), Times.Once);
         _learningOutcomeRepo.VerifyNoOtherCalls();
+        _currentUser.VerifyNoOtherCalls();
     }
 
     private static LearningOutcomeResponse CreateResponse()

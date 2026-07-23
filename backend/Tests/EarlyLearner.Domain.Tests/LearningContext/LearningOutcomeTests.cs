@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.CoreContext;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.Entities;
 using Shouldly;
@@ -13,12 +14,14 @@ public sealed class LearningOutcomeTests
     {
         // Arrange
         const string code = " Language-Listening ";
+        var householdId = new HouseholdId(Guid.NewGuid());
 
         // Act
-        var outcome = LearningOutcome.Create(code, " Listens and responds ", " Responds to sounds. ", " Language ", 10);
+        var outcome = LearningOutcome.Create(householdId, code, " Listens and responds ", " Responds to sounds. ", " Language ", 10);
 
         // Assert
         outcome.Id.Value.ShouldNotBe(Guid.Empty);
+        outcome.HouseholdId.ShouldBe(householdId);
         outcome.Code.ShouldBe("language-listening");
         outcome.Name.ShouldBe("Listens and responds");
         outcome.Description.ShouldBe("Responds to sounds.");
@@ -70,7 +73,7 @@ public sealed class LearningOutcomeTests
         const string missingCode = " ";
 
         // Act
-        var exception = Should.Throw<DomainException>(() => LearningOutcome.Create(missingCode, "Listens", "Description", "Language", 10));
+        var exception = Should.Throw<DomainException>(() => LearningOutcome.Create(new HouseholdId(Guid.NewGuid()), missingCode, "Listens", "Description", "Language", 10));
 
         // Assert
         exception.Message.ShouldBe("code is required.");
@@ -91,6 +94,6 @@ public sealed class LearningOutcomeTests
 
     private static LearningOutcome CreateOutcome()
     {
-        return LearningOutcome.Create("language-listening", "Listens and responds", "Responds to sounds.", "Language", 10);
+        return LearningOutcome.Create(new HouseholdId(Guid.NewGuid()), "language-listening", "Listens and responds", "Responds to sounds.", "Language", 10);
     }
 }

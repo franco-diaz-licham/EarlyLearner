@@ -1,4 +1,5 @@
 using EarlyLearner.Domain.IdentityContext.Entities;
+using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Domain.LearningContext.Entities;
 using EarlyLearner.Infrastructure.Persistence;
@@ -12,9 +13,10 @@ public static class LearningSeeder
         string name = "Listens and responds",
         string description = "Listens to instructions.",
         string category = "Language",
-        int sortOrder = 10)
+        int sortOrder = 10,
+        HouseholdId? householdId = null)
     {
-        return LearningOutcome.Create(code, name, description, category, sortOrder);
+        return LearningOutcome.Create(householdId ?? new HouseholdId(Guid.NewGuid()), code, name, description, category, sortOrder);
     }
 
     public static DailyLog CreateDailyLog(
