@@ -14,16 +14,15 @@ export const AppCheckbox = ({ className, containerClassName, error, inputId, lab
   const generatedId = useId();
   const checkboxId = inputId ?? generatedId;
   const errorId = `${checkboxId}-error`;
+  const isChecked = Boolean(checkboxProps.checked);
   const checkbox = (
     <Checkbox
       {...checkboxProps}
       aria-describedby={error ? errorId : checkboxProps['aria-describedby']}
       aria-invalid={error ? true : checkboxProps['aria-invalid']}
-      className={mergeClassNames(
-        'shrink-0 [&_.p-checkbox-box]:flex [&_.p-checkbox-box]:h-5 [&_.p-checkbox-box]:w-5 [&_.p-checkbox-box]:items-center [&_.p-checkbox-box]:justify-center [&_.p-checkbox-box]:rounded [&_.p-checkbox-box]:border [&_.p-checkbox-box]:border-brand-border [&_.p-checkbox-box]:bg-white [&_.p-checkbox-box]:text-white [&_.p-checkbox-box]:transition [&_.p-checkbox-box]:duration-150 [&_.p-checkbox-box.p-highlight]:border-brand-primary [&_.p-checkbox-box.p-highlight]:bg-brand-primary [&_.p-checkbox-icon]:h-3 [&_.p-checkbox-icon]:w-3 [&_.p-checkbox-input]:cursor-pointer',
-        className
-      )}
+      className={className}
       inputId={checkboxId}
+      pt={{ input: { className: 'sr-only' } }}
       required={required}
     />
   );
@@ -32,7 +31,7 @@ export const AppCheckbox = ({ className, containerClassName, error, inputId, lab
 
   return (
     <div>
-      <label className={mergeClassNames('flex cursor-pointer items-start gap-3 rounded-md border border-brand-border bg-white p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft', containerClassName)} htmlFor={checkboxId}>
+      <label className={mergeClassNames('flex cursor-pointer items-start gap-3 rounded-md border border-brand-border p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft', isChecked ? 'bg-brand-primary-soft' : 'bg-white', containerClassName)} htmlFor={checkboxId}>
         {checkbox}
         {label ? (
           <span>

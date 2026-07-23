@@ -63,7 +63,7 @@ services:
       - "5672:5672"
       - "5300:5300"
     volumes:
-      - ./servicebus/serviceBusConfig.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+      - ./serviceBusConfig.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "ServiceBus_dev_password_123"
