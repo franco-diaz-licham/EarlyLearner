@@ -89,10 +89,10 @@ public sealed class DailyLogRepository(DatabaseContext db) : IDailyLogQueryRepos
         return (items, totalCount);
     }
 
-    public Task<List<LearningOutcome>> GetLearningOutcomesAsync(IReadOnlyList<LearningOutcomeId> learningOutcomeIds, CancellationToken cancellationToken)
+    public Task<List<LearningOutcome>> GetLearningOutcomesAsync(HouseholdId householdId, IReadOnlyList<LearningOutcomeId> learningOutcomeIds, CancellationToken cancellationToken)
     {
         return db.LearningOutcomes
-            .Where(outcome => learningOutcomeIds.Contains(outcome.Id))
+            .Where(outcome => outcome.HouseholdId == householdId && learningOutcomeIds.Contains(outcome.Id))
             .ToListAsync(cancellationToken);
     }
 
