@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { homeKeys } from '../../home/queries/home.queries';
 import { mapDailyLogResponseToModel, mapDailyLogResponsesToModels, mapLearningLogFormToCreateDailyLogRequest, mapLearningLogFormToUpdateLearningMomentRequest, mapLearningMomentFeedResponseToModel } from '../mappers/dailyLog.mapper';
 import { dailyLogService } from '../services/dailyLog.services';
 import type { LearningLogFormModel } from '../types/dailyLog.types';
@@ -76,6 +77,7 @@ export const useCreateDailyLogMutation = () => {
     onSuccess: (dailyLog) => {
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.momentFeeds() });
+      void queryClient.invalidateQueries({ queryKey: homeKeys.all });
       queryClient.setQueryData(dailyLogKeys.detail(dailyLog.dailyLogId), dailyLog);
     }
   });
@@ -85,8 +87,7 @@ export const useUpdateLearningMomentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ dailyLogId, learningMomentId, form }: UpdateLearningMoment) =>
-      mapDailyLogResponseToModel(await dailyLogService.updateLearningMoment(dailyLogId, learningMomentId, mapLearningLogFormToUpdateLearningMomentRequest(form))),
+    mutationFn: async ({ dailyLogId, learningMomentId, form }: UpdateLearningMoment) => mapDailyLogResponseToModel(await dailyLogService.updateLearningMoment(dailyLogId, learningMomentId, mapLearningLogFormToUpdateLearningMomentRequest(form))),
     onSuccess: (dailyLog) => {
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.lists() });
       void queryClient.invalidateQueries({ queryKey: dailyLogKeys.momentFeeds() });

@@ -14,7 +14,7 @@ export const AppCheckbox = ({ className, containerClassName, error, inputId, lab
   const generatedId = useId();
   const checkboxId = inputId ?? generatedId;
   const errorId = `${checkboxId}-error`;
-  const isChecked = Boolean(checkboxProps.checked);
+  const isChecked = checkboxProps.checked;
   const checkbox = (
     <Checkbox
       {...checkboxProps}
@@ -31,7 +31,14 @@ export const AppCheckbox = ({ className, containerClassName, error, inputId, lab
 
   return (
     <div>
-      <label className={mergeClassNames('flex cursor-pointer items-start gap-3 rounded-md border border-brand-border p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft', isChecked ? 'bg-brand-primary-soft' : 'bg-white', containerClassName)} htmlFor={checkboxId}>
+      <label
+        className={mergeClassNames(
+          'flex cursor-pointer items-start gap-3 rounded-md border border-brand-border p-3 text-sm text-brand-text transition hover:bg-brand-surface-soft',
+          isChecked ? 'bg-brand-primary-soft' : 'bg-white',
+          containerClassName
+        )}
+        htmlFor={checkboxId}
+      >
         {checkbox}
         {label ? (
           <span>

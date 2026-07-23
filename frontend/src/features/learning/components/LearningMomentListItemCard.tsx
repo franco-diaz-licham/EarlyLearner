@@ -18,7 +18,6 @@ const learningKindLabels: Record<LearningMomentKind, string> = {
   routine: 'Routine'
 };
 
-
 export const LearningMomentListItemCard = ({ isDeleting, moment, onDeleteMoment, onEditMoment }: LearningMomentListItemCardProps) => {
   return (
     <article className="rounded-md border border-brand-border p-4">
@@ -43,7 +42,7 @@ export const LearningMomentListItemCard = ({ isDeleting, moment, onDeleteMoment,
             </div>
           </div>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center justify-end">
           <AppIconButton
             aria-label={`Edit ${moment.title}`}
             className="flex"
