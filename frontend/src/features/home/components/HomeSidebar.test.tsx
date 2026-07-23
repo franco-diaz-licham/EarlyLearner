@@ -41,7 +41,7 @@ const renderSidebar = (overrides: Partial<Parameters<typeof HomeSidebar>[0]> = {
   );
 
 describe('HomeSidebar', () => {
-  test('renders learning coverage, household pulse, and children', () => {
+  test('renders learning coverage and household pulse', () => {
     // Act
     renderSidebar();
 
@@ -50,12 +50,10 @@ describe('HomeSidebar', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByText('Used')).toBeInTheDocument();
     expect(screen.getByText('Not used')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/learning/outcomes');
+    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/outcomes');
     expect(screen.getByRole('heading', { name: 'Household Pulse' })).toBeInTheDocument();
     expect(screen.getByText('Open invites')).toBeInTheDocument();
     expect(screen.getByText('Invitations waiting for a response.')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Children' })).toBeInTheDocument();
-    expect(screen.getByText('Mia')).toBeInTheDocument();
   });
 
   test('renders loading placeholders', () => {
@@ -66,13 +64,13 @@ describe('HomeSidebar', () => {
     expect(screen.getAllByText('-')).toHaveLength(3);
   });
 
-  test('renders an empty children state', () => {
+  test('renders without metrics', () => {
     // Act
-    renderSidebar({ home: { ...home, children: [] } });
+    renderSidebar({ home: { ...home, metrics: [] } });
 
     // Assert
-    expect(screen.getByText('0 active in this household')).toBeInTheDocument();
-    expect(screen.getByText('Add children from the household page to start recording learning.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Household Pulse' })).toBeInTheDocument();
+    expect(screen.queryByText('Open invites')).not.toBeInTheDocument();
   });
 });
 

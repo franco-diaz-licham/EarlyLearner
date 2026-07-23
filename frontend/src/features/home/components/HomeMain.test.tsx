@@ -57,7 +57,7 @@ describe('HomeMain', () => {
     expect(screen.getByRole('heading', { name: 'Learning Overview' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Manage household' })).toHaveAttribute('href', '/households');
     expect(screen.getByRole('link', { name: 'View logs' })).toHaveAttribute('href', '/learning');
-    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/learning/outcomes');
+    expect(screen.getByRole('link', { name: 'Manage outcomes' })).toHaveAttribute('href', '/outcomes');
     expect(screen.getByRole('heading', { name: 'Learning Mix' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Outcome Coverage' })).toBeInTheDocument();
     expect(screen.getByText('Reading')).toBeInTheDocument();
