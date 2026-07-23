@@ -35,11 +35,9 @@ export const LearningCoverageCard = ({ coverage, isLoading }: LearningCoverageCa
         </div>
       </div>
 
-      <Link className="mt-4 inline-flex text-sm font-semibold text-brand-primary hover:text-brand-primary-hover" to="/learning/outcomes">
+      <Link className="mt-4 inline-flex text-sm font-semibold text-brand-primary hover:text-brand-primary-hover" to="/outcomes">
         Manage outcomes
       </Link>
     </div>
   );
 };
-
-

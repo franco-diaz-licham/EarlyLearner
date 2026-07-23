@@ -42,6 +42,8 @@ export const LearningOutcomesPage = () => {
   };
 
   const outcomeSaving = createLearningOutcomeMutation.isPending || updateLearningOutcomeMutation.isPending;
+  const deletingId = deleteLearningOutcomeMutation.isPending ? deleteLearningOutcomeMutation.variables : null;
+  const updatingStatusId = updateLearningOutcomeStatusMutation.isPending ? updateLearningOutcomeStatusMutation.variables.learningOutcomeId : null;
 
   return (
     <section aria-labelledby="learning-outcomes-title" className="space-y-5">
@@ -72,9 +74,9 @@ export const LearningOutcomesPage = () => {
       </AppCard>
 
       <LearningOutcomeList
-        deletingId={deleteLearningOutcomeMutation.variables ?? null}
+        deletingId={deletingId}
         outcomes={learningOutcomes}
-        updatingStatusId={updateLearningOutcomeStatusMutation.variables?.learningOutcomeId ?? null}
+        updatingStatusId={updatingStatusId}
         onDeleteOutcome={(outcome) => {
           deleteLearningOutcomeMutation.mutate(outcome.learningOutcomeId);
         }}
