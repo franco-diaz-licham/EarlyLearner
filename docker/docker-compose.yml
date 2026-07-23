@@ -63,7 +63,7 @@ services:
       - "5672:5672"
       - "5300:5300"
     volumes:
-      - ./servicebus/config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+      - ./servicebus/serviceBusConfig.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "ServiceBus_dev_password_123"
@@ -90,23 +90,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  db-seeder:
-    image: db-seeder-early-learner
-    container_name: db-seeder-early-learner
-    build:
-      context: ..
-      dockerfile: docker/db-seeder.dockerfile
-    depends_on:
-      - early_learner_local_db
-      - api
-    environment:
-      POSTGRES_HOST: "early_learner_local_db"
-      POSTGRES_PORT: "5432"
-      POSTGRES_DB: "main"
-      POSTGRES_USER: "local-dev"
-      POSTGRES_PASSWORD: "local-dev"
-      SEED_FILE: "/scripts/seed.sql"
 
   api:
     build:
