@@ -125,7 +125,6 @@ docker/
 ├── docker-compose.yml
 ├── api.dockerfile
 ├── worker.dockerfile
-└── db-seeder.dockerfile
 ```
 
 Azure Service Bus cloud setup is documented in `docs/azure-service-bus.md`.
@@ -140,7 +139,7 @@ Azure Service Bus cloud setup is documented in `docs/azure-service-bus.md`.
 - Node.js 20+
 - Docker Desktop
 - PowerShell 7+
-- PostgreSQL client tools if running `scripts/init-db.ps1` directly from the host
+- PostgreSQL client tools
 
 ---
 
@@ -220,26 +219,6 @@ Build the worker:
 ```powershell
 dotnet build backend/EarlyLearner.Worker/EarlyLearner.Worker.csproj
 ```
-
----
-
-## 🌱 Database Seeding
-
-The Docker Compose stack includes a `db-seeder` service that runs:
-
-```text
-scripts/init-db.ps1
-scripts/seed.sql
-```
-
-The seed script inserts a small predictable demo dataset with fixed UUIDs for:
-
-- household
-- carers
-- children
-- learning outcomes
-- daily logs
-- learning moments
 
 ---
 
