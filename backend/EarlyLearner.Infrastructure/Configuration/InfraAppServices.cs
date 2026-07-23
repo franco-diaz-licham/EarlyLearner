@@ -50,6 +50,9 @@ public static class InfraAppServices
         services.AddSingleton(new DocumentContainerDefinition(
             NotificationDocument.ContainerName,
             NotificationDocument.PartitionKeyPath));
+        services.AddSingleton(new DocumentContainerDefinition(
+            NotificationPublicationDocument.ContainerName,
+            NotificationPublicationDocument.PartitionKeyPath));
         return services;
     }
 

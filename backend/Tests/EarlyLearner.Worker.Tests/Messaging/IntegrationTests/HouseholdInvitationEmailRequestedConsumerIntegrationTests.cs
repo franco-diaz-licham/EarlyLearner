@@ -63,4 +63,32 @@ public sealed class HouseholdInvitationEmailRequestedConsumerIntegrationTests : 
         notification.Status.ShouldBe(NotificationDeliveryStatus.Failed);
         notification.Message.ShouldContain("Email service is unavailable.");
     }
+
+    [Test]
+    public async Task Consume_Should_ProcessInvitationOnce_WhenSameInvitationIsPublishedMoreThanOnce()
+    {
+        // Arrange
+        var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
+
+        _emailSender
+            .Setup(sender => sender.SendAsync(
+                It.Is<EmailMessageModel>(email => email.To == message.Email),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _harness.Bus.Publish(message);
+        await _harness.Bus.Publish(message);
+
+        // Assert
+        (await _harness.Consumed.Any<HouseholdInvitationEmailRequestedEvent>()).ShouldBeTrue();
+        (await _harness.Published.Any<HouseholdInvitationEmailSentEvent>()).ShouldBeTrue();
+        (await _harness.Published.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeFalse();
+
+        var notification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
+        notification.ShouldNotBeNull();
+        notification.Type.ShouldBe("householdInvitationEmailSent");
+        notification.Status.ShouldBe(NotificationDeliveryStatus.Succeeded);
+        _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

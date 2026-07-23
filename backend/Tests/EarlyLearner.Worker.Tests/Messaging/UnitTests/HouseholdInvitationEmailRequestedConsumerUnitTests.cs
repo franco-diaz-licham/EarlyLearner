@@ -84,4 +84,29 @@ public sealed class HouseholdInvitationEmailRequestedConsumerUnitTests : WorkerC
         _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Once);
         _emailSender.VerifyNoOtherCalls();
     }
+
+    [Test]
+    public async Task Consume_Should_NotSendEmailOrPublishEvent_WhenInvitationWasAlreadyProcessed()
+    {
+        // Arrange
+        var message = TestData.CreateHouseholdInvitationEmailRequestedEvent();
+        var context = CreateContext(message);
+        var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId, NotificationDeliveryStatus.Succeeded);
+
+        await _documentStore.UpsertAsync(
+            NotificationDocument.ContainerName,
+            notification,
+            NotificationDocument.BuildPartitionKey(message.HouseholdId));
+
+        // Act
+        await _householdInvitationEmailRequestedConsumer.Consume(context.Object);
+
+        // Assert
+        var storedNotification = _documentStore.GetNotification(message.HouseholdId, message.InvitationId);
+        storedNotification.ShouldBe(notification);
+        context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailSentEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+        context.Verify(consumeContext => consumeContext.Publish(It.IsAny<HouseholdInvitationEmailFailedEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+        _emailSender.Verify(sender => sender.SendAsync(It.IsAny<EmailMessageModel>(), It.IsAny<CancellationToken>()), Times.Never);
+        _emailSender.VerifyNoOtherCalls();
+    }
 }

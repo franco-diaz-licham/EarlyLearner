@@ -25,6 +25,13 @@ public sealed class HouseholdInvitationEmailSentConsumerUnitTests : Infrastructu
                 NotificationDocument.BuildPartitionKey(message.HouseholdId),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(notification);
+        _documentStore
+            .Setup(store => store.TryCreateAsync(
+                NotificationPublicationDocument.ContainerName,
+                It.Is<NotificationPublicationDocument>(publication => publication.InvitationId == message.InvitationId),
+                NotificationPublicationDocument.BuildPartitionKey(message.HouseholdId),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         _notificationPublisher
             .Setup(publisher => publisher.PublishAsync(It.IsAny<NotificationResponse>(), It.IsAny<CancellationToken>()))
             .Callback<NotificationResponse, CancellationToken>((response, _) => publishedNotification = response)
@@ -42,6 +49,7 @@ public sealed class HouseholdInvitationEmailSentConsumerUnitTests : Infrastructu
         publishedNotification.Message.ShouldBe(notification.Message);
         publishedNotification.OccurredAt.ShouldBe(notification.OccurredAt);
         _documentStore.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
+        _documentStore.Verify(store => store.TryCreateAsync(NotificationPublicationDocument.ContainerName, It.Is<NotificationPublicationDocument>(publication => publication.InvitationId == message.InvitationId), NotificationPublicationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
         _notificationPublisher.Verify(publisher => publisher.PublishAsync(It.IsAny<NotificationResponse>(), It.IsAny<CancellationToken>()), Times.Once);
         _documentStore.VerifyNoOtherCalls();
         _notificationPublisher.VerifyNoOtherCalls();
@@ -67,6 +75,39 @@ public sealed class HouseholdInvitationEmailSentConsumerUnitTests : Infrastructu
 
         // Assert
         _documentStore.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
+        _notificationPublisher.VerifyNoOtherCalls();
+        _documentStore.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task Consume_Should_NotPublishNotification_WhenInvitationWasAlreadyPublished()
+    {
+        // Arrange
+        var message = TestData.CreateHouseholdInvitationEmailSentEvent();
+        var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId);
+        var context = CreateContext(message);
+
+        _documentStore
+            .Setup(store => store.GetAsync<NotificationDocument>(
+                NotificationDocument.ContainerName,
+                NotificationDocument.BuildId(message.InvitationId),
+                NotificationDocument.BuildPartitionKey(message.HouseholdId),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(notification);
+        _documentStore
+            .Setup(store => store.TryCreateAsync(
+                NotificationPublicationDocument.ContainerName,
+                It.Is<NotificationPublicationDocument>(publication => publication.InvitationId == message.InvitationId),
+                NotificationPublicationDocument.BuildPartitionKey(message.HouseholdId),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        // Act
+        await _householdInvitationEmailSentConsumer.Consume(context.Object);
+
+        // Assert
+        _documentStore.Verify(store => store.GetAsync<NotificationDocument>(NotificationDocument.ContainerName, NotificationDocument.BuildId(message.InvitationId), NotificationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
+        _documentStore.Verify(store => store.TryCreateAsync(NotificationPublicationDocument.ContainerName, It.Is<NotificationPublicationDocument>(publication => publication.InvitationId == message.InvitationId), NotificationPublicationDocument.BuildPartitionKey(message.HouseholdId), It.IsAny<CancellationToken>()), Times.Once);
         _notificationPublisher.VerifyNoOtherCalls();
         _documentStore.VerifyNoOtherCalls();
     }

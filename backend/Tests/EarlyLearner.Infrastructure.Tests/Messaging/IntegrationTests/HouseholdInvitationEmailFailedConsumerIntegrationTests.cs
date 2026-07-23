@@ -45,4 +45,22 @@ public sealed class HouseholdInvitationEmailFailedConsumerIntegrationTests : Inf
         (await _harness.Consumed.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeTrue();
         _notificationPublisher.Notifications.ShouldBeEmpty();
     }
+
+    [Test]
+    public async Task Consume_Should_PublishNotificationOnce_WhenSameInvitationIsPublishedMoreThanOnce()
+    {
+        // Arrange
+        var message = TestData.CreateHouseholdInvitationEmailFailedEvent();
+        var notification = TestData.CreateNotification(message.HouseholdId, message.InvitationId, NotificationDeliveryStatus.Failed);
+        await _documentStore.UpsertAsync(NotificationDocument.ContainerName, notification, NotificationDocument.BuildPartitionKey(message.HouseholdId));
+
+        // Act
+        await _harness.Bus.Publish(message);
+        await _harness.Bus.Publish(message);
+
+        // Assert
+        (await _harness.Consumed.Any<HouseholdInvitationEmailFailedEvent>()).ShouldBeTrue();
+        _notificationPublisher.Notifications.Count.ShouldBe(1);
+        _notificationPublisher.Notifications.Single().Id.ShouldBe(message.InvitationId);
+    }
 }

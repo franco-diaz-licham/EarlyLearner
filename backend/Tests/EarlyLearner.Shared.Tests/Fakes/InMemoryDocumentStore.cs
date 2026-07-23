@@ -21,11 +21,23 @@ public sealed class InMemoryDocumentStore : IDocumentStore
     {
         var id = document switch {
             NotificationDocument notification => notification.Id,
+            NotificationPublicationDocument notificationPublication => notificationPublication.Id,
             _ => throw new InvalidOperationException($"Document type {typeof(TDocument).Name} is not supported.")
         };
 
         _documents[(containerName, id, partitionKey)] = document!;
         return Task.CompletedTask;
+    }
+
+    public Task<bool> TryCreateAsync<TDocument>(string containerName, TDocument document, string partitionKey, CancellationToken cancellationToken = default)
+    {
+        var id = document switch {
+            NotificationDocument notification => notification.Id,
+            NotificationPublicationDocument notificationPublication => notificationPublication.Id,
+            _ => throw new InvalidOperationException($"Document type {typeof(TDocument).Name} is not supported.")
+        };
+
+        return Task.FromResult(_documents.TryAdd((containerName, id, partitionKey), document!));
     }
 
     public Task DeleteAsync(string containerName, string id, string partitionKey, CancellationToken cancellationToken = default)

@@ -17,6 +17,8 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(
     public async Task Consume(ConsumeContext<HouseholdInvitationEmailRequestedEvent> context)
     {
         var message = context.Message;
+        var notificationCreated = await TryCreatePendingNotificationAsync(message, context.CancellationToken);
+        if (!notificationCreated) return;
 
         try {
             await emailSender.SendAsync(EmailBuilder.BuildHouseholdInvitationEmail(message, options.Url), context.CancellationToken);
@@ -55,6 +57,16 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(
         Status: NotificationDeliveryStatus.Succeeded,
         OccurredAt: message.SentAt);
 
+    private static NotificationDocument ToPendingNotificationDocument(HouseholdInvitationEmailRequestedEvent message) => new(
+        Id: NotificationDocument.BuildId(message.InvitationId),
+        HouseholdId: message.HouseholdId,
+        InvitationId: message.InvitationId,
+        Type: "householdInvitationEmailPending",
+        Title: "Invitation email pending",
+        Message: $"Invitation email to {message.Email} is pending.",
+        Status: NotificationDeliveryStatus.Pending,
+        OccurredAt: DateTimeOffset.UtcNow);
+
     private static NotificationDocument ToNotificationDocument(HouseholdInvitationEmailFailedEvent message) => new(
         Id: NotificationDocument.BuildId(message.InvitationId),
         HouseholdId: message.HouseholdId,
@@ -71,6 +83,15 @@ public sealed class HouseholdInvitationEmailRequestedConsumer(
             NotificationDocument.ContainerName,
             notification,
             NotificationDocument.BuildPartitionKey(notification.HouseholdId),
+            cancellationToken);
+    }
+
+    private async Task<bool> TryCreatePendingNotificationAsync(HouseholdInvitationEmailRequestedEvent message, CancellationToken cancellationToken)
+    {
+        return await documentStore.TryCreateAsync(
+            NotificationDocument.ContainerName,
+            ToPendingNotificationDocument(message),
+            NotificationDocument.BuildPartitionKey(message.HouseholdId),
             cancellationToken);
     }
 }

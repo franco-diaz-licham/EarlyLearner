@@ -1,3 +1,4 @@
+using System.Net;
 using EarlyLearner.Shared.Options;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
@@ -21,33 +22,33 @@ public sealed class CosmosDocumentStore(CosmosClient client, IOptions<CosmosDbOp
     public async Task<TDocument?> GetAsync<TDocument>(string containerName, string id, string partitionKey, CancellationToken cancellationToken = default)
     {
         try {
-            var response = await GetContainer(containerName).ReadItemAsync<TDocument>(
-                id,
-                new PartitionKey(partitionKey),
-                cancellationToken: cancellationToken);
-
+            var response = await GetContainer(containerName).ReadItemAsync<TDocument>(id, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
             return response.Resource;
-        } catch (CosmosException exception) when (exception.StatusCode == System.Net.HttpStatusCode.NotFound) {
+        } catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.NotFound) {
             return default;
         }
     }
 
     public async Task UpsertAsync<TDocument>(string containerName, TDocument document, string partitionKey, CancellationToken cancellationToken = default)
     {
-        await GetContainer(containerName).UpsertItemAsync(
-            document,
-            new PartitionKey(partitionKey),
-            cancellationToken: cancellationToken);
+        await GetContainer(containerName).UpsertItemAsync(document, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
+    }
+
+    public async Task<bool> TryCreateAsync<TDocument>(string containerName, TDocument document, string partitionKey, CancellationToken cancellationToken = default)
+    {
+        try {
+            await GetContainer(containerName).CreateItemAsync(document, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
+            return true;
+        } catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.Conflict) {
+            return false;
+        }
     }
 
     public async Task DeleteAsync(string containerName, string id, string partitionKey, CancellationToken cancellationToken = default)
     {
         try {
-            await GetContainer(containerName).DeleteItemAsync<object>(
-                id,
-                new PartitionKey(partitionKey),
-                cancellationToken: cancellationToken);
-        } catch (CosmosException exception) when (exception.StatusCode == System.Net.HttpStatusCode.NotFound) {
+            await GetContainer(containerName).DeleteItemAsync<object>(id, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
+        } catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.NotFound) {
         }
     }
 

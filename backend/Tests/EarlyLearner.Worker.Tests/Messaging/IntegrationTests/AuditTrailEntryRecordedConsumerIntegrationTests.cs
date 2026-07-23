@@ -1,4 +1,5 @@
 using EarlyLearner.Shared.Tests.Fixtures;
+using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Worker.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
@@ -36,22 +37,14 @@ public sealed class AuditTrailEntryRecordedConsumerIntegrationTests : WorkerCons
         // Arrange
         var message = TestData.CreateAuditTrailEntryRecordedEvent();
         var db = ResolveService<AuditDbContext>();
-        db.AuditTrailEntries.Add(new AuditTrailEntry {
-            Id = message.Id,
-            HouseholdId = message.HouseholdId,
-            Action = message.Action,
-            Summary = message.Summary,
-            Details = message.Details,
-            ActionedAt = message.ActionedAt,
-            RecordedAt = DateTimeOffset.UtcNow.AddDays(-1)
-        });
-        await db.SaveChangesAsync();
-        var context = CreateContext(message);
 
         // Act
-        await _auditTrailEntryRecordedConsumer.Consume(context.Object);
+        await _harness.Bus.Publish(message);
+        await _harness.Bus.Publish(message);
 
         // Assert
+        (await _harness.Consumed.Any<AuditTrailEntryRecordedEvent>()).ShouldBeTrue();
+
         var entries = await db.AuditTrailEntries.ToListAsync();
         entries.Count.ShouldBe(1);
         entries.Single().Id.ShouldBe(message.Id);

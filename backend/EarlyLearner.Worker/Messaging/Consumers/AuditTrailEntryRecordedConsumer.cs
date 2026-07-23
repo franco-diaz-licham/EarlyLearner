@@ -2,6 +2,7 @@ using EarlyLearner.Shared.Messaging;
 using EarlyLearner.Worker.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace EarlyLearner.Worker.Messaging.Consumers;
 
@@ -24,6 +25,15 @@ public sealed class AuditTrailEntryRecordedConsumer(AuditDbContext db) : IConsum
             RecordedAt = DateTimeOffset.UtcNow
         });
 
-        await db.SaveChangesAsync(context.CancellationToken);
+        try {
+            await db.SaveChangesAsync(context.CancellationToken);
+        } catch (DbUpdateException exception) when (IsDuplicateAuditTrailEntry(exception)) {
+            db.ChangeTracker.Clear();
+        }
+    }
+
+    private static bool IsDuplicateAuditTrailEntry(DbUpdateException exception)
+    {
+        return exception.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
     }
 }

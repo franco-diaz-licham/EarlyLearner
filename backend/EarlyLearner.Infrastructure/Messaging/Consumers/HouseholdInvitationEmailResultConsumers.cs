@@ -25,6 +25,9 @@ public sealed class HouseholdInvitationEmailSentConsumer(
             return;
         }
 
+        var publicationCreated = await TryCreatePublicationAsync(message.HouseholdId, message.InvitationId, context.CancellationToken);
+        if (!publicationCreated) return;
+
         logger.LogInformation(
             "Publishing invitation email sent notification for household {HouseholdId} and invitation {InvitationId}.",
             message.HouseholdId,
@@ -45,6 +48,19 @@ public sealed class HouseholdInvitationEmailSentConsumer(
             NotificationDocument.ContainerName,
             NotificationDocument.BuildId(invitationId),
             NotificationDocument.BuildPartitionKey(householdId),
+            cancellationToken);
+    }
+
+    private Task<bool> TryCreatePublicationAsync(Guid householdId, Guid invitationId, CancellationToken cancellationToken)
+    {
+        return documentStore.TryCreateAsync(
+            NotificationPublicationDocument.ContainerName,
+            new NotificationPublicationDocument(
+                Id: NotificationPublicationDocument.BuildId(invitationId),
+                HouseholdId: householdId,
+                InvitationId: invitationId,
+                PublishedAt: DateTimeOffset.UtcNow),
+            NotificationPublicationDocument.BuildPartitionKey(householdId),
             cancellationToken);
     }
 }
