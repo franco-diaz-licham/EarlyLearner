@@ -1,4 +1,6 @@
+using System.Net;
 using EarlyLearner.Shared.Tests;
+using Shouldly;
 
 namespace EarlyLearner.Api.Tests.Fixtures;
 
@@ -20,5 +22,11 @@ public abstract class ApiEndpointTestFixture : BaseDatabaseSetup
     {
         Client.Dispose();
         _factory.Dispose();
+    }
+
+    protected async Task EnsureSessionAsync()
+    {
+        var response = await Client.PostAsync("/api/v1/identity/session", content: null);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }

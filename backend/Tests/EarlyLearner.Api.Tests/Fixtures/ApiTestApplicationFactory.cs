@@ -51,16 +51,18 @@ public sealed class ApiTestApplicationFactory(string connectionString) : WebAppl
                 });
             });
 
-            services.RemoveAll<IFileStorageService>();
-            services.RemoveAll<IDocumentStore>();
-            services.RemoveAll<INotificationPublisher>();
-            services.RemoveAll<IHostedService>();
-            services.RemoveAll<IBus>();
-            services.RemoveAll<IBusControl>();
+                services.RemoveAll<IFileStorageService>();
+                services.RemoveAll<IDocumentStore>();
+                services.RemoveAll<INotificationPublisher>();
+                services.RemoveAll<IIntegrationEventPublisher>();
+                services.RemoveAll<IHostedService>();
+                services.RemoveAll<IBus>();
+                services.RemoveAll<IBusControl>();
 
-            services.AddSingleton<IDocumentStore, InMemoryDocumentStore>();
-            services.AddSingleton<INotificationPublisher, InMemoryNotificationPublisher>();
-            services.AddSingleton<IFileStorageService, NoOpFileStorageService>();
+                services.AddSingleton<IDocumentStore, InMemoryDocumentStore>();
+                services.AddSingleton<INotificationPublisher, InMemoryNotificationPublisher>();
+                services.AddSingleton<IIntegrationEventPublisher, InMemoryIntegrationEventPublisher>();
+                services.AddSingleton<IFileStorageService, NoOpFileStorageService>();
 
             services
                 .AddAuthentication(options => {
