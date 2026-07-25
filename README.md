@@ -13,6 +13,18 @@ The project is built as a cloud-native, event-driven .NET system using a modular
 
 ---
 
+## 🎬 Walkthrough
+
+<a href="https://youtu.be/Uig0mlf_3aI">
+  <img
+    src="https://img.youtube.com/vi/Uig0mlf_3aI/hqdefault.jpg"
+    alt="Watch the EarlyLearner app overview on YouTube"
+    width="720"
+  />
+</a>
+
+---
+
 ## 🧭 System Design
 
 EarlyLearner is split across separately deployable application services and managed cloud resources. The API handles HTTP workflows, the worker processes integration events, PostgreSQL stores relational application data, Cosmos DB supports document-style state, Azure Storage keeps uploaded evidence, and Azure Service Bus connects the distributed workflow boundaries.
