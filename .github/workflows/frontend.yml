@@ -40,10 +40,6 @@ jobs:
         run: |
           npm ci --include=optional
 
-          $rollupVersion = node -p "require('./package-lock.json').packages['node_modules/rollup'].version"
-          npm install --no-save --package-lock=false --include=optional "@rollup/rollup-linux-x64-gnu@$rollupVersion"
-          node -e "require.resolve('@rollup/rollup-linux-x64-gnu')"
-
       # Vite reads this value at build time, so CI writes the production API base URL before building.
       - name: Create production environment file
         run: |
