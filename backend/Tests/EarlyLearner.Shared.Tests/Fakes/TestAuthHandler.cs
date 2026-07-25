@@ -6,6 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace EarlyLearner.Shared.Tests.Fakes;
 
+/// <summary>
+/// Provides a fixed authenticated test user for API endpoint tests.
+/// </summary>
 public sealed class TestAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,

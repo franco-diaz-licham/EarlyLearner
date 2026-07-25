@@ -21,6 +21,9 @@ using System.Net.Mime;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
+/// <summary>
+/// Creates a test API host with test services and external dependencies replaced.
+/// </summary>
 public sealed class ApiTestApplicationFactory(string connectionString) : WebApplicationFactory<Api::Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)

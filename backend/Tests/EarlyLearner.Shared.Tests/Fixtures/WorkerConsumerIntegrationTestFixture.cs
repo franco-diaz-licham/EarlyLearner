@@ -17,8 +17,7 @@ using NUnit.Framework;
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
 /// <summary>
-/// Provides an isolated in-process worker host for consumer integration testing.
-/// Creates a fresh host, scope, test doubles, and MassTransit test harness for each test.
+/// Provides a reusable worker host fixture for consumer integration tests.
 /// </summary>
 public abstract class WorkerConsumerIntegrationTestFixture : BaseAuditDatabaseSetup
 {
@@ -31,6 +30,9 @@ public abstract class WorkerConsumerIntegrationTestFixture : BaseAuditDatabaseSe
     private IHost? _host;
     private IServiceScope? _testServiceScope;
 
+    /// <summary>
+    /// Starts the in-process worker host and MassTransit harness before each test.
+    /// </summary>
     [SetUp]
     public async Task StartHostAsync()
     {
@@ -45,6 +47,9 @@ public abstract class WorkerConsumerIntegrationTestFixture : BaseAuditDatabaseSe
         _auditTrailEntryRecordedConsumer = CreateAuditTrailEntryRecordedConsumer();
     }
 
+    /// <summary>
+    /// Stops the MassTransit harness and disposes the worker host after each test.
+    /// </summary>
     [TearDown]
     public async Task TearDownHostAsync()
     {

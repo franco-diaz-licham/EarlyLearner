@@ -1,28 +1,35 @@
-using EarlyLearner.Worker.Persistence;
+using EarlyLearner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Npgsql;
 using NUnit.Framework;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.PostgreSql;
 
-namespace EarlyLearner.Shared.Tests;
+namespace EarlyLearner.Shared.Tests.Fixtures;
 
-public abstract class BaseAuditDatabaseSetup
+/// <summary>
+/// Provides a reusable PostgreSQL database fixture for integration-style tests.
+/// </summary>
+public abstract class BaseDatabaseSetup
 {
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
         .WithImage("postgres:17-alpine")
-        .WithDatabase("earlylearner_audit_tests")
+        .WithDatabase("earlylearner_tests")
         .WithUsername("earlylearner")
         .WithPassword("earlylearner")
         .Build();
 
     private Respawner _respawner = default!;
 
-    protected AuditDbContext Db { get; private set; } = default!;
+    protected DatabaseContext Db { get; private set; } = default!;
 
     protected string ConnectionString => _postgres.GetConnectionString();
 
+    /// <summary>
+    /// Starts the PostgreSQL test container and applies database migrations once for the fixture.
+    /// </summary>
     [OneTimeSetUp]
     public async Task StartDatabaseAsync()
     {
@@ -40,6 +47,9 @@ public abstract class BaseAuditDatabaseSetup
         });
     }
 
+    /// <summary>
+    /// Resets persisted data and creates a fresh database context before each test.
+    /// </summary>
     [SetUp]
     public async Task ResetDatabaseAsync()
     {
@@ -49,6 +59,9 @@ public abstract class BaseAuditDatabaseSetup
         Db = CreateContext();
     }
 
+    /// <summary>
+    /// Disposes the per-test database context after each test completes.
+    /// </summary>
     [TearDown]
     public async Task DisposeContextAsync()
     {
@@ -61,15 +74,16 @@ public abstract class BaseAuditDatabaseSetup
         await _postgres.DisposeAsync();
     }
 
-    protected AuditDbContext CreateContext()
+    protected DatabaseContext CreateContext()
     {
-        var options = new DbContextOptionsBuilder<AuditDbContext>()
+        var options = new DbContextOptionsBuilder<DatabaseContext>()
             .UseNpgsql(ConnectionString)
             .UseSnakeCaseNamingConvention()
+            .ConfigureWarnings(warnings => {
+                warnings.Ignore(RelationalEventId.OptionalDependentWithoutIdentifyingPropertyWarning);
+            })
             .Options;
 
-        return new AuditDbContext(options);
+        return new DatabaseContext(options);
     }
 }
-
-

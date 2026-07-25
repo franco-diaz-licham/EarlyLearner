@@ -10,6 +10,9 @@ using NUnit.Framework;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
+/// <summary>
+/// Provides a reusable MassTransit fixture for infrastructure consumer integration tests.
+/// </summary>
 public abstract class InfrastructureConsumerIntegrationTestFixture
 {
     protected ITestHarness _harness = default!;
@@ -18,6 +21,9 @@ public abstract class InfrastructureConsumerIntegrationTestFixture
 
     private ServiceProvider? _serviceProvider;
 
+    /// <summary>
+    /// Builds the test service provider and starts the MassTransit harness before each test.
+    /// </summary>
     [SetUp]
     public async Task StartHarnessAsync()
     {
@@ -29,6 +35,9 @@ public abstract class InfrastructureConsumerIntegrationTestFixture
         await _harness.Start();
     }
 
+    /// <summary>
+    /// Stops the MassTransit harness and disposes the test service provider after each test.
+    /// </summary>
     [TearDown]
     public async Task StopHarnessAsync()
     {

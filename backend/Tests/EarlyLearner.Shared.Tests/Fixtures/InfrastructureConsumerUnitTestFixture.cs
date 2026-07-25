@@ -8,6 +8,9 @@ using NUnit.Framework;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
+/// <summary>
+/// Provides reusable mocks and consumers for infrastructure consumer unit tests.
+/// </summary>
 public abstract class InfrastructureConsumerUnitTestFixture
 {
     protected Mock<IDocumentStore> _documentStore = default!;
@@ -15,6 +18,9 @@ public abstract class InfrastructureConsumerUnitTestFixture
     protected HouseholdInvitationEmailSentConsumer _householdInvitationEmailSentConsumer = default!;
     protected HouseholdInvitationEmailFailedConsumer _householdInvitationEmailFailedConsumer = default!;
 
+    /// <summary>
+    /// Creates strict mocks and infrastructure consumers before each unit test.
+    /// </summary>
     [SetUp]
     public void SetUp()
     {

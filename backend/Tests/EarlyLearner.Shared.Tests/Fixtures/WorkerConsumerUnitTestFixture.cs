@@ -11,6 +11,9 @@ using NUnit.Framework;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
+/// <summary>
+/// Provides reusable fakes and consumers for worker consumer unit tests.
+/// </summary>
 public abstract class WorkerConsumerUnitTestFixture : IAsyncDisposable
 {
     protected Mock<IEmailSender> _emailSender = default!;
@@ -19,6 +22,9 @@ public abstract class WorkerConsumerUnitTestFixture : IAsyncDisposable
     protected HouseholdInvitationEmailRequestedConsumer _householdInvitationEmailRequestedConsumer = default!;
     protected AuditTrailEntryRecordedConsumer _auditTrailEntryRecordedConsumer = default!;
 
+    /// <summary>
+    /// Creates fakes, in-memory database context, and worker consumers before each unit test.
+    /// </summary>
     [SetUp]
     public void SetUp()
     {
@@ -35,6 +41,9 @@ public abstract class WorkerConsumerUnitTestFixture : IAsyncDisposable
         _auditTrailEntryRecordedConsumer = new AuditTrailEntryRecordedConsumer(_db);
     }
 
+    /// <summary>
+    /// Disposes the in-memory audit database context after each unit test.
+    /// </summary>
     [TearDown]
     public async Task TearDownAsync()
     {

@@ -3,6 +3,9 @@ using EarlyLearner.Shared.NotificationService;
 
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
+/// <summary>
+/// Creates reusable test messages and documents for shared test fixtures.
+/// </summary>
 public static class TestData
 {
     public static HouseholdInvitationEmailRequestedEvent CreateHouseholdInvitationEmailRequestedEvent()

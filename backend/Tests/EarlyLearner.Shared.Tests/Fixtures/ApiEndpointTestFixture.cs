@@ -6,6 +6,9 @@ using Shouldly;
 namespace EarlyLearner.Shared.Tests.Fixtures;
 
 [NonParallelizable]
+/// <summary>
+/// Provides a reusable API endpoint fixture with a test database and HTTP client.
+/// </summary>
 public abstract class ApiEndpointTestFixture : BaseDatabaseSetup, IDisposable
 {
     private ApiTestApplicationFactory? _factory;
@@ -13,6 +16,9 @@ public abstract class ApiEndpointTestFixture : BaseDatabaseSetup, IDisposable
 
     protected HttpClient Client => _client ?? throw new InvalidOperationException("API test client is not initialized.");
 
+    /// <summary>
+    /// Creates a test API factory and HTTP client before each endpoint test.
+    /// </summary>
     [SetUp]
     public void SetUpApi()
     {
@@ -20,6 +26,9 @@ public abstract class ApiEndpointTestFixture : BaseDatabaseSetup, IDisposable
         _client = _factory.CreateClient();
     }
 
+    /// <summary>
+    /// Disposes the test HTTP client and API factory after each endpoint test.
+    /// </summary>
     [TearDown]
     public void TearDownApi()
     {
