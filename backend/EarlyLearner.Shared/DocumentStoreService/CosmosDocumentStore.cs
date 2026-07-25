@@ -9,13 +9,15 @@ public sealed class CosmosDocumentStore(CosmosClient client, IOptions<CosmosDbOp
 {
     private readonly CosmosDbOptions options = options.Value;
 
-    public async Task EnsureContainerAsync(string containerName, string partitionKeyPath, int? defaultTimeToLiveSeconds = null, CancellationToken cancellationToken = default)
+    public async Task EnsureContainerAsync(
+        string containerName,
+        string partitionKeyPath,
+        int? defaultTimeToLiveSeconds = null,
+        CancellationToken cancellationToken = default)
     {
-        var databaseResponse = await client.CreateDatabaseIfNotExistsAsync(options.DatabaseName, cancellationToken: cancellationToken);
-        var properties = new ContainerProperties(containerName, partitionKeyPath) {
-            DefaultTimeToLive = defaultTimeToLiveSeconds ?? options.DefaultTimeToLiveSeconds
-        };
-
+        var databaseResponse =
+            await client.CreateDatabaseIfNotExistsAsync(options.DatabaseName, throughput: options.Throughput, cancellationToken: cancellationToken);
+        var properties = new ContainerProperties(containerName, partitionKeyPath) { DefaultTimeToLive = defaultTimeToLiveSeconds ?? options.DefaultTimeToLiveSeconds };
         await databaseResponse.Database.CreateContainerIfNotExistsAsync(properties, cancellationToken: cancellationToken);
     }
 
