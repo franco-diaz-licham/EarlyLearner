@@ -31,7 +31,8 @@ try {
     app.UseMiddleware<UserClaimsMiddleware>();
     app.UseAuthorization();
     app.MapApiEndpoints();
-    await app.Services.ConfigureApp();
+
+    if (!app.Environment.IsEnvironment("Testing")) await app.Services.ConfigureApp();
     await app.RunAsync();
 } catch (Exception ex) {
     Log.Fatal(ex, "Application startup failed");
@@ -41,3 +42,4 @@ try {
 }
 
 public partial class Program;
+

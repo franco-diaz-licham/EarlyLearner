@@ -30,7 +30,7 @@ public sealed class DailyLogEndpointsTests : ApiEndpointTestFixture
         var request = new {
             ChildId = child.Id.Value,
             LogDate = new DateOnly(2026, 7, 24),
-            Kind = LearningMomentKindEnum.Activity,
+            Kind = "activity",
             Title = "Paint mixing",
             Notes = "Mixed colours and described the changes.",
             LearningOutcomeIds = new[] { outcome.Id.Value }

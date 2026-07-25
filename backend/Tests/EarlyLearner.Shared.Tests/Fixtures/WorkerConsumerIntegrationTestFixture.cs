@@ -1,5 +1,4 @@
 using EarlyLearner.Shared.DocumentStoreService;
-using EarlyLearner.Shared.Tests;
 using EarlyLearner.Shared.Tests.Fakes;
 using EarlyLearner.Worker.Configuration.Options;
 using EarlyLearner.Worker.Messaging;

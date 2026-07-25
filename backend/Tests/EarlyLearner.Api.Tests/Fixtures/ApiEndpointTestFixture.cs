@@ -1,28 +1,33 @@
 using System.Net;
+using EarlyLearner.Infrastructure.Persistence;
 using EarlyLearner.Shared.Tests;
 using Shouldly;
 
 namespace EarlyLearner.Api.Tests.Fixtures;
 
+[NonParallelizable]
 public abstract class ApiEndpointTestFixture : BaseDatabaseSetup
 {
-    private ApiTestApplicationFactory _factory = default!;
+    private ApiTestApplicationFactory? _factory;
+    private HttpClient? _client;
 
-    protected HttpClient Client { get; private set; } = default!;
+    protected HttpClient Client => _client ?? throw new InvalidOperationException("API test client is not initialized.");
 
     [SetUp]
     public void SetUpApi()
     {
         _factory = new ApiTestApplicationFactory(ConnectionString);
-        Client = _factory.CreateClient();
+        _client = _factory.CreateClient();
     }
 
     [TearDown]
     public void TearDownApi()
     {
-        Client.Dispose();
-        _factory.Dispose();
+        _client?.Dispose();
+        _factory?.Dispose();
     }
+
+    protected new DatabaseContext CreateContext() => base.CreateContext();
 
     protected async Task EnsureSessionAsync()
     {

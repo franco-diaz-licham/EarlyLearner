@@ -38,6 +38,6 @@ public sealed class DashboardEndpointsTests : ApiEndpointTestFixture
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await response.Content.ReadFromJsonAsync<JsonElement>();
         json.GetProperty("data").GetProperty("children").GetArrayLength().ShouldBe(1);
-        json.GetProperty("data").GetProperty("learningCoverage").GetProperty("activeOutcomeCount").GetInt32().ShouldBe(1);
+        json.GetProperty("data").GetProperty("outcomeCoverage").GetProperty("activeOutcomeCount").GetInt32().ShouldBe(1);
     }
 }

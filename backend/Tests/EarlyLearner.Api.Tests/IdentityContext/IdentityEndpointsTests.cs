@@ -19,7 +19,7 @@ public sealed class IdentityEndpointsTests : ApiEndpointTestFixture
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-        json.GetProperty("data").GetProperty("displayName").GetString().ShouldBe("Franco Diaz");
+        json.GetProperty("data").GetProperty("fullName").GetString().ShouldBe("Franco Diaz");
 
         await using var db = CreateContext();
         var user = await db.Users.SingleAsync();
@@ -28,3 +28,4 @@ public sealed class IdentityEndpointsTests : ApiEndpointTestFixture
         household.Name.ShouldBe("Franco's household");
     }
 }
+

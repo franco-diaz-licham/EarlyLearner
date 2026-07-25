@@ -54,7 +54,7 @@ public sealed class LearningOutcomeEndpointsTests : ApiEndpointTestFixture
         await Db.SaveChangesAsync();
 
         var request = new {
-            Status = LearningOutcomeStatusEnum.Archived
+            Status = "archived"
         };
 
         // Act

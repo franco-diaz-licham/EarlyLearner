@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NUnit.Framework;
 using Respawn;
+using Respawn.Graph;
 using Testcontainers.PostgreSql;
 
 namespace EarlyLearner.Shared.Tests;
@@ -34,7 +35,8 @@ public abstract class BaseAuditDatabaseSetup
         await connection.OpenAsync();
         _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions {
             DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public"]
+            SchemasToInclude = ["public"],
+            TablesToIgnore = [new Table("public", "__EFMigrationsHistory")]
         });
     }
 
@@ -50,7 +52,7 @@ public abstract class BaseAuditDatabaseSetup
     [TearDown]
     public async Task DisposeContextAsync()
     {
-        await Db.DisposeAsync();
+        if (Db is not null) await Db.DisposeAsync();
     }
 
     [OneTimeTearDown]
@@ -69,3 +71,5 @@ public abstract class BaseAuditDatabaseSetup
         return new AuditDbContext(options);
     }
 }
+
+

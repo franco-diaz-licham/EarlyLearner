@@ -19,24 +19,14 @@ public sealed class InMemoryDocumentStore : IDocumentStore
 
     public Task UpsertAsync<TDocument>(string containerName, TDocument document, string partitionKey, CancellationToken cancellationToken = default)
     {
-        var id = document switch {
-            NotificationDocument notification => notification.Id,
-            NotificationPublicationDocument notificationPublication => notificationPublication.Id,
-            _ => throw new InvalidOperationException($"Document type {typeof(TDocument).Name} is not supported.")
-        };
-
+        var id = GetDocumentId(document);
         _documents[(containerName, id, partitionKey)] = document!;
         return Task.CompletedTask;
     }
 
     public Task<bool> TryCreateAsync<TDocument>(string containerName, TDocument document, string partitionKey, CancellationToken cancellationToken = default)
     {
-        var id = document switch {
-            NotificationDocument notification => notification.Id,
-            NotificationPublicationDocument notificationPublication => notificationPublication.Id,
-            _ => throw new InvalidOperationException($"Document type {typeof(TDocument).Name} is not supported.")
-        };
-
+        var id = GetDocumentId(document);
         return Task.FromResult(_documents.TryAdd((containerName, id, partitionKey), document!));
     }
 
@@ -54,5 +44,13 @@ public sealed class InMemoryDocumentStore : IDocumentStore
             NotificationDocument.BuildPartitionKey(householdId)), out var document)
             ? (NotificationDocument)document
             : null;
+    }
+
+    private static string GetDocumentId<TDocument>(TDocument document)
+    {
+        var id = document?.GetType().GetProperty("Id")?.GetValue(document) as string;
+        if (string.IsNullOrWhiteSpace(id)) throw new InvalidOperationException($"Document type {typeof(TDocument).Name} does not expose a string Id property.");
+
+        return id;
     }
 }

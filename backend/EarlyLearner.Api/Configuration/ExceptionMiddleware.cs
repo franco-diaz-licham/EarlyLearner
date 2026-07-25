@@ -33,7 +33,7 @@ public class ExceptionMiddleware
 
             var devError = new ApiException(statusCode: context.Response.StatusCode, message: ex.Message, details: BuildDevelopmentDetails(ex: ex));
             var prodError = new ApiException(statusCode: context.Response.StatusCode, message: "Error...");
-            var response = _env.IsDevelopment() ? devError : prodError;
+            var response = _env.IsDevelopment() || _env.IsEnvironment("Testing") ? devError : prodError;
 
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             var json = JsonSerializer.Serialize(value: response, options: options);
@@ -79,3 +79,4 @@ public class ExceptionMiddleware
         return string.Join(separator: Environment.NewLine, values: details);
     }
 }
+
