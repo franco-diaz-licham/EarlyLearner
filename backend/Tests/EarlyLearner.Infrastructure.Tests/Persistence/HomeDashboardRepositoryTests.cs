@@ -2,7 +2,7 @@ using EarlyLearner.Application.Ports;
 using EarlyLearner.Application.UseCases.Dashboard;
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Infrastructure.Persistence.Repositories;
-using EarlyLearner.Shared.Tests;
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Shared.Tests.Seeders;
 using EarlyLearner.Shared.Utilities;
 using Moq;
@@ -11,7 +11,7 @@ using Shouldly;
 namespace EarlyLearner.Infrastructure.Tests.Persistence;
 
 [TestFixture]
-public sealed class HomeDashboardRepositoryTests : BaseDatabaseSetup
+public sealed class HomeDashboardRepositoryTests : BaseMainDatabaseSetup
 {
     private Mock<ICurrentUser> _currentUser = default!;
 

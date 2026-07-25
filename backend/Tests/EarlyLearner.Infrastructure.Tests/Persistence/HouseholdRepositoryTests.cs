@@ -2,14 +2,14 @@ using EarlyLearner.Domain.CoreContext.ValueObjects;
 using EarlyLearner.Domain.IdentityContext.Entities;
 using EarlyLearner.Domain.IdentityContext.ValueObjects;
 using EarlyLearner.Infrastructure.Persistence.Repositories;
-using EarlyLearner.Shared.Tests;
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Shared.Tests.Seeders;
 using Shouldly;
 
 namespace EarlyLearner.Infrastructure.Tests.Persistence.Repositories;
 
 [TestFixture]
-public sealed class HouseholdRepositoryTests : BaseDatabaseSetup
+public sealed class HouseholdRepositoryTests : BaseMainDatabaseSetup
 {
     [Test]
     public async Task ListAsync_Should_ReturnAccessibleHouseholdsWithActiveChildrenOnly()

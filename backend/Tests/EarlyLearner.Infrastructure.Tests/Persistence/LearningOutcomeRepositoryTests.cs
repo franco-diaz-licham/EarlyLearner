@@ -1,13 +1,13 @@
 using EarlyLearner.Domain.LearningContext;
 using EarlyLearner.Infrastructure.Persistence.Repositories;
-using EarlyLearner.Shared.Tests;
+using EarlyLearner.Shared.Tests.Fixtures;
 using EarlyLearner.Shared.Tests.Seeders;
 using Shouldly;
 
 namespace EarlyLearner.Infrastructure.Tests.Persistence.Repositories;
 
 [TestFixture]
-public sealed class LearningOutcomeRepositoryTests : BaseDatabaseSetup
+public sealed class LearningOutcomeRepositoryTests : BaseMainDatabaseSetup
 {
     [Test]
     public async Task ListAsync_Should_ReturnOutcomesOrderedBySortOrder()

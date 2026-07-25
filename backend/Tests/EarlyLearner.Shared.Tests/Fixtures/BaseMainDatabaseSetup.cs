@@ -12,7 +12,7 @@ namespace EarlyLearner.Shared.Tests.Fixtures;
 /// <summary>
 /// Provides a reusable PostgreSQL database fixture for integration-style tests.
 /// </summary>
-public abstract class BaseDatabaseSetup
+public abstract class BaseMainDatabaseSetup
 {
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
         .WithImage("postgres:17-alpine")

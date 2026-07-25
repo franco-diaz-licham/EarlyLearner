@@ -9,7 +9,7 @@ namespace EarlyLearner.Shared.Tests.Fixtures;
 /// <summary>
 /// Provides a reusable API endpoint fixture with a test database and HTTP client.
 /// </summary>
-public abstract class ApiEndpointTestFixture : BaseDatabaseSetup, IDisposable
+public abstract class ApiEndpointTestFixture : BaseMainDatabaseSetup, IDisposable
 {
     private ApiTestApplicationFactory? _factory;
     private HttpClient? _client;
