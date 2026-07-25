@@ -19,7 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Net.Mime;
 
-namespace EarlyLearner.Api.Tests.Fixtures;
+namespace EarlyLearner.Shared.Tests.Fixtures;
 
 public sealed class ApiTestApplicationFactory(string connectionString) : WebApplicationFactory<Api::Program>
 {

@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using EarlyLearner.Api.Tests.Fixtures;
+using EarlyLearner.Shared.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 

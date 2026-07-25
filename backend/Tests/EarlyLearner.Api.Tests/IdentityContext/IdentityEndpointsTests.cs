@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using EarlyLearner.Api.Tests.Fixtures;
+using EarlyLearner.Shared.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 
@@ -28,4 +28,3 @@ public sealed class IdentityEndpointsTests : ApiEndpointTestFixture
         household.Name.ShouldBe("Franco's household");
     }
 }
-

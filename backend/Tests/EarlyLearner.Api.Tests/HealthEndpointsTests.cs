@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using EarlyLearner.Api.Tests.Fixtures;
+using EarlyLearner.Shared.Tests.Fixtures;
 using Shouldly;
 
 namespace EarlyLearner.Api.Tests;

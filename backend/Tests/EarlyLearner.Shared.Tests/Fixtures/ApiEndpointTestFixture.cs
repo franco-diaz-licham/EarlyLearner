@@ -1,12 +1,12 @@
 using System.Net;
 using EarlyLearner.Infrastructure.Persistence;
-using EarlyLearner.Shared.Tests;
+using NUnit.Framework;
 using Shouldly;
 
-namespace EarlyLearner.Api.Tests.Fixtures;
+namespace EarlyLearner.Shared.Tests.Fixtures;
 
 [NonParallelizable]
-public abstract class ApiEndpointTestFixture : BaseDatabaseSetup
+public abstract class ApiEndpointTestFixture : BaseDatabaseSetup, IDisposable
 {
     private ApiTestApplicationFactory? _factory;
     private HttpClient? _client;
@@ -25,6 +25,13 @@ public abstract class ApiEndpointTestFixture : BaseDatabaseSetup
     {
         _client?.Dispose();
         _factory?.Dispose();
+    }
+
+    public void Dispose()
+    {
+        _client?.Dispose();
+        _factory?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     protected new DatabaseContext CreateContext() => base.CreateContext();
