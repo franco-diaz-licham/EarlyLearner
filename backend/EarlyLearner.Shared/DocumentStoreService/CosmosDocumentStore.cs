@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using EarlyLearner.Shared.Options;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
@@ -7,6 +8,7 @@ namespace EarlyLearner.Shared.DocumentStoreService;
 
 public sealed class CosmosDocumentStore(CosmosClient client, IOptions<CosmosDbOptions> options) : IDocumentStore
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private readonly CosmosDbOptions options = options.Value;
 
     public async Task EnsureContainerAsync(
@@ -23,12 +25,10 @@ public sealed class CosmosDocumentStore(CosmosClient client, IOptions<CosmosDbOp
 
     public async Task<TDocument?> GetAsync<TDocument>(string containerName, string id, string partitionKey, CancellationToken cancellationToken = default)
     {
-        try {
-            var response = await GetContainer(containerName).ReadItemAsync<TDocument>(id, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
-            return response.Resource;
-        } catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.NotFound) {
-            return default;
-        }
+        using var response = await GetContainer(containerName).ReadItemStreamAsync(id, new PartitionKey(partitionKey), cancellationToken: cancellationToken);
+        if (response.StatusCode == HttpStatusCode.NotFound) return default;
+        response.EnsureSuccessStatusCode();
+        return await JsonSerializer.DeserializeAsync<TDocument>(response.Content, SerializerOptions, cancellationToken);
     }
 
     public async Task UpsertAsync<TDocument>(string containerName, TDocument document, string partitionKey, CancellationToken cancellationToken = default)
