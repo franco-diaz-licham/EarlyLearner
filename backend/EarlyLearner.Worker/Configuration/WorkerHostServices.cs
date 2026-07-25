@@ -1,4 +1,4 @@
-using Azure.Monitor.OpenTelemetry.Exporter;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using EarlyLearner.Shared.Options;
 using EarlyLearner.Worker.Configuration.Options;
 using OpenTelemetry.Logs;
@@ -82,10 +82,9 @@ public static class WorkerHostServices
             logging.ParseStateValues = true;
 
             if (useOtlpExporter) logging.AddOtlpExporter(options => options.Endpoint = new Uri(observabilityOptions.OtlpEndpoint));
-            if (useAzureMonitorExporter) logging.AddAzureMonitorLogExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
         });
 
-        builder.Services
+        var openTelemetry = builder.Services
             .AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(serviceName))
             .WithTracing(tracing => {
@@ -95,7 +94,6 @@ public static class WorkerHostServices
                     .AddSource("MassTransit");
 
                 if (useOtlpExporter) tracing.AddOtlpExporter(options => options.Endpoint = new Uri(observabilityOptions.OtlpEndpoint));
-                if (useAzureMonitorExporter) tracing.AddAzureMonitorTraceExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
             })
             .WithMetrics(metrics => {
                 metrics
@@ -103,8 +101,13 @@ public static class WorkerHostServices
                     .AddRuntimeInstrumentation();
 
                 if (useOtlpExporter) metrics.AddOtlpExporter(options => options.Endpoint = new Uri(observabilityOptions.OtlpEndpoint));
-                if (useAzureMonitorExporter) metrics.AddAzureMonitorMetricExporter(options => options.ConnectionString = observabilityOptions.AppInsightConnectionString);
             });
+
+        if (useAzureMonitorExporter) {
+            openTelemetry.UseAzureMonitor(options => {
+                options.ConnectionString = observabilityOptions.AppInsightConnectionString;
+            });
+        }
 
         return builder;
     }
