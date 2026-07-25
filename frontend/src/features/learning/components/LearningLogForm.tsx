@@ -61,7 +61,7 @@ export const LearningLogForm = ({ children, moment, learningOutcomes, saving, vi
   return (
     <AppDialog header={title} visible={visible} onHide={handleCancel}>
       <div className="space-y-4 pt-4">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div>
           <AppSelect
             label="Child"
             options={childOptions}
@@ -73,6 +73,8 @@ export const LearningLogForm = ({ children, moment, learningOutcomes, saving, vi
             error={errors.childId}
             required
           />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
           <AppInputText
             error={errors.logDate}
             label="Date"
