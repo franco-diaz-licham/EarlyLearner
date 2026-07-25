@@ -51,8 +51,6 @@ public static class WorkerAppServices
             options.UseNpgsql(dbOpts.AuditDb).UseSnakeCaseNamingConvention();
         });
 
-        services.AddHostedService<AuditDbInitializer>();
-
         return services;
     }
 

@@ -7,7 +7,8 @@ try {
     WorkerProgram.AddServices(builder.Configuration, builder.Services, builder.Environment);
 
     var host = builder.Build();
-    host.Run();
+    await host.Services.ConfigureDatabase();
+    await host.RunAsync();
 } catch (Exception ex) {
     Log.Fatal(ex, "Worker startup failed");
     throw;
