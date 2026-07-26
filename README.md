@@ -7,23 +7,19 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 
-EarlyLearner is a distributed early childhood learning record and school-readiness planning system. It helps carers manage households and children, capture daily learning moments, attach evidence, and tag progress against learning outcomes.
+EarlyLearner is a distributed early childhood learning record and school-readiness planning system. It helps carers manage household and child profiles, maintain a learning outcome catalogue, capture daily learning moments with file evidence, send household invitation emails, receive realtime invitation status notifications, and view dashboard summaries for household learning activity.
 
 The project is built as a cloud-native, event-driven .NET system using a modular API, background worker microservice, Azure-managed services, asynchronous messaging, durable storage, and a React frontend.
 
----
-
-## 🎬 Walkthrough
+## 🎬 Demo Video
 
 <a href="https://youtu.be/MLcxa0VT7Ro">
   <img
     src="https://img.youtube.com/vi/MLcxa0VT7Ro/maxresdefault.jpg"
     alt="Watch the EarlyLearner app overview on YouTube"
-    width="720"
+    width="800"
   />
 </a>
-
----
 
 ## 🧭 System Design
 
@@ -31,18 +27,15 @@ EarlyLearner is split across separately deployable application services and mana
 
 ![EarlyLearner system design](docs/systemDesign.png)
 
----
+## ☁️ Azure Deployment
 
-## ✨ Features
+EarlyLearner was deployed to Azure as a distributed system using resouces such as: Container Apps, Static Web Apps, Azure Service Bus,etc...
 
-- Household and child profiles
-- Learning outcome catalogue
-- Daily logs with learning moments and file evidence
-- Household invitation email workflow
-- Realtime invitation delivery status notifications
-- Dashboard query slice for household summary data
+> [View all Azure deployment screenshots](docs/azure/README.md)
 
----
+<p>
+  <img src="docs/azure/resource-group.png" alt="Azure resource group overview" width="800" />
+</p>
 
 ## 🧰 Technology Stack
 
@@ -101,8 +94,6 @@ EarlyLearner is split across separately deployable application services and mana
 - OpenTelemetry collector
 - PowerShell helper scripts
 
----
-
 ## 🏗️ Project Architecture
 
 ### Backend
@@ -141,8 +132,6 @@ docker/
 
 Azure Service Bus cloud setup is documented in `docs/azure-service-bus.md`.
 
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -152,8 +141,6 @@ Azure Service Bus cloud setup is documented in `docs/azure-service-bus.md`.
 - Docker Desktop
 - PowerShell 7+
 - PostgreSQL client tools
-
----
 
 ## 🐳 Run With Docker
 
@@ -189,8 +176,6 @@ Database: early_learner_main
 Username: local-dev
 Password: local-dev
 ```
-
----
 
 ## ⚙️ Backend Setup
 
@@ -231,8 +216,6 @@ Build the worker:
 ```powershell
 dotnet build backend/EarlyLearner.Worker/EarlyLearner.Worker.csproj
 ```
-
----
 
 ## 🖥️ Frontend Setup
 
