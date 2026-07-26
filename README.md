@@ -15,9 +15,9 @@ The project is built as a cloud-native, event-driven .NET system using a modular
 
 ## 🎬 Walkthrough
 
-<a href="https://youtu.be/Uig0mlf_3aI">
+<a href="https://youtu.be/MLcxa0VT7Ro">
   <img
-    src="https://img.youtube.com/vi/Uig0mlf_3aI/hqdefault.jpg"
+    src="https://img.youtube.com/vi/MLcxa0VT7Ro/maxresdefault.jpg"
     alt="Watch the EarlyLearner app overview on YouTube"
     width="720"
   />
