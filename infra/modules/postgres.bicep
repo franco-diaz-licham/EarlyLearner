@@ -1,0 +1,111 @@
+// ------------------------------------- Parameters -------------------------------------
+
+@description('Azure region for PostgreSQL.')
+param location string
+
+@description('PostgreSQL flexible server name.')
+param serverName string
+
+@description('PostgreSQL administrator login name.')
+param administratorLogin string
+
+@description('PostgreSQL administrator password.')
+@secure()
+param administratorLoginPassword string
+
+@description('Allow Azure-hosted services to reach PostgreSQL over its public endpoint.')
+param allowAzureServices bool
+
+@description('Additional PostgreSQL public firewall rules.')
+param firewallRules array
+
+@description('Tags applied to PostgreSQL resources.')
+param tags object
+
+// ------------------------------------- Variables -------------------------------------
+
+var version = '17'
+var skuName = 'Standard_B1ms'
+var skuTier = 'Burstable'
+var storageSizeGb = 32
+var mainDatabaseName = 'main'
+var auditDatabaseName = 'audit'
+
+// ------------------------------------- Resources -------------------------------------
+
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
+  name: serverName
+  location: location
+  tags: tags
+  sku: {
+    name: skuName
+    tier: skuTier
+  }
+  properties: {
+    administratorLogin: administratorLogin
+    administratorLoginPassword: administratorLoginPassword
+    authConfig: {
+      activeDirectoryAuth: 'Disabled'
+      passwordAuth: 'Enabled'
+    }
+    backup: {
+      backupRetentionDays: 7
+      geoRedundantBackup: 'Disabled'
+    }
+    highAvailability: {
+      mode: 'Disabled'
+    }
+    network: {
+      publicNetworkAccess: 'Enabled'
+    }
+    storage: {
+      storageSizeGB: storageSizeGb
+    }
+    version: version
+  }
+}
+
+resource mainDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-01' = {
+  name: mainDatabaseName
+  parent: postgresServer
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.utf8'
+  }
+}
+
+resource auditDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-01' = {
+  name: auditDatabaseName
+  parent: postgresServer
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.utf8'
+  }
+}
+
+resource allowAzureServicesFirewallRule 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = if (allowAzureServices) {
+  name: 'AllowAzureServices'
+  parent: postgresServer
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+resource additionalFirewallRules 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = [
+  for rule in firewallRules: {
+    name: rule.name
+    parent: postgresServer
+    properties: {
+      startIpAddress: rule.startIpAddress
+      endIpAddress: rule.endIpAddress
+    }
+  }
+]
+
+// ------------------------------------- Outputs -------------------------------------
+
+output auditDatabaseName string = auditDatabase.name
+output hostName string = '${postgresServer.name}.postgres.database.azure.com'
+output mainDatabaseName string = mainDatabase.name
+output serverName string = postgresServer.name
