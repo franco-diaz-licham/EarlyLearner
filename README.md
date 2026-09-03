@@ -29,7 +29,7 @@ EarlyLearner is split across separately deployable application services and mana
 
 ## ☁️ Azure Deployment
 
-EarlyLearner was deployed to Azure as a distributed system using resouces such as: Container Apps, Static Web Apps, Azure Service Bus,etc...
+EarlyLearner was deployed to Azure as a distributed system using resources such as Container Apps, Static Web Apps, Azure Service Bus, Cosmos DB, PostgreSQL, Azure Communication Services, Storage, Key Vault, Application Insights, and Log Analytics.
 
 > [View all Azure deployment screenshots](docs/azure/README.md)
 
@@ -130,7 +130,24 @@ docker/
 ├── worker.dockerfile
 ```
 
-Azure Service Bus cloud setup is documented in `docs/azure-service-bus.md`.
+### Infrastructure
+
+```text
+infra/                 # Production Azure Bicep modules and parameters
+```
+
+EarlyLearner can be provisioned to Azure with Bicep. The infrastructure lives under `infra/`, and deployment is wrapped by `scripts/provision-infra.ps1`. The production parameters default to the cheapest viable plans: Container Apps consumption with zero minimum replicas, Static Web Apps Free, ACR Basic, PostgreSQL Burstable B1ms, Cosmos DB 400 RU/s with free tier enabled, SignalR Free_F1, and Storage Standard_LRS.
+
+Ccreate an ignored `infra/.env`, and set the required Azure and Entra values:
+
+```powershell
+./scripts/provision-infra.ps1 -WhatIfOnly
+./scripts/provision-infra.ps1 -SkipWhatIf
+```
+
+See `infra/README.md` for the full Azure deployment notes, emitted GitHub secret names, and deprovisioning command.
+
+Azure deployment screenshots and Service Bus topic examples are documented in `docs/azure/README.md`.
 
 ## 🚀 Getting Started
 
