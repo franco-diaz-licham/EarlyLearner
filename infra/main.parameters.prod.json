@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "australiaeast"
+    },
+    "staticWebAppLocation": {
+      "value": "eastasia"
+    },
+    "workloadName": {
+      "value": "earlylearner"
+    },
+    "environmentName": {
+      "value": "prod"
+    },
+    "postgresAdminLogin": {
+      "value": "earlylearneradmin"
+    },
+    "postgresAllowAzureServices": {
+      "value": true
+    },
+    "postgresFirewallRules": {
+      "value": []
+    },
+    "communicationDataLocation": {
+      "value": "Australia"
+    },
+    "cosmosDatabaseName": {
+      "value": "earlylearner"
+    },
+    "cosmosThroughput": {
+      "value": 400
+    },
+    "cosmosEnableFreeTier": {
+      "value": true
+    },
+    "cosmosDefaultTimeToLiveSeconds": {
+      "value": 86400
+    },
+    "fileBlobContainerName": {
+      "value": "earlylearner-files"
+    },
+    "apiMinReplicas": {
+      "value": 0
+    },
+    "apiMaxReplicas": {
+      "value": 1
+    },
+    "workerMinReplicas": {
+      "value": 0
+    },
+    "workerMaxReplicas": {
+      "value": 1
+    },
+    "tags": {
+      "value": {
+        "owner": "earlylearner"
+      }
+    }
+  }
+}
